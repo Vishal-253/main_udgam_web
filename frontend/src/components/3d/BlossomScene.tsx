@@ -10,6 +10,9 @@ import floatingCampusImg from "@/assets/floating_campus.png";
 import woodImg from "@/assets/wood_planks.jpg";
 import canvasImg from "@/assets/canvas_fabric.jpg";
 import clothesImg from "@/assets/folded_clothes.jpg";
+import dominosImg from "@/assets/dominos_pizza_photo.jpg";
+import quarksImg from "@/assets/quarks_tech_photo.jpg";
+import arcadeScreenImg from "@/assets/arcade_screen_udgam.jpg";
 import { Suspense, useMemo, useRef } from "react";
 import * as THREE from "three";
 
@@ -459,9 +462,9 @@ function CameraRig({ progress }: { progress: React.MutableRefObject<number> }) {
   const { camera, scene } = useThree();
   const sun = useRef<THREE.DirectionalLight>(null);
   const cur = useRef(0);
-  const morning = useMemo(() => new THREE.Color("#fde4ec"), []);
-  const golden = useMemo(() => new THREE.Color("#ffd9b8"), []);
-  const aerialSky = useMemo(() => new THREE.Color("#c8e8d8"), []);
+  const morning = useMemo(() => new THREE.Color("#dbe7fb"), []);
+  const golden = useMemo(() => new THREE.Color("#ecdcf5"), []);
+  const aerialSky = useMemo(() => new THREE.Color("#cbe0f8"), []);
 
   useFrame((state, d) => {
     const dt = Math.min(d, 0.05);
@@ -831,6 +834,436 @@ function MerchStall({ position }: { position: [number, number, number] }) {
   );
 }
 
+/* ─── Playful Sakura Arcade & Event Registration Button ─── */
+function GameArcadeZone({ position }: { position: [number, number, number] }) {
+  const rootRef = useRef<THREE.Group>(null);
+  const btnWrapRef = useRef<HTMLDivElement>(null);
+  const starRef = useRef<THREE.Group>(null);
+  const petalRef = useRef<THREE.Group>(null);
+  const joystick1Ref = useRef<THREE.Group>(null);
+  const joystick2Ref = useRef<THREE.Group>(null);
+  const screenLightRef = useRef<THREE.PointLight>(null);
+
+  const arcadeTex = useTexture(arcadeScreenImg);
+  arcadeTex.colorSpace = THREE.SRGBColorSpace;
+
+  useFrame(({ clock, camera }) => {
+    const t = clock.elapsedTime;
+
+    // Bobbing and rotating the floating blossom ornaments
+    if (starRef.current) {
+      starRef.current.rotation.y = t * 1.6;
+      starRef.current.position.y = 2.4 + Math.sin(t * 2.2) * 0.16;
+    }
+
+    if (petalRef.current) {
+      petalRef.current.rotation.y = -t * 1.3;
+      petalRef.current.rotation.z = Math.sin(t * 1.5) * 0.2;
+      petalRef.current.position.y = 2.6 + Math.cos(t * 1.8) * 0.16;
+    }
+
+    // Playful joystick wiggle
+    if (joystick1Ref.current) {
+      joystick1Ref.current.rotation.x = Math.sin(t * 3.0) * 0.15;
+      joystick1Ref.current.rotation.z = Math.cos(t * 2.5) * 0.15;
+    }
+    if (joystick2Ref.current) {
+      joystick2Ref.current.rotation.x = Math.cos(t * 2.7) * 0.15;
+      joystick2Ref.current.rotation.z = Math.sin(t * 2.1) * 0.15;
+    }
+
+    // Gentle warm blossom screen light pulse
+    if (screenLightRef.current) {
+      screenLightRef.current.intensity = 1.4 + Math.sin(t * 3.2) * 0.4;
+    }
+
+    // Proximity fade and smooth float for the event registration button above
+    if (rootRef.current && btnWrapRef.current) {
+      const dist = camera.position.distanceTo(rootRef.current.position);
+      if (dist < 32 && dist > 1.5) {
+        const factor = Math.min(1, Math.max(0, (32 - dist) / 7));
+        btnWrapRef.current.style.opacity = factor.toFixed(2);
+        btnWrapRef.current.style.pointerEvents = factor > 0.4 ? 'auto' : 'none';
+        btnWrapRef.current.style.transform = `scale(${0.92 + 0.08 * factor}) translateY(${Math.sin(t * 2.4) * 6}px)`;
+      } else {
+        btnWrapRef.current.style.opacity = '0';
+        btnWrapRef.current.style.pointerEvents = 'none';
+      }
+    }
+  });
+
+  const posX = position[0] + roadX(position[2]);
+  const posY = position[1];
+  const posZ = position[2];
+  const rotY = 0.35 + Math.atan(roadSlope(posZ));
+
+  return (
+    <group ref={rootRef} position={[posX, posY, posZ]} rotation-y={rotY}>
+      {/* ── Soft Blossom Pedestal Platform ── */}
+      <mesh position={[0, 0.04, 0]} receiveShadow>
+        <cylinderGeometry args={[1.5, 1.65, 0.08, 20]} />
+        <meshStandardMaterial color="#fff0f5" roughness={0.8} />
+      </mesh>
+      <mesh position={[0, 0.085, 0]}>
+        <torusGeometry args={[1.48, 0.022, 8, 36]} rotation-x={Math.PI / 2} />
+        <meshStandardMaterial color="#ff9ebb" emissive="#ff6584" emissiveIntensity={0.6} />
+      </mesh>
+      <mesh position={[0, 0.086, 0]}>
+        <torusGeometry args={[1.15, 0.016, 8, 36]} rotation-x={Math.PI / 2} />
+        <meshStandardMaterial color="#f5c842" emissive="#d4a017" emissiveIntensity={0.5} />
+      </mesh>
+
+      {/* ── Cabinet Main Body (Sakura Candy Cab Theme) ── */}
+      <mesh position={[0, 0.72, 0]} castShadow receiveShadow>
+        <boxGeometry args={[1.36, 1.25, 0.98]} />
+        <meshStandardMaterial color="#fff7f9" roughness={0.25} metalness={0.1} />
+      </mesh>
+
+      {/* ── Sakura Pink Side Trims & Edge Accents ── */}
+      <mesh position={[-0.7, 1.45, 0]} castShadow>
+        <boxGeometry args={[0.04, 1.85, 1.05]} />
+        <meshStandardMaterial color="#ff80ab" roughness={0.3} />
+      </mesh>
+      <mesh position={[0.7, 1.45, 0]} castShadow>
+        <boxGeometry args={[0.04, 1.85, 1.05]} />
+        <meshStandardMaterial color="#ff80ab" roughness={0.3} />
+      </mesh>
+
+      {/* Front golden blossom highlight strips */}
+      <mesh position={[-0.67, 0.72, 0.5]}>
+        <boxGeometry args={[0.02, 1.2, 0.02]} />
+        <meshStandardMaterial color="#f5c842" emissive="#d4a017" emissiveIntensity={0.4} />
+      </mesh>
+      <mesh position={[0.67, 0.72, 0.5]}>
+        <boxGeometry args={[0.02, 1.2, 0.02]} />
+        <meshStandardMaterial color="#f5c842" emissive="#d4a017" emissiveIntensity={0.4} />
+      </mesh>
+
+      {/* ── Coin Door Panel (Warm Lacquer with Gold Slots) ── */}
+      <mesh position={[0, 0.52, 0.5]}>
+        <boxGeometry args={[0.62, 0.5, 0.02]} />
+        <meshStandardMaterial color="#3a1c27" roughness={0.5} metalness={0.4} />
+      </mesh>
+      {[-0.14, 0.14].map((cx, i) => (
+        <group key={i} position={[cx, 0.6, 0.52]}>
+          <mesh>
+            <boxGeometry args={[0.1, 0.14, 0.02]} />
+            <meshStandardMaterial color="#4d2434" roughness={0.3} />
+          </mesh>
+          <mesh position={[0, 0, 0.012]}>
+            <boxGeometry args={[0.02, 0.07, 0.01]} />
+            <meshStandardMaterial color="#f5c842" emissive="#e8a000" emissiveIntensity={0.8} />
+          </mesh>
+        </group>
+      ))}
+
+      {/* ── Slanted Control Deck (Sakura Blossom Pink) ── */}
+      <mesh position={[0, 1.28, 0.22]} rotation-x={0.26} castShadow receiveShadow>
+        <boxGeometry args={[1.4, 0.16, 0.62]} />
+        <meshStandardMaterial color="#ffccd5" roughness={0.35} metalness={0.15} />
+      </mesh>
+      {/* Control panel deck gold trim */}
+      <mesh position={[0, 1.34, 0.16]} rotation-x={0.26}>
+        <boxGeometry args={[1.36, 0.01, 0.04]} />
+        <meshStandardMaterial color="#f5c842" emissive="#d4a017" emissiveIntensity={0.5} />
+      </mesh>
+
+      {/* Player 1 Joystick (Sakura Pink Ball) */}
+      <group ref={joystick1Ref} position={[-0.36, 1.35, 0.22]}>
+        <mesh position={[0, 0.01, 0]}>
+          <cylinderGeometry args={[0.07, 0.08, 0.02, 12]} />
+          <meshStandardMaterial color="#4a2c38" metalness={0.7} />
+        </mesh>
+        <mesh position={[0, 0.1, 0]}>
+          <cylinderGeometry args={[0.014, 0.014, 0.18, 8]} />
+          <meshStandardMaterial color="#e0e0e0" metalness={0.9} roughness={0.1} />
+        </mesh>
+        <mesh position={[0, 0.2, 0]}>
+          <sphereGeometry args={[0.065, 14, 12]} />
+          <meshStandardMaterial color="#ff6699" emissive="#ff3377" emissiveIntensity={0.4} roughness={0.2} />
+        </mesh>
+      </group>
+
+      {/* Player 2 Joystick (Blossom Gold Ball) */}
+      <group ref={joystick2Ref} position={[0.36, 1.35, 0.22]}>
+        <mesh position={[0, 0.01, 0]}>
+          <cylinderGeometry args={[0.07, 0.08, 0.02, 12]} />
+          <meshStandardMaterial color="#4a2c38" metalness={0.7} />
+        </mesh>
+        <mesh position={[0, 0.1, 0]}>
+          <cylinderGeometry args={[0.014, 0.014, 0.18, 8]} />
+          <meshStandardMaterial color="#e0e0e0" metalness={0.9} roughness={0.1} />
+        </mesh>
+        <mesh position={[0, 0.2, 0]}>
+          <sphereGeometry args={[0.065, 14, 12]} />
+          <meshStandardMaterial color="#f5c842" emissive="#d4a017" emissiveIntensity={0.4} roughness={0.2} />
+        </mesh>
+      </group>
+
+      {/* Arcade Action Buttons (Sakura Petal & Gold Palette) */}
+      {[
+        { x: -0.18, y: 1.38, z: 0.28, c: "#ff6699" },
+        { x: -0.10, y: 1.36, z: 0.22, c: "#ffffff" },
+        { x: -0.02, y: 1.34, z: 0.16, c: "#f5c842" },
+        { x: 0.54, y: 1.38, z: 0.28, c: "#f5c842" },
+        { x: 0.62, y: 1.36, z: 0.22, c: "#ffffff" },
+        { x: 0.70, y: 1.34, z: 0.16, c: "#ff6699" },
+      ].map((btn, i) => (
+        <mesh key={i} position={[btn.x, btn.y, btn.z]}>
+          <cylinderGeometry args={[0.035, 0.04, 0.03, 10]} />
+          <meshStandardMaterial color={btn.c} roughness={0.3} />
+        </mesh>
+      ))}
+
+      {/* ── Screen Housing & Direct 3D High-Res Poster Display ── */}
+      <group position={[0, 1.88, 0.08]} rotation-x={-0.22}>
+        {/* Outer Cabinet Bezel Housing */}
+        <mesh castShadow>
+          <boxGeometry args={[1.36, 1.06, 0.35]} />
+          <meshStandardMaterial color="#2e1723" roughness={0.4} />
+        </mesh>
+
+        {/* Outer Sakura Glowing Frame Trim */}
+        <mesh position={[0, 0, 0.176]}>
+          <planeGeometry args={[1.26, 0.88]} />
+          <meshStandardMaterial color="#ff9ebb" emissive="#ff6584" emissiveIntensity={0.6} />
+        </mesh>
+
+        {/* Inner Black Bezel Frame */}
+        <mesh position={[0, 0, 0.178]}>
+          <planeGeometry args={[1.22, 0.84]} />
+          <meshStandardMaterial color="#0c0408" roughness={0.9} />
+        </mesh>
+
+        {/* The Real Minecraft Udgam Festival Poster Texture (100% luminous & crisp) */}
+        <mesh position={[0, 0, 0.182]}>
+          <planeGeometry args={[1.20, 0.80]} />
+          <meshBasicMaterial map={arcadeTex} toneMapped={false} />
+        </mesh>
+
+        {/* Subtle Arcade Screen Glass Glare Sheen */}
+        <mesh position={[0, 0, 0.184]}>
+          <planeGeometry args={[1.20, 0.80]} />
+          <meshStandardMaterial
+            color="#ffffff"
+            transparent
+            opacity={0.07}
+            roughness={0.08}
+            metalness={0.7}
+          />
+        </mesh>
+      </group>
+
+      {/* Screen Illumination Glow */}
+      <pointLight ref={screenLightRef} position={[0, 1.95, 0.7]} color="#ff9ebb" intensity={1.8} distance={6} decay={2} />
+
+      {/* ── Top Marquee Hood & Banner ── */}
+      <mesh position={[0, 2.68, 0.22]} castShadow>
+        <boxGeometry args={[1.42, 0.42, 0.52]} />
+        <meshStandardMaterial color="#fff7f9" roughness={0.3} />
+      </mesh>
+      <Html position={[0, 2.68, 0.49]} transform center scale={0.007}>
+        <div style={{
+          background: 'linear-gradient(135deg, #ff80ab, #f06292)',
+          color: '#ffffff',
+          fontWeight: '900',
+          fontSize: '30px',
+          letterSpacing: '3px',
+          padding: '8px 22px',
+          borderRadius: '8px',
+          border: '2px solid #ffffff',
+          boxShadow: '0 0 18px rgba(255,128,171,0.6)',
+          whiteSpace: 'nowrap',
+          fontFamily: '"Quicksand", "Inter", sans-serif',
+          textShadow: '0 1px 4px rgba(0,0,0,0.25)',
+          userSelect: 'none',
+        }}>
+          🌸 UDGAM ARCADE 🌸
+        </div>
+      </Html>
+
+      {/* ── Floating Cherry Blossom Petal / Flower Ornament (Left Side) ── */}
+      <group ref={petalRef} position={[-1.3, 2.5, 0.15]}>
+        <mesh castShadow>
+          <sphereGeometry args={[0.26, 12, 10]} />
+          <meshStandardMaterial color="#ff8da7" emissive="#ff6584" emissiveIntensity={0.4} roughness={0.3} />
+        </mesh>
+        <pointLight color="#ff8da7" intensity={0.7} distance={3} decay={2} />
+      </group>
+
+      {/* ── Floating Golden Blossom Star (Right Side) ── */}
+      <group ref={starRef} position={[1.3, 2.2, 0.15]}>
+        <mesh castShadow>
+          <octahedronGeometry args={[0.26, 0]} />
+          <meshStandardMaterial color="#f5c842" emissive="#d4a017" emissiveIntensity={0.6} metalness={0.7} roughness={0.2} />
+        </mesh>
+        <pointLight color="#f5c842" intensity={0.8} distance={3} decay={2} />
+      </group>
+
+      {/* ── Clean Floating "Register for Events" Button Above ── */}
+      <Html position={[0, 3.8, 0]} center>
+        <div
+          ref={btnWrapRef}
+          style={{
+            opacity: 0,
+            transform: 'scale(0.92)',
+            transition: 'opacity 0.35s ease, transform 0.35s ease',
+            pointerEvents: 'none',
+            userSelect: 'none',
+            fontFamily: '"Quicksand", "Inter", sans-serif',
+          }}
+        >
+          <button
+            style={{
+              background: 'linear-gradient(135deg, #ff758c 0%, #ff7eb3 50%, #e05375 100%)',
+              color: '#ffffff',
+              border: '2px solid rgba(255, 255, 255, 0.85)',
+              borderRadius: '9999px',
+              padding: '13px 32px',
+              fontSize: '16px',
+              fontWeight: '800',
+              letterSpacing: '0.6px',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+              boxShadow: '0 10px 28px rgba(224, 83, 117, 0.45), 0 0 20px rgba(255, 126, 179, 0.35)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+            }}
+            onPointerOver={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px) scale(1.06)';
+              e.currentTarget.style.boxShadow = '0 14px 34px rgba(224, 83, 117, 0.65), 0 0 26px rgba(255, 126, 179, 0.55)';
+            }}
+            onPointerOut={(e) => {
+              e.currentTarget.style.transform = 'translateY(0) scale(1)';
+              e.currentTarget.style.boxShadow = '0 10px 28px rgba(224, 83, 117, 0.45), 0 0 20px rgba(255, 126, 179, 0.35)';
+            }}
+            onClick={() => {
+              window.location.href = '/events';
+            }}
+          >
+            <span>🌸</span>
+            <span>Register for Events</span>
+          </button>
+        </div>
+      </Html>
+    </group>
+  );
+}
+
+/* ─── 3D Sponsor Billboards (Domino's & Quarks Technosoft) ── */
+function SponsorBillboard({
+  position,
+  rotationY = 0,
+  sponsor,
+}: {
+  position: [number, number, number];
+  rotationY?: number;
+  sponsor: 'dominos' | 'quarks';
+}) {
+  const posX = position[0] + roadX(position[2]);
+  const posY = position[1];
+  const posZ = position[2];
+
+  const dominosTex = useTexture(dominosImg);
+  const quarksTex = useTexture(quarksImg);
+  useMemo(() => {
+    dominosTex.colorSpace = THREE.SRGBColorSpace;
+    quarksTex.colorSpace = THREE.SRGBColorSpace;
+  }, [dominosTex, quarksTex]);
+
+  const activeTex = sponsor === 'dominos' ? dominosTex : quarksTex;
+
+  return (
+    <group position={[posX, posY, posZ]} rotation-y={rotationY}>
+      {/* Heavy-Duty Concrete Base Footings */}
+      {[-2.6, 2.6].map((x, i) => (
+        <mesh key={i} position={[x, 0.3, 0]} receiveShadow>
+          <boxGeometry args={[1.0, 0.6, 1.0]} />
+          <meshStandardMaterial color="#888c94" roughness={0.92} />
+        </mesh>
+      ))}
+
+      {/* Monumental Structural Steel Support Pillars */}
+      {[-2.6, 2.6].map((x, i) => (
+        <mesh key={i} position={[x, 4.2, 0]} castShadow>
+          <cylinderGeometry args={[0.15, 0.15, 8.2, 14]} />
+          <meshStandardMaterial color="#2d323b" metalness={0.8} roughness={0.35} />
+        </mesh>
+      ))}
+
+      {/* Heavy-Duty Steel Cross Braces */}
+      <mesh position={[0, 3.8, 0]} rotation-z={0.65}>
+        <cylinderGeometry args={[0.045, 0.045, 6.4, 8]} />
+        <meshStandardMaterial color="#252a33" metalness={0.7} roughness={0.4} />
+      </mesh>
+      <mesh position={[0, 3.8, 0]} rotation-z={-0.65}>
+        <cylinderGeometry args={[0.045, 0.045, 6.4, 8]} />
+        <meshStandardMaterial color="#252a33" metalness={0.7} roughness={0.4} />
+      </mesh>
+
+      {/* Giant Billboard Main Board Backing */}
+      <mesh position={[0, 8.4, 0]} castShadow>
+        <boxGeometry args={[10.4, 6.2, 0.28]} />
+        <meshStandardMaterial color="#1a1c22" metalness={0.75} roughness={0.3} />
+      </mesh>
+
+      {/* Outer Illuminated Border Trim */}
+      <mesh position={[0, 8.4, 0.15]}>
+        <planeGeometry args={[10.0, 5.8]} />
+        <meshStandardMaterial
+          color={sponsor === 'dominos' ? '#e31837' : '#00f0ff'}
+          emissive={sponsor === 'dominos' ? '#cc1430' : '#00a0cc'}
+          emissiveIntensity={0.6}
+        />
+      </mesh>
+
+      {/* High-Resolution Commercial Sponsor Graphic Billboard Texture (100% luminous & crisp) */}
+      <mesh position={[0, 8.4, 0.18]}>
+        <planeGeometry args={[9.75, 5.55]} />
+        <meshBasicMaterial map={activeTex} toneMapped={false} />
+      </mesh>
+
+      {/* Subtle Screen Glass Sheen */}
+      <mesh position={[0, 8.4, 0.2]}>
+        <planeGeometry args={[9.75, 5.55]} />
+        <meshStandardMaterial
+          color="#ffffff"
+          transparent
+          opacity={0.06}
+          roughness={0.1}
+          metalness={0.8}
+        />
+      </mesh>
+
+      {/* Triple Overhead Spotlight Gantries & Fixtures */}
+      {[-3.2, 0, 3.2].map((x, i) => (
+        <group key={i} position={[x, 11.65, 0]}>
+          {/* Extension Arm */}
+          <mesh position={[0, 0, 0.45]} rotation-x={Math.PI / 2}>
+            <cylinderGeometry args={[0.04, 0.04, 0.9, 8]} />
+            <meshStandardMaterial color="#2d323b" metalness={0.8} />
+          </mesh>
+          {/* Lamp Head */}
+          <mesh position={[0, -0.06, 0.9]} rotation-x={0.45}>
+            <boxGeometry args={[0.55, 0.16, 0.32]} />
+            <meshStandardMaterial color="#1f232b" metalness={0.7} />
+          </mesh>
+          {/* Emissive Lamp Lens */}
+          <mesh position={[0, -0.15, 0.9]} rotation-x={0.45}>
+            <planeGeometry args={[0.5, 0.24]} />
+            <meshStandardMaterial color="#fffbe6" emissive="#ffeaad" emissiveIntensity={1.5} />
+          </mesh>
+        </group>
+      ))}
+
+      {/* Powerful Floodlight Illumination for Giant Billboard */}
+      <pointLight position={[0, 11.2, 1.8]} intensity={3.5} distance={15} color="#fffbe8" />
+    </group>
+  );
+}
+
 /* ─── Root ───────────────────────────────────────────── */
 export function BlossomScene({ progress, low }: { progress: React.MutableRefObject<number>; low: boolean }) {
   return (
@@ -840,10 +1273,10 @@ export function BlossomScene({ progress, low }: { progress: React.MutableRefObje
       camera={{ fov: 60, position: [0, 1.7, 10] }}
       gl={{ antialias: !low, powerPreference: "high-performance" }}
     >
-      <color attach="background" args={["#fde4ec"]} />
-      <fog attach="fog" args={["#fde4ec", 10, 62]} />
-      <ambientLight intensity={0.65} color="#ffe8f0" />
-      <hemisphereLight args={["#fff0f6", "#a8c898", 0.55]} />
+      <color attach="background" args={["#dbe7fb"]} />
+      <fog attach="fog" args={["#dbe7fb", 10, 68]} />
+      <ambientLight intensity={0.7} color="#f0f4ff" />
+      <hemisphereLight args={["#e8efff", "#d2dec9", 0.6]} />
       <Environment resolution={32}>
         <Lightformer intensity={2} position={[0, 6, 0]} scale={[10, 10, 1]} color="#fff" />
         <Lightformer intensity={1} color="#ffc0d6" position={[-5, 1, -1]} rotation-y={Math.PI / 2} scale={[20, 1, 1]} />
@@ -852,9 +1285,14 @@ export function BlossomScene({ progress, low }: { progress: React.MutableRefObje
       <Suspense fallback={null}>
         <Ground />
         <Forest />
-        <BackgroundTrees />        <ForestSign label="NIT SIKKIM" position={[2.4, 0, -12]} rotation={-0.12} accent="#d9b66f" />
+        <BackgroundTrees />
+        <ForestSign label="NIT SIKKIM" position={[2.4, 0, -12]} rotation={-0.12} accent="#d9b66f" />
+        <GameArcadeZone position={[-3.2, 0, -22]} />
         <ForestSign label="UDGAM 2K26" position={[-2.6, 0, -32]} rotation={0.14} accent="#e9a9bd" />
         <MerchStall position={[3.8, 0, -50]} />
+        {/* End of journey monumental sponsor billboards on open ground */}
+        <SponsorBillboard position={[-8.2, 0, -82]} rotationY={0.25} sponsor="dominos" />
+        <SponsorBillboard position={[8.2, 0, -82]} rotationY={-0.25} sponsor="quarks" />
         <SkyDragon progress={progress} />
       </Suspense>
       <Petals count={low ? 1500 : 4500} progress={progress} />
