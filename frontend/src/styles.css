@@ -69,11 +69,14 @@
 
 @layer base {
   * { border-color: var(--color-border); }
+  html { scroll-behavior: smooth; }
   body {
     background: var(--gradient-sky);
     color: var(--color-foreground);
     font-family: var(--font-sans);
     min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeSpeed;
   }
   h1, h2, h3 { font-family: var(--font-display); }
 }

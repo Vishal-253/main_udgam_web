@@ -1,34 +1,104 @@
 import { motion } from "framer-motion";
 
-function Flower({ className }: { className?: string }) {
-  return (
-    <svg viewBox="-50 -50 100 100" className={className}>
-      {[0, 72, 144, 216, 288].map((a) => (
-        <path key={a} transform={`rotate(${a})`} d="M0 0 C -14 -10 -16 -32 -5 -40 L 0 -35 L 5 -40 C 16 -32 14 -10 0 0Z" fill="var(--blossom)" stroke="var(--blossom-deep)" strokeWidth="1.2" />
-      ))}
-      <circle r="7" fill="oklch(0.85 0.14 85)" />
-      {[0, 60, 120, 180, 240, 300].map((a) => (
-        <circle key={a} transform={`rotate(${a}) translate(0 -11)`} r="1.8" fill="var(--blossom-deep)" />
-      ))}
-    </svg>
-  );
-}
-
 export function BlossomLoader({ onDone }: { onDone: () => void }) {
   return (
-    <motion.div className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-background" exit={{ opacity: 0 }} transition={{ duration: 0.6 }}>
+    <motion.div
+      className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden"
+      style={{ background: "linear-gradient(135deg, #fff0f5 0%, #fce4ef 50%, #fbd4e9 100%)" }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.5, ease: "easeInOut" }}
+    >
+      {/* Subtle background petals */}
+      {[...Array(8)].map((_, i) => (
+        <motion.div
+          key={i}
+          style={{
+            position: "absolute",
+            top: `${10 + (i * 11) % 80}%`,
+            left: `${5 + (i * 13) % 90}%`,
+            width: 16 + (i % 3) * 8,
+            height: (16 + (i % 3) * 8) * 0.72,
+            borderRadius: "150% 0 150% 0",
+            background: "linear-gradient(135deg, rgba(255,180,210,0.4), rgba(245,143,180,0.25))",
+            pointerEvents: "none",
+          }}
+          animate={{ y: [0, -10, 0], rotate: [0, 15, 0] }}
+          transition={{ duration: 3 + i * 0.4, repeat: Infinity, ease: "easeInOut", delay: i * 0.2 }}
+        />
+      ))}
+
+      {/* Logo + text container */}
       <motion.div
-        className="absolute"
-        initial={{ x: "-45vw", y: "-40vh", scale: 0.08, rotate: -220 }}
-        animate={{ x: [null, "10vw", "0vw", "0vw"], y: [null, "5vh", "0vh", "0vh"], scale: [null, 0.4, 0.6, 30], rotate: [null, 40, 0, 90] }}
-        transition={{ duration: 3.2, times: [0, 0.45, 0.7, 1], ease: "easeInOut" }}
+        className="relative flex flex-col items-center gap-6"
+        initial={{ opacity: 0, scale: 0.85 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
         onAnimationComplete={onDone}
       >
-        <Flower className="h-[40vmin] w-[40vmin] drop-shadow-2xl" />
-      </motion.div>
-      <motion.div className="relative text-center" initial={{ opacity: 0, y: 20 }} animate={{ opacity: [0, 1, 1, 0], y: 0 }} transition={{ duration: 2.6, times: [0, 0.3, 0.8, 1] }}>
-        <p className="font-display text-5xl text-gradient md:text-7xl">Udgam</p>
-        <p className="mt-2 tracking-[0.5em] text-muted-foreground">2K26</p>
+        {/* Udgam Logo */}
+        <motion.div
+          className="relative flex items-center justify-center"
+          animate={{ y: [0, -8, 0] }}
+          transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+        >
+          {/* Glow ring behind logo */}
+          <motion.div
+            style={{
+              position: "absolute",
+              inset: -24,
+              borderRadius: "50%",
+              background: "radial-gradient(circle, rgba(236,100,150,0.35) 0%, transparent 70%)",
+              filter: "blur(18px)",
+            }}
+            animate={{ opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <img
+            src="/favicon.ico"
+            alt="Udgam Logo"
+            style={{
+              width: 120,
+              height: 120,
+              objectFit: "contain",
+              position: "relative",
+              zIndex: 1,
+              filter: "drop-shadow(0 8px 24px rgba(220,80,130,0.45))",
+            }}
+          />
+        </motion.div>
+
+        {/* Title */}
+        <motion.div
+          className="text-center"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+        >
+          <p
+            className="font-display text-6xl md:text-7xl"
+            style={{
+              background: "linear-gradient(135deg, oklch(0.55 0.19 358), oklch(0.75 0.14 20))",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}
+          >
+            Udgam
+          </p>
+          <p style={{ marginTop: 6, letterSpacing: "0.5em", color: "oklch(0.5 0.05 350)", fontSize: 14 }}>
+            2K26
+          </p>
+        </motion.div>
+
+        {/* Loading bar */}
+        <div style={{ width: 160, height: 3, borderRadius: 99, background: "rgba(220,130,170,0.2)", overflow: "hidden", marginTop: 4 }}>
+          <motion.div
+            style={{ height: "100%", borderRadius: 99, background: "linear-gradient(90deg, oklch(0.62 0.17 355), oklch(0.75 0.14 20))" }}
+            initial={{ width: "0%" }}
+            animate={{ width: "100%" }}
+            transition={{ duration: 1.6, ease: "easeInOut" }}
+          />
+        </div>
       </motion.div>
     </motion.div>
   );

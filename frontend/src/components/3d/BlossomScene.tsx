@@ -692,117 +692,7 @@ function SkyDragon({ progress }: { progress: React.MutableRefObject<number> }) {
   );
 }
 
-/* ─── Event Registration Desk (3D) ────────────────────── */
-function RegistrationDesk() {
-  const deskRef = useRef<THREE.Group>(null);
-  const btnWrapRef = useRef<HTMLDivElement>(null);
-  
-  const textures = useTexture([woodImg, canvasImg]);
-  const woodTex = textures[0];
-  const canvasTex = textures[1];
 
-  woodTex.colorSpace = THREE.SRGBColorSpace;
-  canvasTex.colorSpace = THREE.SRGBColorSpace;
-  woodTex.wrapS = woodTex.wrapT = THREE.RepeatWrapping;
-  woodTex.repeat.set(2, 2);
-  canvasTex.wrapS = canvasTex.wrapT = THREE.RepeatWrapping;
-  canvasTex.repeat.set(3, 3);
-  
-  useFrame(({ camera }) => {
-    if (deskRef.current && btnWrapRef.current) {
-      const dist = camera.position.distanceTo(deskRef.current.position);
-      if (dist < 28 && dist > 2) {
-        btnWrapRef.current.style.opacity = '1';
-        btnWrapRef.current.style.pointerEvents = 'auto';
-      } else {
-        btnWrapRef.current.style.opacity = '0';
-        btnWrapRef.current.style.pointerEvents = 'none';
-      }
-    }
-  });
-  
-  return (
-    <group ref={deskRef} position={[-4.65 + roadX(-25), 0, -25]} rotation-y={0.4 + Math.atan(roadSlope(-25))}>
-      {/* Wooden Desk Top */}
-      <mesh position={[0, 0.9, 0]} castShadow receiveShadow>
-        <boxGeometry args={[3.8, 0.1, 1.6]} />
-        <meshStandardMaterial map={woodTex} roughness={0.8} />
-      </mesh>
-      
-      {/* Desk Legs */}
-      {[
-        [-1.7, 0.45, -0.6], [1.7, 0.45, -0.6], 
-        [-1.7, 0.45, 0.6], [1.7, 0.45, 0.6]
-      ].map((pos, i) => (
-        <mesh key={i} position={pos as [number, number, number]} castShadow receiveShadow>
-          <cylinderGeometry args={[0.08, 0.08, 0.9]} />
-          <meshStandardMaterial map={woodTex} roughness={0.9} />
-        </mesh>
-      ))}
-
-      {/* Desk Front Banner */}
-      <Html position={[0, 0.5, 0.81]} transform center scale={0.008}>
-        <div style={{
-          background: 'rgba(255, 77, 136, 0.85)',
-          color: 'white',
-          padding: '20px 40px',
-          border: '4px solid white',
-          borderRadius: '8px',
-          fontFamily: 'sans-serif',
-          fontWeight: 'bold',
-          fontSize: '48px',
-          width: '420px',
-          textAlign: 'center',
-          backdropFilter: 'blur(8px)',
-          boxShadow: '0px 8px 20px rgba(0,0,0,0.5)',
-        }}>
-          REGISTRATION
-        </div>
-      </Html>
-      
-      {/* Floating Interactive Button */}
-      <Html position={[0, 4.2, 0]} center>
-        <div ref={btnWrapRef} style={{ transition: 'opacity 0.4s ease', opacity: 0, pointerEvents: 'none' }}>
-          <div 
-            style={{
-              background: 'white',
-              padding: '16px 32px',
-              borderRadius: '40px',
-              boxShadow: '0 8px 24px rgba(233, 169, 189, 0.6)',
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              color: '#e9a9bd',
-              fontFamily: 'sans-serif',
-              fontSize: '24px',
-              border: '4px solid #e9a9bd',
-              whiteSpace: 'nowrap',
-              textTransform: 'uppercase',
-              letterSpacing: '1px',
-              transition: 'all 0.2s ease',
-            }}
-            onPointerOver={(e) => {
-              e.currentTarget.style.background = '#e9a9bd';
-              e.currentTarget.style.color = 'white';
-              e.currentTarget.style.transform = 'scale(1.1) translateY(-5px)';
-              e.currentTarget.style.boxShadow = '0 12px 32px rgba(233, 169, 189, 0.8)';
-            }}
-            onPointerOut={(e) => {
-              e.currentTarget.style.background = 'white';
-              e.currentTarget.style.color = '#e9a9bd';
-              e.currentTarget.style.transform = 'scale(1) translateY(0)';
-              e.currentTarget.style.boxShadow = '0 8px 24px rgba(233, 169, 189, 0.6)';
-            }}
-            onClick={() => {
-              alert('Opening Event Registration!');
-            }}
-          >
-            🎟️ Register for Event
-          </div>
-        </div>
-      </Html>
-    </group>
-  );
-}
 
 /* ─── Merch Stall ────────────────────────────────────── */
 function MerchStall({ position }: { position: [number, number, number] }) {
@@ -944,12 +834,17 @@ function MerchStall({ position }: { position: [number, number, number] }) {
 /* ─── Root ───────────────────────────────────────────── */
 export function BlossomScene({ progress, low }: { progress: React.MutableRefObject<number>; low: boolean }) {
   return (
-    <Canvas shadows={!low} dpr={low ? 1 : [1, 1.75]} camera={{ fov: 60, position: [0, 1.7, 10] }}>
+    <Canvas
+      shadows={!low}
+      dpr={low ? 1 : [1, 1.5]}
+      camera={{ fov: 60, position: [0, 1.7, 10] }}
+      gl={{ antialias: !low, powerPreference: "high-performance" }}
+    >
       <color attach="background" args={["#fde4ec"]} />
       <fog attach="fog" args={["#fde4ec", 10, 62]} />
       <ambientLight intensity={0.65} color="#ffe8f0" />
       <hemisphereLight args={["#fff0f6", "#a8c898", 0.55]} />
-      <Environment resolution={64}>
+      <Environment resolution={32}>
         <Lightformer intensity={2} position={[0, 6, 0]} scale={[10, 10, 1]} color="#fff" />
         <Lightformer intensity={1} color="#ffc0d6" position={[-5, 1, -1]} rotation-y={Math.PI / 2} scale={[20, 1, 1]} />
       </Environment>
@@ -960,10 +855,9 @@ export function BlossomScene({ progress, low }: { progress: React.MutableRefObje
         <BackgroundTrees />        <ForestSign label="NIT SIKKIM" position={[2.4, 0, -12]} rotation={-0.12} accent="#d9b66f" />
         <ForestSign label="UDGAM 2K26" position={[-2.6, 0, -32]} rotation={0.14} accent="#e9a9bd" />
         <MerchStall position={[3.8, 0, -50]} />
-        <RegistrationDesk />
         <SkyDragon progress={progress} />
       </Suspense>
-      <Petals count={low ? 2000 : 6500} progress={progress} />
+      <Petals count={low ? 1500 : 4500} progress={progress} />
     </Canvas>
   );
 }

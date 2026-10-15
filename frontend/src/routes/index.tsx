@@ -195,7 +195,7 @@ function Home() {
           `}</style>
           <div className="sticky top-0 h-screen w-full overflow-hidden">
             {/* video layer */}
-            <div ref={videoWrap} className="absolute inset-0" style={{ opacity: 0, transform: "scale(1.12)", willChange: "opacity, transform" }}>
+            <div ref={videoWrap} className="absolute inset-0" style={{ opacity: 0, transform: "scale(1.12)", willChange: "opacity, transform", backfaceVisibility: "hidden" }}>
               <video
                 ref={videoEl}
                 src="/campus.mp4"
@@ -216,7 +216,7 @@ function Home() {
             <div
               ref={veilEl}
               className="absolute inset-0"
-              style={{ opacity: 0, background: "radial-gradient(ellipse at 50% 40%, #fff0f5 0%, #fbcfe0 55%, #f7b6cf 100%)" }}
+              style={{ opacity: 0, background: "radial-gradient(ellipse at 50% 40%, #fff0f5 0%, #fbcfe0 55%, #f7b6cf 100%)", willChange: "opacity", backfaceVisibility: "hidden" }}
             />
             {/* falling petals over the transition */}
             <div ref={petalEl} className="absolute inset-0 overflow-hidden" style={{ opacity: 0 }}>
