@@ -21,6 +21,22 @@ function rng(seed: number) {
   };
 }
 
+/* ─── Road centre-line: x as a function of z ───────── */
+const smooth = (e0: number, e1: number, x: number) => {
+  const t = Math.min(Math.max((x - e0) / (e1 - e0), 0), 1);
+  return t * t * (3 - 2 * t);
+};
+// Straight at the start (z≥8) and at the campus (z≤-95), winding in between.
+const roadEnvelope = (z: number) => smooth(8, -8, z) * smooth(-95, -80, z);
+export function roadX(z: number) {
+  return (3.6 * Math.sin(z * 0.08) + 1.3 * Math.sin(z * 0.19 + 1.0)) * roadEnvelope(z);
+}
+function roadSlope(z: number) {
+  const h = 0.05;
+  return (roadX(z + h) - roadX(z - h)) / (2 * h);
+}
+const ROAD_HALF_W = 1.575;
+
 type TreeSpec = { pos: THREE.Vector3; scale: number; texIdx: number };
 
 /* ─── Forest: ONE pair of trees per ~6 units of road ── */
@@ -40,13 +56,14 @@ function Forest() {
       const texIdx = i % 3;
       // Left side
       list.push({
-        pos: new THREE.Vector3(-(6.5 + r() * 3.5), 0, z),
+        pos: new THREE.Vector3(roadX(z) - (6.5 + r() * 3.5), 0, z),
         scale: 0.9 + r() * 0.5,
         texIdx,
       });
       // Right side (different variety)
+      const zr = z + (r() - 0.5) * 1.5;
       list.push({
-        pos: new THREE.Vector3(6.5 + r() * 3.5, 0, z + (r() - 0.5) * 1.5),
+        pos: new THREE.Vector3(roadX(zr) + 6.5 + r() * 3.5, 0, zr),
         scale: 0.9 + r() * 0.5,
         texIdx: (texIdx + 1) % 3,
       });
@@ -92,8 +109,9 @@ function BackgroundTrees() {
     const list: TreeSpec[] = [];
     for (let i = 0; i < 24; i++) {
       const side = i % 2 === 0 ? -1 : 1;
+      const z = 5 - i * 3.8 - r() * 1.5;
       list.push({
-        pos: new THREE.Vector3(side * (11 + r() * 13), 0, 5 - i * 3.8 - r() * 1.5),
+        pos: new THREE.Vector3(roadX(z) * 0.6 + side * (11 + r() * 13), 0, z),
         scale: 0.6 + r() * 0.32,
         texIdx: i % 3,
       });
@@ -130,13 +148,41 @@ function BackgroundTrees() {
 /* ─── Ground (improved grass + road with edge lines) ── */
 function Ground() {
   const [grass, road] = useTexture([groundImg, roadImg]);
+  const roadGeo = useMemo(() => {
+    const zStart = 30, zEnd = -110, step = 0.5, tile = 6.36;
+    const n = Math.round((zStart - zEnd) / step);
+    const pos: number[] = [], uv: number[] = [], idx: number[] = [];
+    let dist = 0, prevX = roadX(zStart), prevZ = zStart;
+    for (let i = 0; i <= n; i++) {
+      const z = zStart - i * step;
+      const x = roadX(z);
+      dist += Math.hypot(x - prevX, z - prevZ);
+      prevX = x; prevZ = z;
+      const sl = roadSlope(z);
+      // unit normal to the tangent (sl, -1) in the XZ plane
+      const len = Math.hypot(sl, 1);
+      const nx = 1 / len, nz = sl / len;
+      pos.push(x - nx * ROAD_HALF_W, 0, z - nz * ROAD_HALF_W, x + nx * ROAD_HALF_W, 0, z + nz * ROAD_HALF_W);
+      uv.push(0, dist / tile, 1, dist / tile);
+      if (i < n) {
+        const a = i * 2;
+        idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2);
+      }
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+    g.setAttribute("uv", new THREE.Float32BufferAttribute(uv, 2));
+    g.setIndex(idx);
+    g.computeVertexNormals();
+    return g;
+  }, []);
   if (!grass || !road) return null;
   grass.wrapS = grass.wrapT = THREE.RepeatWrapping;
   grass.repeat.set(9, 18);
   grass.colorSpace = THREE.SRGBColorSpace;
   grass.anisotropy = 8;
   road.wrapS = road.wrapT = THREE.RepeatWrapping;
-  road.repeat.set(1, 22);
+  road.repeat.set(1, 1);
   road.colorSpace = THREE.SRGBColorSpace;
   road.anisotropy = 8;
   return (
@@ -145,8 +191,7 @@ function Ground() {
         <planeGeometry args={[80, 140]} />
         <meshStandardMaterial map={grass} roughness={0.96} />
       </mesh>
-      <mesh rotation-x={-Math.PI / 2} position={[0, 0.025, -40]} receiveShadow>
-        <planeGeometry args={[3.15, 140, 1, 70]} />
+      <mesh geometry={roadGeo} position={[0, 0.025, 0]} receiveShadow>
         <meshStandardMaterial map={road} roughness={0.93} />
       </mesh>
     </>
@@ -268,7 +313,7 @@ function NITCampus({ progress }: { progress: React.MutableRefObject<number> }) {
               e.currentTarget.style.transform = 'translateY(0) scale(1)';
               e.currentTarget.style.boxShadow = '0 12px 24px rgba(0,0,0,0.2), 0 0 0 4px rgba(255,255,255,0.3)';
             }}
-            onClick={() => alert('Entering Campus Tour...')}
+            onClick={() => window.dispatchEvent(new Event("udgam:enter-campus"))}
           >
             Enter Campus
           </button>
@@ -378,8 +423,9 @@ function makeSignTexture(label: string, accent: string) {
 
 function ForestSign({ label, position, rotation = 0, accent }: { label: string; position: [number, number, number]; rotation?: number; accent: string }) {
   const texture = useMemo(() => makeSignTexture(label, accent), [label, accent]);
+  const z = position[2];
   return (
-    <group position={position} rotation-y={rotation}>
+    <group position={[position[0] + roadX(z), position[1], z]} rotation-y={rotation + Math.atan(roadSlope(z))}>
       <mesh position={[-1.55, 1.35, 0]} castShadow>
         <cylinderGeometry args={[0.11, 0.15, 2.7, 12]} />
         <meshStandardMaterial color="#3d2418" roughness={0.95} />
@@ -428,15 +474,17 @@ function CameraRig({ progress }: { progress: React.MutableRefObject<number> }) {
     const roadZ = 10 - p * 82;
     const groundY = 1.7 + p * p * 4.5 + Math.sin(t * 0.6) * 0.05;
 
+    const camZ = roadZ + aerialT * 16;
+    const lookZ = camZ - 10 - aerialT * 30;
     camera.position.set(
-      Math.sin(p * Math.PI * 2) * 1.2 * (1 - aerialT) + state.pointer.x * 0.4 * (1 - aerialT),
+      roadX(camZ) + state.pointer.x * 0.4 * (1 - aerialT),
       groundY + aerialT * 32,
-      roadZ + aerialT * 16,
+      camZ,
     );
     camera.lookAt(
-      Math.sin(p * Math.PI * 2 + 0.6) * 1.5 * (1 - aerialT),
+      roadX(lookZ),
       2.2 + p * 4 + state.pointer.y * 0.3 * (1 - aerialT) + aerialT * 18,
-      camera.position.z - 10 - aerialT * 30,
+      lookZ,
     );
 
     const midCol = morning.clone().lerp(golden, Math.min(p * 1.3, 1));
@@ -616,7 +664,7 @@ function SkyDragon({ progress }: { progress: React.MutableRefObject<number> }) {
     const targetY = 12.0 + Math.sin(t * 1.2) * 1.8;
     const targetZ = journeyZ - 30 + Math.cos(t * 0.3) * 6.0;
 
-    dragon.current.position.lerp(new THREE.Vector3(targetX, targetY, targetZ), 1.5 * dt);
+    dragon.current.position.lerp(new THREE.Vector3(targetX + roadX(targetZ), targetY, targetZ), 1.5 * dt);
 
     // Calculate realistic banking & pitching based on flight curve derivatives
     const bankZ = Math.cos(t * 0.5) * 0.4;
@@ -674,7 +722,7 @@ function RegistrationDesk() {
   });
   
   return (
-    <group ref={deskRef} position={[-4.65, 0, -25]} rotation-y={0.4}>
+    <group ref={deskRef} position={[-4.65 + roadX(-25), 0, -25]} rotation-y={0.4 + Math.atan(roadSlope(-25))}>
       {/* Wooden Desk Top */}
       <mesh position={[0, 0.9, 0]} castShadow receiveShadow>
         <boxGeometry args={[3.8, 0.1, 1.6]} />
@@ -790,7 +838,7 @@ function MerchStall({ position }: { position: [number, number, number] }) {
   });
 
   return (
-    <group position={position} ref={stallRef} rotation-y={-0.2}>
+    <group position={[position[0] + roadX(position[2]), position[1], position[2]]} ref={stallRef} rotation-y={-0.2 + Math.atan(roadSlope(position[2]))}>
       {/* Wooden Table Top */}
       <mesh position={[0, 0.9, 0]} castShadow receiveShadow>
         <boxGeometry args={[3.6, 0.1, 1.8]} />
@@ -909,9 +957,7 @@ export function BlossomScene({ progress, low }: { progress: React.MutableRefObje
       <Suspense fallback={null}>
         <Ground />
         <Forest />
-        <BackgroundTrees />
-        <NITCampus progress={progress} />
-        <ForestSign label="NIT SIKKIM" position={[2.4, 0, -12]} rotation={-0.12} accent="#d9b66f" />
+        <BackgroundTrees />        <ForestSign label="NIT SIKKIM" position={[2.4, 0, -12]} rotation={-0.12} accent="#d9b66f" />
         <ForestSign label="UDGAM 2K26" position={[-2.6, 0, -32]} rotation={0.14} accent="#e9a9bd" />
         <MerchStall position={[3.8, 0, -50]} />
         <RegistrationDesk />
