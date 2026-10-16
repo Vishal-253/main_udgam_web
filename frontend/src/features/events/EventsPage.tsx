@@ -8,7 +8,7 @@ import {
   type EventTier,
   type FestEvent,
 } from "./data/eventDetails";
-import { formatFee } from "./format";
+import { feeLabel, feePill, formatFee } from "./format";
 import { useEventPass } from "./hooks/useEventPass";
 import { CategoryChip, RegisterButton, RotatingTagline } from "./components/EventBits";
 import { categoryOf } from "./utils";
@@ -36,8 +36,9 @@ type Comparator = (a: FestEvent, b: FestEvent) => number;
 
 const SORTS: Record<SortId, { label: string; fn: Comparator | null }> = {
   featured: { label: "Featured", fn: null },
-  "fee-asc": { label: "Fee: low to high", fn: (a, b) => a.fee - b.fee },
-  "fee-desc": { label: "Fee: high to low", fn: (a, b) => b.fee - a.fee },
+  // fees still to be announced sort last either way
+  "fee-asc": { label: "Fee: low to high", fn: (a, b) => (a.fee ?? Infinity) - (b.fee ?? Infinity) },
+  "fee-desc": { label: "Fee: high to low", fn: (a, b) => (b.fee ?? -1) - (a.fee ?? -1) },
   name: { label: "Name A–Z", fn: (a, b) => a.name.localeCompare(b.name) },
 };
 
@@ -126,7 +127,7 @@ export default function EventsPage({
     setCategory("all");
   };
 
-  const minFee = Math.min(...events.map((e) => e.fee));
+  const freeCount = events.filter((e) => e.fee === 0).length;
   const openEvent = events.find((e) => e.id === openId) ?? null;
 
   return (
@@ -157,8 +158,8 @@ export default function EventsPage({
             <dd>{categories.length}</dd>
           </div>
           <div>
-            <dt>Entry from</dt>
-            <dd>{formatFee(minFee)}</dd>
+            <dt>Free entry</dt>
+            <dd>{freeCount}</dd>
           </div>
         </dl>
       </header>
@@ -370,7 +371,7 @@ function HeadlinerTile({ event, index, added, onToggle, onOpen }: CardProps & { 
       <div className="ep-tile-top">
         <span className="ep-tile-index">{String(index + 1).padStart(2, "0")}</span>
         <CategoryChip id={event.category} small />
-        <span className="ep-fee-pill">{formatFee(event.fee)}</span>
+        <span className="ep-fee-pill">{feePill(event)}</span>
       </div>
 
       <h3 className="ep-tile-title">
@@ -425,7 +426,7 @@ function TicketCard({ event, added, onToggle, onOpen }: CardProps) {
       </div>
       <div className="ep-ticket-stub">
         <span className="ep-ticket-fee">{formatFee(event.fee)}</span>
-        <span className="ep-ticket-fee-label">entry</span>
+        <span className="ep-ticket-fee-label">{feeLabel(event)}</span>
         <RegisterButton added={added} onToggle={onToggle} eventName={event.name} size="sm" />
       </div>
     </article>

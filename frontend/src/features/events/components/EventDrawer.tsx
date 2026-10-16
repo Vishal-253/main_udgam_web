@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { cssVars } from "@/lib/css-vars";
 import type { FestEvent } from "../data/eventDetails";
-import { formatFee } from "../format";
+import { feeLabel, formatFee } from "../format";
 import { CategoryChip, RegisterButton } from "./EventBits";
 import { categoryOf } from "../utils";
 import { ArrowIcon, CloseIcon, DocIcon } from "./eventIcons";
@@ -160,7 +160,8 @@ export default function EventDrawer({
         <div className="ep-drawer-foot">
           <div>
             <span className="ep-drawer-fee">{formatFee(shown.fee)}</span>
-            <span className="ep-drawer-fee-label">entry fee</span>
+            <span className="ep-drawer-fee-label">{feeLabel(shown)}</span>
+            {shown.feeNote && <span className="ep-drawer-fee-note">{shown.feeNote}</span>}
           </div>
           <RegisterButton added={added} onToggle={onToggle} eventName={shown.name} size="lg" />
         </div>

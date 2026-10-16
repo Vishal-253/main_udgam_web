@@ -1,5 +1,5 @@
 // Udgam 2026 events, from event_details.md (event-management sheet).
-// `fee` values are PLACEHOLDERS (INR) until the committee confirms real pricing.
+// Entry fees from event_names_entry_fees.md (event-management sheet).
 
 export type EventTier = "major" | "regular";
 export type EventCategoryId = "games" | "sports" | "performance" | "creative" | "food" | "esports";
@@ -21,8 +21,12 @@ export interface FestEvent {
   name: string;
   tier: EventTier;
   category: EventCategoryId;
-  /** entry fee in INR (placeholder) */
-  fee: number;
+  /** entry fee in INR; 0 = free entry, null = not announced yet */
+  fee: number | null;
+  /** what the fee covers; omitted for free / unannounced fees and flat fees */
+  feeUnit?: "team" | "person";
+  /** extra pricing detail, e.g. a different fee for one title */
+  feeNote?: string;
   taglines: string[];
   description?: string;
   rounds?: string[];
@@ -48,7 +52,8 @@ export const EVENTS: FestEvent[] = [
     name: "Spoil the T-shirt",
     tier: "major",
     category: "games",
-    fee: 120,
+    fee: 150,
+    feeUnit: "team",
     taglines: [],
     docUrl: DOC("1B7N4-QUDR-qa8jM9BscvCeTci3eNen6rC4VW0rTIWqo", "edit?usp=sharing"),
   },
@@ -57,7 +62,8 @@ export const EVENTS: FestEvent[] = [
     name: "Treasure Hunt",
     tier: "major",
     category: "games",
-    fee: 150,
+    fee: 250,
+    feeUnit: "team",
     taglines: [
       "Follow the clues. Find the glory.",
       "X marks the spot. Who finds it first?",
@@ -69,7 +75,8 @@ export const EVENTS: FestEvent[] = [
     name: "IPL Auction",
     tier: "major",
     category: "games",
-    fee: 200,
+    fee: 50,
+    feeUnit: "team",
     description: "Auction for IPL teams.",
     taglines: [
       "Every bid counts. Every player matters.",
@@ -82,7 +89,7 @@ export const EVENTS: FestEvent[] = [
     name: "Ramp Walk",
     tier: "major",
     category: "performance",
-    fee: 150,
+    fee: 0,
     description: "Ramp walk with different traditions.",
     taglines: [
       "Threads of tradition, steps of grace!",
@@ -95,7 +102,7 @@ export const EVENTS: FestEvent[] = [
     name: "Housie (Bingo)",
     tier: "major",
     category: "games",
-    fee: 50,
+    fee: null,
     taglines: [
       "Mark, match, shout — it's Housie time!",
       "One ticket, endless thrill!",
@@ -108,7 +115,7 @@ export const EVENTS: FestEvent[] = [
     name: "Dance Competition",
     tier: "major",
     category: "performance",
-    fee: 200,
+    fee: 0,
     description: "The winner of the dance competition gets to perform on the Udgam stage.",
     taglines: [
       "Steal the floor, own the stage!",
@@ -121,7 +128,7 @@ export const EVENTS: FestEvent[] = [
     name: "Food Fiesta",
     tier: "major",
     category: "food",
-    fee: 300,
+    fee: null,
     description: "Cook-off for food makers. The winner gets to run a stall during Udgam.",
     taglines: ["One fest. Endless flavors.", "Come hungry. Leave happy."],
   },
@@ -130,7 +137,7 @@ export const EVENTS: FestEvent[] = [
     name: "Singing Competition",
     tier: "major",
     category: "performance",
-    fee: 100,
+    fee: 0,
     taglines: ["Sing your heart out. Touch the soul.", "Amplify your voice. Electrify the crowd."],
     docUrl: DOC("1e5-mq9BAFEiCco7V1LSZt8cZ7-1HGBvsz1WJbWh3xtk", "edit?usp=drivesdk"),
   },
@@ -139,7 +146,8 @@ export const EVENTS: FestEvent[] = [
     name: "Wall Painting",
     tier: "major",
     category: "creative",
-    fee: 150,
+    fee: 200,
+    feeUnit: "team",
     taglines: ["Walls that speak, art that screams.", "Give your thoughts a splash of freedom."],
     docUrl: DOC("137-WU42Cb8S25cM8u-Iw7xFDLUh1RPUYhkLTkE2LrbQ", "edit?usp=drivesdk"),
   },
@@ -150,7 +158,7 @@ export const EVENTS: FestEvent[] = [
     name: "Dumb Charades",
     tier: "regular",
     category: "games",
-    fee: 50,
+    fee: 0,
     description:
       "Guess the movie name — one player acts while the other guesses. Includes a guess-the-personality round.",
     taglines: [
@@ -164,7 +172,7 @@ export const EVENTS: FestEvent[] = [
     name: "Antakshari",
     tier: "regular",
     category: "performance",
-    fee: 50,
+    fee: 0,
     taglines: [
       "कुछ सुर, कुछ नग़मे, और एक महफ़िल यादगार।",
       "From timeless melodies to unforgettable moments.",
@@ -178,6 +186,7 @@ export const EVENTS: FestEvent[] = [
     tier: "regular",
     category: "games",
     fee: 30,
+    feeUnit: "team",
     taglines: [
       "A little pressure, a lot of chaos.",
       "Fast hands, sharp moves, one loud finish.",
@@ -190,7 +199,8 @@ export const EVENTS: FestEvent[] = [
     name: "Squid Games",
     tier: "regular",
     category: "games",
-    fee: 80,
+    fee: 30,
+    feeUnit: "person",
     description: "Four rounds of survival games.",
     rounds: [
       "Red Light, Green Light",
@@ -209,7 +219,8 @@ export const EVENTS: FestEvent[] = [
     name: "E-Games",
     tier: "regular",
     category: "esports",
-    fee: 100,
+    fee: 200,
+    feeNote: "₹50 for eFootball",
     description: "Compete in four titles: MLBB, Free Fire, BGMI and eFootball.",
     games: [
       {
@@ -245,7 +256,8 @@ export const EVENTS: FestEvent[] = [
     name: "Guess the Juice",
     tier: "regular",
     category: "food",
-    fee: 30,
+    fee: 50,
+    feeUnit: "team",
     taglines: [
       "Bet you can't guess this in one sip.",
       "Taste buds vs. blindfold — who wins?",
@@ -258,7 +270,8 @@ export const EVENTS: FestEvent[] = [
     name: "Three-Leg Tie",
     tier: "regular",
     category: "sports",
-    fee: 40,
+    fee: 30,
+    feeUnit: "team",
     taglines: [
       "Three feet, one goal.",
       "Step together, win together.",
@@ -271,7 +284,7 @@ export const EVENTS: FestEvent[] = [
     name: "Musical Chair",
     tier: "regular",
     category: "games",
-    fee: 30,
+    fee: 0,
     description: "Grab a chair when the music stops.",
     taglines: ["Music on, game on.", "Listen, move, grab, win.", "Move fast, sit fast."],
   },
@@ -281,6 +294,7 @@ export const EVENTS: FestEvent[] = [
     tier: "regular",
     category: "creative",
     fee: 80,
+    feeUnit: "team",
     description: "Team up and make a rangoli.",
     taglines: ["Create together, shine together.", "Let your colour shine."],
   },
@@ -289,7 +303,7 @@ export const EVENTS: FestEvent[] = [
     name: "Tug of War",
     tier: "regular",
     category: "sports",
-    fee: 100,
+    fee: 0,
     description: "Pull the rope and cross the winning line.",
     taglines: ["It's not personal… until you lose.", "Aaj rassi nahi, izzat kheechni hai."],
   },
@@ -298,7 +312,7 @@ export const EVENTS: FestEvent[] = [
     name: "Photography",
     tier: "regular",
     category: "creative",
-    fee: 50,
+    fee: 0,
     description: "Submit raw pictures taken on your phone, with no post-processing.",
     taglines: ["Freeze the vibe, frame the moment.", "Paal ko thaamo, yaadon mein sajaao."],
   },
@@ -307,7 +321,8 @@ export const EVENTS: FestEvent[] = [
     name: "Food Eating Challenge",
     tier: "regular",
     category: "food",
-    fee: 60,
+    fee: 50,
+    feeUnit: "person",
     description: "Whoever eats the most within the time limit wins.",
     taglines: ["Are you hungry enough to make history?", "Khao aise, ki plate sharma jaye."],
   },
@@ -316,7 +331,7 @@ export const EVENTS: FestEvent[] = [
     name: "Cup Pong",
     tier: "regular",
     category: "games",
-    fee: 40,
+    fee: 0,
     taglines: ["Aim. Bounce. Conquer.", "Aim sharp. Score big."],
     docUrl: DOC("12jCYqkQuibo-SxHFXvPzk_xMqHLQXVcoiurq3-Rd0Zw", "edit?usp=drivesdk"),
   },
@@ -325,7 +340,7 @@ export const EVENTS: FestEvent[] = [
     name: "Short Movie Competition",
     tier: "regular",
     category: "creative",
-    fee: 150,
+    fee: 0,
     taglines: ["Small screen. Big stories.", "Your vision, our screen."],
     docUrl: DOC("1RIhcZUI_ft315IRD_aH607UVxkKPNDeOGRuYlBUMGHQ", "edit?usp=drivesdk"),
   },
@@ -334,7 +349,8 @@ export const EVENTS: FestEvent[] = [
     name: "String Maze",
     tier: "regular",
     category: "sports",
-    fee: 40,
+    fee: 30,
+    feeUnit: "person",
     description:
       "Step into a maze of tangled strings and make your way to the other side without touching them. Duck, crawl, twist and squeeze through the gaps while finding the fastest route. One wrong move can cost you valuable seconds — reach the finish line in the shortest time to win.",
     taglines: [
@@ -348,7 +364,7 @@ export const EVENTS: FestEvent[] = [
     name: "Balloon Between Two Race",
     tier: "regular",
     category: "sports",
-    fee: 40,
+    fee: 0,
     taglines: ["Two to hold one.", "Press in pair to move.", "Stick together, move as one!"],
   },
   {
@@ -356,7 +372,8 @@ export const EVENTS: FestEvent[] = [
     name: "Fill & Burst the Balloon",
     tier: "regular",
     category: "games",
-    fee: 40,
+    fee: 60,
+    feeUnit: "team",
     taglines: [
       "Catch n' splash n' win.",
       "Fill, aim, throw, repeat.",
