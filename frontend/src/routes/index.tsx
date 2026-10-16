@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { BlossomLoader, LoaderScreen } from "@/components/ui/BlossomLoader";
@@ -38,13 +38,8 @@ function Home() {
   const [loadProgress, setLoadProgress] = useState<number | null>(null);
   const [minTimePassed, setMinTimePassed] = useState(false);
   const loading = !(sceneReady && minTimePassed);
-  // Start in low quality on phones / low-core or low-memory devices (user can still toggle)
-  const [low, setLow] = useState(() => {
-    if (typeof window === "undefined") return false;
-    const nav = navigator as Navigator & { deviceMemory?: number };
-    const coarse = window.matchMedia?.("(pointer: coarse)").matches ?? false;
-    return coarse || (nav.hardwareConcurrency ?? 8) <= 4 || (nav.deviceMemory ?? 8) <= 4;
-  });
+  // High quality by default on every device; the button bottom-right switches to Low quality
+  const [low, setLow] = useState(false);
 
   useEffect(() => {
     const min = setTimeout(() => setMinTimePassed(true), MIN_LOADER_MS);
@@ -57,6 +52,17 @@ function Home() {
   }, []);
   const onSceneReady = useCallback(() => setSceneReady(true), []);
   const onLoadProgress = useCallback((p: number) => setLoadProgress(p), []);
+
+  // buttons inside the 3D scene (drei <Html> has no router context) ask for in-app navigation
+  const navigate = useNavigate();
+  useEffect(() => {
+    const go = (e: Event) => {
+      const to = (e as CustomEvent<string>).detail;
+      if (to === "/events" || to === "/merch") void navigate({ to });
+    };
+    window.addEventListener("udgam:navigate", go);
+    return () => window.removeEventListener("udgam:navigate", go);
+  }, [navigate]);
 
   // scroll position drives the 3D camera; a ref (not React state), so scrolling never re-renders
   useEffect(() => {
@@ -91,7 +97,9 @@ function Home() {
         {low ? "Low quality ✓" : "High quality ✓"}
       </button>
 
-      <main className="relative z-10">
+      {/* click-through: this layer only provides scroll height + the title, so clicks reach
+          the 3D scene's buttons (Register for Events, Shop Merch) underneath */}
+      <main className="pointer-events-none relative z-10">
         <div ref={zoneRef}>
         <section className="relative flex h-screen flex-col items-center justify-center px-5 text-center select-none">
           {/* Modern Impressive Udgam 2K26 Title */}

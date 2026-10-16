@@ -10,7 +10,7 @@ import woodImg from "@/assets/wood_planks.webp";
 import canvasImg from "@/assets/canvas_fabric.webp";
 import clothesImg from "@/assets/folded_clothes.webp";
 import dominosImg from "@/assets/dominos_pizza_photo.webp";
-import quarksImg from "@/assets/quarks_tech_photo.webp";
+import quarksImg from "@/assets/quarks_logo_billboard.webp";
 import arcadeScreenImg from "@/assets/arcade_screen_udgam.webp";
 import mountainImg from "@/assets/distant_mountains_sikkim.webp";
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
@@ -689,7 +689,7 @@ function MerchStall({ position }: { position: [number, number, number] }) {
               e.currentTarget.style.transform = 'scale(1)';
             }}
             onClick={() => {
-              window.location.href = '/merch';
+              window.dispatchEvent(new CustomEvent('udgam:navigate', { detail: '/merch' }));
             }}
           >
             🛍️ Shop Merch
@@ -1004,7 +1004,7 @@ function GameArcadeZone({ position }: { position: [number, number, number] }) {
               e.currentTarget.style.boxShadow = '0 10px 28px rgba(224, 83, 117, 0.45), 0 0 20px rgba(255, 126, 179, 0.35)';
             }}
             onClick={() => {
-              window.location.href = '/events';
+              window.dispatchEvent(new CustomEvent('udgam:navigate', { detail: '/events' }));
             }}
           >
             <span>🌸</span>
@@ -1077,8 +1077,8 @@ function SponsorBillboard({
       <mesh position={[0, 5.2, 0.15]}>
         <planeGeometry args={[8.6, 4.9]} />
         <meshStandardMaterial
-          color={sponsor === 'dominos' ? '#e31837' : '#00f0ff'}
-          emissive={sponsor === 'dominos' ? '#cc1430' : '#00a0cc'}
+          color={sponsor === 'dominos' ? '#e31837' : '#40b76c'}
+          emissive={sponsor === 'dominos' ? '#cc1430' : '#2f9a57'}
           emissiveIntensity={0.6}
         />
       </mesh>
