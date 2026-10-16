@@ -18,6 +18,7 @@ export interface TeamDirectory {
   treasurer: TeamMember | null;
   conveners: TeamMember[];
   generalSecretaries: TeamMember[];
+  jointSecretaries: TeamMember[];
   committees: CommitteeDeck[];
 }
 
@@ -65,6 +66,8 @@ export function buildTeamDirectory(): TeamDirectory {
     treasurer: byBadge("treasurer")[0] ?? null,
     conveners: byBadge("convener"),
     generalSecretaries,
+    // in the order listed in teamData (Anuska Mandal, Sujal Prasad, Mudit Sharma)
+    jointSecretaries: byBadge("jointsec"),
     committees,
   };
 }

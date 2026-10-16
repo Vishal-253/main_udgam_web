@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import { EVENTS, EVENT_CATEGORIES } from "@/features/events/data/eventDetails";
 import { buildTeamDirectory } from "@/features/team/data/teamDecks";
 import { teamMembers, committeeMembers } from "@/features/team/data/teamData";
+import { teamPhotoFor } from "@/features/team/lib/teamPhotos";
 
 describe("events data", () => {
   it("has unique ids and a known category for every event", () => {
@@ -71,6 +72,21 @@ describe("team directory", () => {
     for (const d of team.committees) {
       expect(d.coverImage).toBe(`/assets/team/committees/${d.id}.webp`);
     }
+  });
+
+  it("has three Joint Secretaries in order, each with their own photo", () => {
+    expect(team.jointSecretaries.map((m) => m.name)).toEqual([
+      "Anuska Mandal",
+      "Sujal Prasad",
+      "Mudit Sharma",
+    ]);
+    for (const m of team.jointSecretaries) {
+      expect(m.role).toBe("Joint Secretary");
+      expect(teamPhotoFor(m.id), m.id).toMatch(/jointsec-/);
+    }
+    // their committee cards keep the committee photo
+    expect(teamPhotoFor("anuska-mandal")).toMatch(/anuska-mandal/);
+    expect(teamPhotoFor("anuska-mandal")).not.toMatch(/jointsec-/);
   });
 
   it("shows the Web Dev committee first, others in their usual order", () => {

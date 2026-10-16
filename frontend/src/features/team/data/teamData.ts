@@ -1,7 +1,7 @@
 // Udgam 2026 organising team. Phone numbers are placeholders (hidden on the cards for now).
 
 export type BadgeType =
-  "president" | "vp" | "treasurer" | "convener" | "gensec" | "lead" | "assoc-lead";
+  "president" | "vp" | "treasurer" | "convener" | "gensec" | "jointsec" | "lead" | "assoc-lead";
 
 export interface TeamMember {
   id: string;
@@ -180,6 +180,43 @@ export const teamMembers: TeamMember[] = [
     phone: "+91 98765 43221",
     initials: "SH",
     avatarGradient: "linear-gradient(135deg, #F0C28A 0%, #FF4D79 100%)",
+  },
+  // Joint Secretaries (shown below the General Secretaries); photos: assets/team-photos/<id>.webp
+  {
+    id: "jointsec-anuska-mandal",
+    name: "Anuska Mandal",
+    role: "Joint Secretary",
+    badgeText: "Joint Sec",
+    badgeType: "jointsec",
+    department: "Executive Secretariat",
+    email: "b240033@nitsikkim.ac.in",
+    phone: "",
+    initials: "AM",
+    avatarGradient: "linear-gradient(135deg, #FF85A2 0%, #FFA07A 100%)",
+  },
+  {
+    id: "jointsec-sujal-prasad",
+    name: "Sujal Prasad",
+    role: "Joint Secretary",
+    badgeText: "Joint Sec",
+    badgeType: "jointsec",
+    department: "Executive Secretariat",
+    email: "b240116@nitsikkim.ac.in",
+    phone: "",
+    initials: "SP",
+    avatarGradient: "linear-gradient(135deg, #F0C28A 0%, #FF4D79 100%)",
+  },
+  {
+    id: "jointsec-mudit-sharma",
+    name: "Mudit Sharma",
+    role: "Joint Secretary",
+    badgeText: "Joint Sec",
+    badgeType: "jointsec",
+    department: "Executive Secretariat",
+    email: "",
+    phone: "",
+    initials: "MS",
+    avatarGradient: "linear-gradient(135deg, #FF6B8B 0%, #C73E64 100%)",
   },
 ];
 

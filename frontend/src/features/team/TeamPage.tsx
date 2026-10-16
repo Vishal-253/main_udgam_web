@@ -40,6 +40,11 @@ export default function TeamPage({ team }: { team: TeamDirectory }) {
           label="General Secretaries"
           members={team.generalSecretaries}
         />
+        <CoreTeamSection
+          title="Joint Secretary"
+          label="Joint Secretaries"
+          members={team.jointSecretaries}
+        />
         <OrganisingCommitteeSection decks={team.committees} renderDeck={renderDeck} />
       </main>
 
