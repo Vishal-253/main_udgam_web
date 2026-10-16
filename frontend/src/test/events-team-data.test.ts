@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { EVENTS, EVENT_CATEGORIES, cardTaglines } from "@/features/events/data/eventDetails";
+import { EVENTS, EVENT_CATEGORIES } from "@/features/events/data/eventDetails";
 import { buildTeamDirectory } from "@/features/team/data/teamDecks";
 import { teamMembers, committeeMembers } from "@/features/team/data/teamData";
 
@@ -18,7 +18,6 @@ describe("events data", () => {
     expect(byId("squid-games")).toMatchObject({ fee: 30, feeUnit: "person" });
     expect(byId("dance-competition")?.fee).toBe(0);
     expect(byId("food-fiesta")?.fee).toBeNull();
-    expect(byId("e-games")).toMatchObject({ fee: 200, feeNote: "₹50 for eFootball" });
   });
 
   it("only gives a fee unit to paid events, and no negative fees", () => {
@@ -28,10 +27,13 @@ describe("events data", () => {
     }
   });
 
-  it("gives E-Games one tagline per title", () => {
-    const egames = EVENTS.find((e) => e.games);
-    expect(egames).toBeDefined();
-    if (egames?.games) expect(cardTaglines(egames)).toHaveLength(egames.games.length);
+  it("lists each e-sports title as its own event", () => {
+    const esports = EVENTS.filter((e) => e.category === "esports");
+    expect(esports.map((e) => e.name)).toEqual(["Free Fire", "BGMI", "MLBB", "eFootball"]);
+    for (const e of esports.filter((x) => x.id !== "efootball")) {
+      expect(e).toMatchObject({ fee: 200, feeUnit: "team" });
+    }
+    expect(EVENTS.find((e) => e.id === "efootball")).toMatchObject({ fee: 50, feeUnit: "person" });
   });
 });
 
