@@ -12,6 +12,22 @@ describe("events data", () => {
     for (const e of EVENTS) expect(categories.has(e.category)).toBe(true);
   });
 
+  it("has the fees from the event-management sheet", () => {
+    const byId = (id: string) => EVENTS.find((e) => e.id === id);
+    expect(byId("treasure-hunt")).toMatchObject({ fee: 250, feeUnit: "team" });
+    expect(byId("squid-games")).toMatchObject({ fee: 30, feeUnit: "person" });
+    expect(byId("dance-competition")?.fee).toBe(0);
+    expect(byId("food-fiesta")?.fee).toBeNull();
+    expect(byId("e-games")).toMatchObject({ fee: 200, feeNote: "₹50 for eFootball" });
+  });
+
+  it("only gives a fee unit to paid events, and no negative fees", () => {
+    for (const e of EVENTS) {
+      if (e.fee !== null) expect(e.fee).toBeGreaterThanOrEqual(0);
+      if (e.feeUnit) expect(e.fee).toBeGreaterThan(0);
+    }
+  });
+
   it("gives E-Games one tagline per title", () => {
     const egames = EVENTS.find((e) => e.games);
     expect(egames).toBeDefined();
