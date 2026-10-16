@@ -10,7 +10,7 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   --radius-2xl: calc(var(--radius) + 8px);
-  --font-display: "Fraunces", Georgia, serif;
+  --font-display: "Outfit", "Plus Jakarta Sans", system-ui, sans-serif;
   --font-sans: "Quicksand", system-ui, sans-serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);

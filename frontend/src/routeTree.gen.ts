@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as EventsRouteImport } from './routes/events'
+import { Route as GalleryRouteImport } from './routes/gallery'
 import { Route as MerchRouteImport } from './routes/merch'
 
 const IndexRoute = IndexRouteImport.update({
@@ -35,6 +36,11 @@ const EventsRoute = EventsRouteImport.update({
   path: '/events',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GalleryRoute = GalleryRouteImport.update({
+  id: '/gallery',
+  path: '/gallery',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MerchRoute = MerchRouteImport.update({
   id: '/merch',
   path: '/merch',
@@ -46,6 +52,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/calendar': typeof CalendarRoute
   '/events': typeof EventsRoute
+  '/gallery': typeof GalleryRoute
   '/merch': typeof MerchRoute
 }
 export interface FileRoutesByTo {
@@ -53,6 +60,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/calendar': typeof CalendarRoute
   '/events': typeof EventsRoute
+  '/gallery': typeof GalleryRoute
   '/merch': typeof MerchRoute
 }
 export interface FileRoutesById {
@@ -61,14 +69,22 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/calendar': typeof CalendarRoute
   '/events': typeof EventsRoute
+  '/gallery': typeof GalleryRoute
   '/merch': typeof MerchRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/calendar' | '/events' | '/merch'
+  fullPaths: '/' | '/about' | '/calendar' | '/events' | '/gallery' | '/merch'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/calendar' | '/events' | '/merch'
-  id: '__root__' | '/' | '/about' | '/calendar' | '/events' | '/merch'
+  to: '/' | '/about' | '/calendar' | '/events' | '/gallery' | '/merch'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/calendar'
+    | '/events'
+    | '/gallery'
+    | '/merch'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -76,6 +92,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   CalendarRoute: typeof CalendarRoute
   EventsRoute: typeof EventsRoute
+  GalleryRoute: typeof GalleryRoute
   MerchRoute: typeof MerchRoute
 }
 
@@ -109,6 +126,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EventsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/gallery': {
+      id: '/gallery'
+      path: '/gallery'
+      fullPath: '/gallery'
+      preLoaderRoute: typeof GalleryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/merch': {
       id: '/merch'
       path: '/merch'
@@ -124,6 +148,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   CalendarRoute: CalendarRoute,
   EventsRoute: EventsRoute,
+  GalleryRoute: GalleryRoute,
   MerchRoute: MerchRoute,
 }
 export const routeTree = rootRouteImport

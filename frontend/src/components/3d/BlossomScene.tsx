@@ -13,6 +13,7 @@ import clothesImg from "@/assets/folded_clothes.jpg";
 import dominosImg from "@/assets/dominos_pizza_photo.jpg";
 import quarksImg from "@/assets/quarks_tech_photo.jpg";
 import arcadeScreenImg from "@/assets/arcade_screen_udgam.jpg";
+import mountainImg from "@/assets/distant_mountains_sikkim.jpg";
 import { Suspense, useMemo, useRef } from "react";
 import * as THREE from "three";
 
@@ -472,37 +473,35 @@ function CameraRig({ progress }: { progress: React.MutableRefObject<number> }) {
     const p = cur.current;
     const t = state.clock.elapsedTime;
 
-    // Aerial transition: starts at p=0.85
-    const aerialT = Math.max(0, (p - 0.85) / 0.15);
-    const roadZ = 10 - p * 82;
-    const groundY = 1.7 + p * p * 4.5 + Math.sin(t * 0.6) * 0.05;
+    // Steady eye-level road travel (no upward aerial lift at end)
+    const roadZ = 10 - p * 86;
+    const camY = 1.75 + Math.sin(t * 0.5) * 0.03;
+    const camZ = roadZ;
+    const lookZ = camZ - 14;
 
-    const camZ = roadZ + aerialT * 16;
-    const lookZ = camZ - 10 - aerialT * 30;
     camera.position.set(
-      roadX(camZ) + state.pointer.x * 0.4 * (1 - aerialT),
-      groundY + aerialT * 32,
+      roadX(camZ) + state.pointer.x * 0.35,
+      camY,
       camZ,
     );
     camera.lookAt(
       roadX(lookZ),
-      2.2 + p * 4 + state.pointer.y * 0.3 * (1 - aerialT) + aerialT * 18,
+      1.9 + state.pointer.y * 0.25,
       lookZ,
     );
 
-    const midCol = morning.clone().lerp(golden, Math.min(p * 1.3, 1));
-    const col = midCol.lerp(aerialSky, aerialT);
+    const col = morning.clone().lerp(golden, Math.min(p * 1.2, 1));
     if (scene.fog) {
       const fog = scene.fog as THREE.Fog;
       fog.color.copy(col);
-      fog.near = 10 + p * 120;
-      fog.far = 62 + p * 220;
+      fog.near = 15;
+      fog.far = 140;
     }
     (scene.background as THREE.Color)?.copy?.(col);
 
     if (sun.current) {
       sun.current.color.set("#fff4e6").lerp(new THREE.Color("#ffb37a"), Math.min(p, 1));
-      sun.current.position.set(10, 18 - p * 8, camera.position.z + 6);
+      sun.current.position.set(10, 14, camera.position.z + 6);
       sun.current.target.position.set(0, 0, camera.position.z - 10);
       sun.current.target.updateMatrixWorld();
     }
@@ -522,175 +521,166 @@ function CameraRig({ progress }: { progress: React.MutableRefObject<number> }) {
   );
 }
 
-/* ─── Dragon Cherry Blossom Breath ─────────────────────── */
-const breathVert = /* glsl */ `
-  uniform float uTime; 
-  attribute float aSeed;
-  attribute vec3 aVelocity;
-  varying float vSeed;
-  varying float vLife;
-  void main() {
-    float cycle = mod(uTime * 0.8, 3.0); // 3-second cycle
-    float start = aSeed * 1.0; // Burst over 1 second
-    float age = cycle - start;
-    
-    float active = step(0.0, age) * step(age, 1.5);
-    float life = clamp(age / 1.5, 0.0, 1.0); // 0 to 1 over 1.5s
-    vLife = life;
-    
-    vec3 p = position;
-    // Shoot forward (Z) and spread (X, Y)
-    p += aVelocity * (life * 8.0);
-    // Gravity effect making petals fall slightly
-    p.y -= life * life * 3.5; 
-    // Swirling motion
-    p.x += sin(life * 12.0 + aSeed * 20.0) * life * 1.8;
-    
-    vec4 mv = modelViewMatrix * vec4(p, 1.0);
-    gl_Position = projectionMatrix * mv;
-    gl_PointSize = (18.0 + aSeed * 20.0) * (1.0 - life) * (10.0 / -mv.z) * active;
-    vSeed = aSeed;
-  }`;
+/* ─── 3D Festival Hot Air Balloon ("UDGAM") ───────────────── */
+function HotAirBalloon({ progress }: { progress: React.MutableRefObject<number> }) {
+  const balloonRef = useRef<THREE.Group>(null);
+  const burnerLightRef = useRef<THREE.PointLight>(null);
 
-const breathFrag = /* glsl */ `
-  varying float vSeed;
-  varying float vLife;
-  void main() {
-    vec2 uv = gl_PointCoord - 0.5;
-    float a = vSeed * 6.28 + vLife * 12.0; // Spinning
-    uv = mat2(cos(a), -sin(a), sin(a), cos(a)) * uv;
-    float d = length(vec2(uv.x * 1.8, uv.y + abs(uv.x) * 0.6));
-    if (d > 0.42) discard;
-    
-    float vein = smoothstep(0.03, 0.0, abs(uv.x)) * 0.14;
-    // Glowing cherry blossom colors (vibrant pink/magenta)
-    vec3 c = mix(vec3(1.0, 0.2, 0.5), vec3(1.0, 0.8, 0.9), vSeed) + vein;
-    float alpha = (1.0 - pow(vLife, 1.5));
-    // Multiply color to create emissive bloom effect
-    gl_FragColor = vec4(c * 1.6, smoothstep(0.42, 0.18, d) * alpha * 0.95);
-  }`;
-
-function DragonBreath() {
-  const count = 450;
-  const geo = useMemo(() => {
-    const pos = new Float32Array(count * 3);
-    const vel = new Float32Array(count * 3);
-    const seed = new Float32Array(count);
-    for (let i = 0; i < count; i++) {
-      // Start near dragon mouth (approximate position)
-      pos[i * 3] = (Math.random() - 0.5) * 0.6;
-      pos[i * 3 + 1] = -0.5 + (Math.random() - 0.5) * 0.5;
-      pos[i * 3 + 2] = 0.5;
-
-      // Velocity: shoot forward (+Z) and down (-Y)
-      vel[i * 3] = (Math.random() - 0.5) * 1.8;
-      vel[i * 3 + 1] = -0.5 - Math.random() * 1.5;
-      vel[i * 3 + 2] = 2.5 + Math.random() * 3.0;
-
-      seed[i] = Math.random();
+  // Inverted aerodynamic teardrop balloon envelope geometry
+  const balloonGeo = useMemo(() => {
+    const pts: THREE.Vector2[] = [];
+    for (let i = 0; i <= 36; i++) {
+      const t = i / 36;
+      const y = (t - 0.45) * 7.2;
+      let r = 0;
+      if (t > 0.4) {
+        const st = (t - 0.4) / 0.6;
+        r = 3.2 * Math.sin(st * Math.PI * 0.5 + 0.35);
+      } else {
+        const lt = t / 0.4;
+        r = 0.95 + 2.25 * Math.pow(lt, 0.9);
+      }
+      pts.push(new THREE.Vector2(Math.max(0.1, r), y));
     }
-    const g = new THREE.BufferGeometry();
-    g.setAttribute("position", new THREE.BufferAttribute(pos, 3));
-    g.setAttribute("aVelocity", new THREE.BufferAttribute(vel, 3));
-    g.setAttribute("aSeed", new THREE.BufferAttribute(seed, 1));
-    return g;
-  }, [count]);
+    const geo = new THREE.LatheGeometry(pts, 36);
+    geo.computeVertexNormals();
+    return geo;
+  }, []);
 
-  const mat = useRef<THREE.ShaderMaterial>(null);
-  const uniforms = useMemo(() => ({ uTime: { value: 0 } }), []);
+  // Festival Sakura canopy pattern with bold "UDGAM" printed on both sides
+  const balloonTex = useMemo(() => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1024;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      // Alternating festival vertical gores (cherry blossom pink & ivory)
+      const stripes = 16;
+      const w = canvas.width / stripes;
+      for (let i = 0; i < stripes; i++) {
+        ctx.fillStyle = i % 2 === 0 ? '#ff7597' : '#fff5f8';
+        ctx.fillRect(i * w, 0, w, canvas.height);
+        // Golden accent pinstripe along each seam
+        ctx.fillStyle = '#f5c842';
+        ctx.fillRect(i * w + w - 3, 0, 3, canvas.height);
+      }
 
-  useFrame((state) => {
-    if (mat.current) mat.current.uniforms.uTime.value = state.clock.elapsedTime;
-  });
+      // Middle white festival ribbon banner
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+      ctx.fillRect(0, 192, canvas.width, 128);
 
-  return (
-    <points geometry={geo}>
-      <shaderMaterial
-        ref={mat}
-        vertexShader={breathVert}
-        fragmentShader={breathFrag}
-        uniforms={uniforms}
-        transparent
-        depthWrite={false}
-        blending={THREE.AdditiveBlending}
-      />
-    </points>
-  );
-}
+      // Ribbon gold borders
+      ctx.fillStyle = '#f5c842';
+      ctx.fillRect(0, 186, canvas.width, 6);
+      ctx.fillRect(0, 320, canvas.width, 6);
 
-/* ─── Sky Dragon ─────────────────────────────────────── */
-function SkyDragon({ progress }: { progress: React.MutableRefObject<number> }) {
-  const texture = useTexture(dragonImg);
-  const dragon = useRef<THREE.Group>(null);
-  const innerDragon = useRef<THREE.Group>(null);
+      // Ruby pink accent lines
+      ctx.fillStyle = '#e11d48';
+      ctx.fillRect(0, 180, canvas.width, 6);
+      ctx.fillRect(0, 326, canvas.width, 6);
 
-  const flapMat = useMemo(() => {
-    const mat = new THREE.MeshStandardMaterial({
-      map: texture,
-      transparent: true,
-      alphaTest: 0.06,
-      side: THREE.DoubleSide,
-      roughness: 0.68,
-    });
+      // "UDGAM" bold festive typography with blossoms
+      ctx.fillStyle = '#d81b4b';
+      ctx.font = '900 84px "Outfit", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.shadowColor = 'rgba(216, 27, 75, 0.45)';
+      ctx.shadowBlur = 10;
 
-    mat.onBeforeCompile = (shader) => {
-      shader.uniforms.uTime = { value: 0 };
-      mat.userData.shader = shader;
-
-      shader.vertexShader = 'uniform float uTime;\n' + shader.vertexShader;
-      shader.vertexShader = shader.vertexShader.replace(
-        '#include <begin_vertex>',
-        `
-        vec3 transformed = vec3(position);
-        float dist = abs(transformed.x);
-        float flapStrength = max(0.0, dist - 1.5) * 0.45;
-        // Majestic slower flapping
-        transformed.z += sin(uTime * 3.5) * flapStrength;
-        `
-      );
-    };
-    return mat;
-  }, [texture]);
-
-  texture.colorSpace = THREE.SRGBColorSpace;
-  texture.anisotropy = 8;
+      // Front Face
+      ctx.fillText('🌸 UDGAM 🌸', canvas.width * 0.25, 256);
+      // Back Face
+      ctx.fillText('🌸 UDGAM 🌸', canvas.width * 0.75, 256);
+    }
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = 16;
+    return tex;
+  }, []);
 
   useFrame((state, delta) => {
-    if (!dragon.current || !innerDragon.current) return;
+    if (!balloonRef.current) return;
     const dt = Math.min(delta, 0.05);
-    const t = state.clock.elapsedTime * 0.6; // majestic slow time
+    const t = state.clock.elapsedTime * 0.5;
 
-    const journeyZ = 4 - progress.current * 70;
+    // Follows the journey down the valley with serene, graceful floating
+    const journeyZ = 6 - progress.current * 72;
+    const targetX = roadX(journeyZ) + Math.sin(t * 0.4) * 5.0 + 3.8;
+    const targetY = 15.5 + Math.sin(t * 0.8) * 1.4;
+    const targetZ = journeyZ - 18 + Math.cos(t * 0.3) * 4.0;
 
-    // Smooth, majestic flight path (figure-8 / sweeping curves)
-    const targetX = Math.sin(t * 0.5) * 7.0;
-    const targetY = 12.0 + Math.sin(t * 1.2) * 1.8;
-    const targetZ = journeyZ - 30 + Math.cos(t * 0.3) * 6.0;
+    balloonRef.current.position.lerp(new THREE.Vector3(targetX, targetY, targetZ), 1.5 * dt);
 
-    dragon.current.position.lerp(new THREE.Vector3(targetX + roadX(targetZ), targetY, targetZ), 1.5 * dt);
+    // Gentle slow rotation showing both sides of UDGAM
+    balloonRef.current.rotation.y = t * 0.25;
+    // Gentle sway in the mountain breeze
+    balloonRef.current.rotation.z = Math.sin(t * 0.6) * 0.04;
+    balloonRef.current.rotation.x = Math.cos(t * 0.5) * 0.03;
 
-    // Calculate realistic banking & pitching based on flight curve derivatives
-    const bankZ = Math.cos(t * 0.5) * 0.4;
-    const pitchX = Math.cos(t * 1.2) * 0.2;
-
-    innerDragon.current.rotation.z += (bankZ - innerDragon.current.rotation.z) * 3.0 * dt;
-    innerDragon.current.rotation.x += (pitchX - innerDragon.current.rotation.x) * 3.0 * dt;
-
-    if (flapMat.userData.shader) {
-      flapMat.userData.shader.uniforms.uTime.value = state.clock.elapsedTime;
+    // Burner light flicker
+    if (burnerLightRef.current) {
+      burnerLightRef.current.intensity = 2.2 + Math.sin(state.clock.elapsedTime * 8.0) * 0.7;
     }
   });
 
   return (
-    <group ref={dragon} position={[3, 11.5, -22]}>
-      <Billboard lockX lockZ>
-        <group ref={innerDragon}>
-          <mesh material={flapMat} depthWrite={false}>
-            <planeGeometry args={[10.5, 7, 32, 1]} />
-          </mesh>
-          <DragonBreath />
-        </group>
-      </Billboard>
+    <group ref={balloonRef} position={[3.8, 15.5, -20]}>
+      {/* ── Main Teardrop Balloon Envelope ── */}
+      <mesh geometry={balloonGeo} castShadow receiveShadow>
+        <meshStandardMaterial
+          map={balloonTex}
+          roughness={0.4}
+          metalness={0.08}
+        />
+      </mesh>
+
+      {/* Balloon Top Crown Cap (Golden finial) */}
+      <mesh position={[0, 4.05, 0]}>
+        <sphereGeometry args={[0.35, 12, 10]} />
+        <meshStandardMaterial color="#f5c842" emissive="#d4a017" emissiveIntensity={0.5} metalness={0.7} />
+      </mesh>
+
+      {/* ── Wicker Basket Gondola ── */}
+      <group position={[0, -5.2, 0]}>
+        {/* Wicker Rattan Basket Body */}
+        <mesh castShadow receiveShadow>
+          <cylinderGeometry args={[0.9, 0.75, 1.1, 16]} />
+          <meshStandardMaterial color="#8a5a36" roughness={0.9} />
+        </mesh>
+        {/* Basket Padded Rim */}
+        <mesh position={[0, 0.55, 0]}>
+          <torusGeometry args={[0.9, 0.08, 8, 24]} rotation-x={Math.PI / 2} />
+          <meshStandardMaterial color="#5a3418" roughness={0.8} />
+        </mesh>
+        {/* Festive Mini Sakura Bunting around basket */}
+        <mesh position={[0, 0.1, 0]}>
+          <cylinderGeometry args={[0.92, 0.85, 0.2, 16, 1, true]} />
+          <meshStandardMaterial color="#ff80ab" roughness={0.5} />
+        </mesh>
+      </group>
+
+      {/* ── 4 Suspension Rigging Ropes ── */}
+      {[
+        [-0.6, -0.6],
+        [0.6, -0.6],
+        [-0.6, 0.6],
+        [0.6, 0.6],
+      ].map(([rx, rz], i) => (
+        <mesh key={i} position={[rx * 0.85, -3.8, rz * 0.85]}>
+          <cylinderGeometry args={[0.02, 0.02, 2.5, 6]} />
+          <meshStandardMaterial color="#3a2518" metalness={0.2} roughness={0.8} />
+        </mesh>
+      ))}
+
+      {/* ── Propane Burner Frame & Flame Glow ── */}
+      <group position={[0, -3.1, 0]}>
+        <mesh>
+          <cylinderGeometry args={[0.3, 0.3, 0.35, 12]} />
+          <meshStandardMaterial color="#2d323b" metalness={0.85} roughness={0.3} />
+        </mesh>
+        {/* Pulsating Burner Fire Flame */}
+        <pointLight ref={burnerLightRef} color="#ff9933" intensity={2.4} distance={9} decay={2} />
+      </group>
     </group>
   );
 }
@@ -1178,40 +1168,40 @@ function SponsorBillboard({
   return (
     <group position={[posX, posY, posZ]} rotation-y={rotationY}>
       {/* Heavy-Duty Concrete Base Footings */}
-      {[-2.6, 2.6].map((x, i) => (
-        <mesh key={i} position={[x, 0.3, 0]} receiveShadow>
-          <boxGeometry args={[1.0, 0.6, 1.0]} />
+      {[-2.2, 2.2].map((x, i) => (
+        <mesh key={i} position={[x, 0.25, 0]} receiveShadow>
+          <boxGeometry args={[0.9, 0.5, 0.9]} />
           <meshStandardMaterial color="#888c94" roughness={0.92} />
         </mesh>
       ))}
 
-      {/* Monumental Structural Steel Support Pillars */}
-      {[-2.6, 2.6].map((x, i) => (
-        <mesh key={i} position={[x, 4.2, 0]} castShadow>
-          <cylinderGeometry args={[0.15, 0.15, 8.2, 14]} />
+      {/* Structural Steel Support Pillars */}
+      {[-2.2, 2.2].map((x, i) => (
+        <mesh key={i} position={[x, 2.4, 0]} castShadow>
+          <cylinderGeometry args={[0.12, 0.12, 4.6, 12]} />
           <meshStandardMaterial color="#2d323b" metalness={0.8} roughness={0.35} />
         </mesh>
       ))}
 
       {/* Heavy-Duty Steel Cross Braces */}
-      <mesh position={[0, 3.8, 0]} rotation-z={0.65}>
-        <cylinderGeometry args={[0.045, 0.045, 6.4, 8]} />
+      <mesh position={[0, 2.2, 0]} rotation-z={0.65}>
+        <cylinderGeometry args={[0.04, 0.04, 5.0, 8]} />
         <meshStandardMaterial color="#252a33" metalness={0.7} roughness={0.4} />
       </mesh>
-      <mesh position={[0, 3.8, 0]} rotation-z={-0.65}>
-        <cylinderGeometry args={[0.045, 0.045, 6.4, 8]} />
+      <mesh position={[0, 2.2, 0]} rotation-z={-0.65}>
+        <cylinderGeometry args={[0.04, 0.04, 5.0, 8]} />
         <meshStandardMaterial color="#252a33" metalness={0.7} roughness={0.4} />
       </mesh>
 
-      {/* Giant Billboard Main Board Backing */}
-      <mesh position={[0, 8.4, 0]} castShadow>
-        <boxGeometry args={[10.4, 6.2, 0.28]} />
+      {/* Main Billboard Board Backing */}
+      <mesh position={[0, 5.2, 0]} castShadow>
+        <boxGeometry args={[9.0, 5.3, 0.25]} />
         <meshStandardMaterial color="#1a1c22" metalness={0.75} roughness={0.3} />
       </mesh>
 
       {/* Outer Illuminated Border Trim */}
-      <mesh position={[0, 8.4, 0.15]}>
-        <planeGeometry args={[10.0, 5.8]} />
+      <mesh position={[0, 5.2, 0.15]}>
+        <planeGeometry args={[8.6, 4.9]} />
         <meshStandardMaterial
           color={sponsor === 'dominos' ? '#e31837' : '#00f0ff'}
           emissive={sponsor === 'dominos' ? '#cc1430' : '#00a0cc'}
@@ -1220,14 +1210,14 @@ function SponsorBillboard({
       </mesh>
 
       {/* High-Resolution Commercial Sponsor Graphic Billboard Texture (100% luminous & crisp) */}
-      <mesh position={[0, 8.4, 0.18]}>
-        <planeGeometry args={[9.75, 5.55]} />
+      <mesh position={[0, 5.2, 0.18]}>
+        <planeGeometry args={[8.35, 4.7]} />
         <meshBasicMaterial map={activeTex} toneMapped={false} />
       </mesh>
 
       {/* Subtle Screen Glass Sheen */}
-      <mesh position={[0, 8.4, 0.2]}>
-        <planeGeometry args={[9.75, 5.55]} />
+      <mesh position={[0, 5.2, 0.2]}>
+        <planeGeometry args={[8.35, 4.7]} />
         <meshStandardMaterial
           color="#ffffff"
           transparent
@@ -1238,28 +1228,160 @@ function SponsorBillboard({
       </mesh>
 
       {/* Triple Overhead Spotlight Gantries & Fixtures */}
-      {[-3.2, 0, 3.2].map((x, i) => (
-        <group key={i} position={[x, 11.65, 0]}>
+      {[-2.6, 0, 2.6].map((x, i) => (
+        <group key={i} position={[x, 7.9, 0]}>
           {/* Extension Arm */}
           <mesh position={[0, 0, 0.45]} rotation-x={Math.PI / 2}>
-            <cylinderGeometry args={[0.04, 0.04, 0.9, 8]} />
+            <cylinderGeometry args={[0.035, 0.035, 0.9, 8]} />
             <meshStandardMaterial color="#2d323b" metalness={0.8} />
           </mesh>
           {/* Lamp Head */}
           <mesh position={[0, -0.06, 0.9]} rotation-x={0.45}>
-            <boxGeometry args={[0.55, 0.16, 0.32]} />
+            <boxGeometry args={[0.5, 0.15, 0.3]} />
             <meshStandardMaterial color="#1f232b" metalness={0.7} />
           </mesh>
           {/* Emissive Lamp Lens */}
           <mesh position={[0, -0.15, 0.9]} rotation-x={0.45}>
-            <planeGeometry args={[0.5, 0.24]} />
+            <planeGeometry args={[0.45, 0.22]} />
             <meshStandardMaterial color="#fffbe6" emissive="#ffeaad" emissiveIntensity={1.5} />
           </mesh>
         </group>
       ))}
 
-      {/* Powerful Floodlight Illumination for Giant Billboard */}
-      <pointLight position={[0, 11.2, 1.8]} intensity={3.5} distance={15} color="#fffbe8" />
+      {/* Powerful Floodlight Illumination for Billboard */}
+      <pointLight position={[0, 7.6, 1.6]} intensity={3.0} distance={12} color="#fffbe8" />
+    </group>
+  );
+}
+
+/* ─── Distant Himalayan Mountains (Kangchenjunga Range Panorama) ─── */
+function DistantHimalayas() {
+  const mountainTex = useTexture(mountainImg);
+  useMemo(() => {
+    mountainTex.colorSpace = THREE.SRGBColorSpace;
+    mountainTex.anisotropy = 16;
+    mountainTex.wrapS = THREE.ClampToEdgeWrapping;
+    mountainTex.wrapT = THREE.ClampToEdgeWrapping;
+  }, [mountainTex]);
+
+  // Sweeping panoramic curved amphitheater geometry (190° seamless horizon wrap, stretched tall)
+  const curvedGeo = useMemo(() => {
+    const segments = 80;
+    const radius = 250;
+    // Sweeps from -95 degrees to +95 degrees (wraps around the full horizon)
+    const startAngle = -Math.PI * 0.53;
+    const endAngle = Math.PI * 0.53;
+    const height = 230; // Tall stretch reaching high into the sky dome
+    const yBottom = -30;
+    const yTop = yBottom + height;
+    const centerZ = -55;
+
+    const positions: number[] = [];
+    const uvs: number[] = [];
+    const indices: number[] = [];
+
+    for (let i = 0; i <= segments; i++) {
+      const t = i / segments;
+      const angle = startAngle + t * (endAngle - startAngle);
+      const x = Math.sin(angle) * radius;
+      const z = centerZ - Math.cos(angle) * radius;
+
+      // Bottom vertex
+      positions.push(x, yBottom, z);
+      uvs.push(t, 0);
+
+      // Top vertex
+      positions.push(x, yTop, z);
+      uvs.push(t, 1);
+
+      if (i < segments) {
+        const b = i * 2;
+        // Inward facing triangles for interior horizon view
+        indices.push(b, b + 2, b + 1);
+        indices.push(b + 1, b + 2, b + 3);
+      }
+    }
+
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+    geo.setIndex(indices);
+    geo.computeVertexNormals();
+    return geo;
+  }, []);
+
+  // Custom shader that seamlessly melts the top sky portion into the scene's background color
+  const mountainShader = useMemo(() => {
+    return new THREE.ShaderMaterial({
+      uniforms: {
+        uMap: { value: mountainTex },
+        uSkyColor: { value: new THREE.Color("#dbe7fb") },
+      },
+      vertexShader: `
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform sampler2D uMap;
+        uniform vec3 uSkyColor;
+        varying vec2 vUv;
+        void main() {
+          vec4 col = texture2D(uMap, vUv);
+          // Softly melt the upper sky portion into the infinite canvas sky color (no top border)
+          float factor = smoothstep(0.62, 0.94, vUv.y);
+          vec3 finalRgb = mix(col.rgb, uSkyColor, factor);
+          gl_FragColor = vec4(finalRgb, 1.0);
+        }
+      `,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+    });
+  }, [mountainTex]);
+
+  const mistRef = useRef<THREE.Group>(null);
+
+  useFrame(({ clock, scene }) => {
+    if (mistRef.current) {
+      mistRef.current.position.x = Math.sin(clock.elapsedTime * 0.05) * 4;
+    }
+    // Keep the sky blend color synced with scene background
+    const bg = scene.background as THREE.Color;
+    if (bg && bg.r !== undefined) {
+      mountainShader.uniforms.uSkyColor.value.copy(bg);
+    }
+  });
+
+  return (
+    <group position={[0, 0, 0]}>
+      {/* ── Main Expansive Stretched Panoramic Curved Himalayan Horizon ── */}
+      <mesh geometry={curvedGeo} material={mountainShader} renderOrder={-10} />
+
+      {/* ── Secondary Subtle Horizon Mist / Floating Cloud Wisps ── */}
+      <group ref={mistRef} position={[0, 4, -140]}>
+        <mesh position={[-60, 0, 0]} renderOrder={-9}>
+          <planeGeometry args={[180, 24]} />
+          <meshBasicMaterial
+            color="#ffffff"
+            transparent
+            opacity={0.15}
+            fog={false}
+            depthWrite={false}
+          />
+        </mesh>
+        <mesh position={[60, 2, 0]} renderOrder={-9}>
+          <planeGeometry args={[200, 26]} />
+          <meshBasicMaterial
+            color="#ffeef4"
+            transparent
+            opacity={0.12}
+            fog={false}
+            depthWrite={false}
+          />
+        </mesh>
+      </group>
     </group>
   );
 }
@@ -1283,6 +1405,7 @@ export function BlossomScene({ progress, low }: { progress: React.MutableRefObje
       </Environment>
       <CameraRig progress={progress} />
       <Suspense fallback={null}>
+        <DistantHimalayas />
         <Ground />
         <Forest />
         <BackgroundTrees />
@@ -1293,7 +1416,7 @@ export function BlossomScene({ progress, low }: { progress: React.MutableRefObje
         {/* End of journey monumental sponsor billboards on open ground */}
         <SponsorBillboard position={[-8.2, 0, -82]} rotationY={0.25} sponsor="dominos" />
         <SponsorBillboard position={[8.2, 0, -82]} rotationY={-0.25} sponsor="quarks" />
-        <SkyDragon progress={progress} />
+        <HotAirBalloon progress={progress} />
       </Suspense>
       <Petals count={low ? 1500 : 4500} progress={progress} />
     </Canvas>

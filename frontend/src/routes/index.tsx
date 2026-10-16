@@ -135,16 +135,41 @@ function Home() {
 
       <main className="relative z-10">
         <div ref={zoneRef}>
-        <section className="flex h-screen flex-col items-center justify-center px-5 text-center">
-          <motion.p initial={{ opacity: 0 }} animate={{ opacity: loading ? 0 : 1 }} transition={{ delay: 0.2 }} className="tracking-[0.5em] text-secondary-foreground">COLLEGE FEST</motion.p>
-          <motion.h1 initial={{ opacity: 0, y: 40 }} animate={loading ? {} : { opacity: 1, y: 0 }} transition={{ duration: 1 }} className="mt-3 text-7xl font-semibold text-gradient drop-shadow md:text-9xl">Udgam 2K26</motion.h1>
-          <motion.p initial={{ opacity: 0 }} animate={loading ? {} : { opacity: 1 }} transition={{ delay: 0.5 }} className="mt-4 text-xl italic text-secondary-foreground font-display">Where dreams bloom.</motion.p>
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={loading ? {} : { opacity: 1, y: 0 }} transition={{ delay: 0.8 }} className="mt-10 flex flex-wrap justify-center gap-3">
-            <Cta to="/events" primary>Explore Events</Cta>
-            <Cta to="/calendar">View Calendar</Cta>
-            <Cta to="/merch">Get Merch</Cta>
+        <section className="relative flex h-screen flex-col items-center justify-center px-5 text-center select-none">
+          {/* Modern Impressive Udgam 2K26 Title */}
+          <motion.h1
+            initial={{ opacity: 0, y: 30, scale: 0.94 }}
+            animate={loading ? {} : { opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+            className="font-['Outfit',sans-serif] text-7xl sm:text-8xl md:text-9xl lg:text-[11rem] font-black tracking-[-0.03em] leading-none"
+            style={{
+              background: 'linear-gradient(180deg, #ffffff 15%, #ffe6f0 45%, #ff5c87 78%, #d81b4b 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              filter: 'drop-shadow(0 10px 28px rgba(216, 27, 75, 0.35))',
+            }}
+          >
+            Udgam 2K26
+          </motion.h1>
+
+          {/* Clean Minimalist Floating Scroll Indicator */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={loading ? {} : { opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className="absolute bottom-10 flex flex-col items-center gap-1.5 pointer-events-none"
+          >
+            <motion.div
+              animate={{ y: [0, 6, 0] }}
+              transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+              className="flex items-center gap-2 rounded-full border border-white/50 bg-white/20 px-4 py-1.5 shadow-[0_2px_12px_rgba(216,27,75,0.15)] backdrop-blur-md"
+            >
+              <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-[#7a1c3e]">
+                Scroll to explore
+              </span>
+              <span className="text-xs text-[#d81b4b]">↓</span>
+            </motion.div>
           </motion.div>
-          <motion.span animate={{ y: [0, 10, 0] }} transition={{ repeat: Infinity, duration: 2 }} className="absolute bottom-10 text-sm text-secondary-foreground">scroll into the grove ↓</motion.span>
         </section>
 
         <div className="h-[200vh]" />
