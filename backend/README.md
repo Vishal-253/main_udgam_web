@@ -86,29 +86,27 @@ npm test
 The website's dev server (`cd ../frontend && npm run dev`, port 8080) calls
 `http://localhost:4000` by default; keep `http://localhost:8080` in `FRONTEND_ORIGINS`.
 
-## Deploy on Render
+## Deploy on Render (free: website + API as ONE service)
 
-1. Render Dashboard → **New → Blueprint** → choose the repo and set **Blueprint Path** to
-   `backend/render.yaml`. It creates the `udgam-api` web service from `backend/`.
-   (Or **New → Web Service**: Root Directory `backend`, Build `npm ci && npm run build`,
-   Start `npm start`, Health Check Path `/health`.)
-2. Fill in the environment variables (see `.env.example`). `FRONTEND_ORIGINS` = your website's
-   URL(s), e.g. `https://udgam.example.com`.
-3. Run the schema once: locally with the production `DATABASE_URL`, `npm run db:schema`
-   (or `psql "$DATABASE_URL" -f db/schema.sql`).
-4. In the website's settings set `VITE_API_URL=https://udgam-api.onrender.com` (your service URL)
-   and redeploy the website.
-5. **Razorpay webhook**: Dashboard → Webhooks → `https://udgam-api.onrender.com/api/razorpay/webhook`,
-   with your `RAZORPAY_WEBHOOK_SECRET`, events `payment.authorized`, `payment.captured`, `order.paid`.
-6. **Firebase**: Project settings → Service accounts → *Generate new private key* → put
-   `project_id`, `client_email`, `private_key` into the `FIREBASE_*` variables. Create Firestore
-   (Native mode) and publish `db/firestore.rules`.
-7. **Optional cron** (extra keep-alive): backups already run automatically every 5 minutes inside
-   the server. As a second safety net you can add a [cron-job.org](https://cron-job.org) job every
-   5 minutes: `POST https://udgam-api.onrender.com/api/admin/backup-sync` with header
-   `Authorization: Bearer <BACKUP_SYNC_TOKEN>` (it also wakes the server if it ever fell asleep).
-8. When ready: `REGISTRATIONS_OPEN=true`, and update the "do not register yet" lines in
-   `frontend/src/features/events/components/NoticeTicker.tsx`.
+Render's free plan has 750 instance-hours per workspace per month — enough to keep exactly one
+service awake 24/7. So this server also serves the website: the frontend is built with
+`NITRO_PRESET=node-middleware` and attached via `WEBSITE_SERVER_ENTRY`. `/api/*` and `/health*`
+are the API; every other path is the website (same address, so no CORS / API URL to configure).
+
+1. Render Dashboard → **New → Blueprint** → choose the repo, **Blueprint Path**
+   `backend/render.yaml`. It creates one free web service, `udgam`:
+   - Build: `cd frontend && npm ci && NITRO_PRESET=node-middleware npm run build && cd ../backend && npm ci && npm run build`
+   - Start: `cd backend && npm start` · Health check: `/health`
+2. Fill in the environment variables marked `sync: false` (values from your `backend/.env`).
+   `ADMIN_SESSION_SECRET` and `BACKUP_SYNC_TOKEN` are generated automatically.
+   `FRONTEND_ORIGINS` and `VITE_API_URL` are NOT needed in this setup.
+3. The database schema only has to be applied once (`npm run db:schema`, already done if you ran it).
+4. **Razorpay webhook**: `https://<your-service>.onrender.com/api/razorpay/webhook`, your
+   `RAZORPAY_WEBHOOK_SECRET`, events `payment.authorized`, `payment.captured`, `order.paid`.
+5. **Firebase**: publish `db/firestore.rules` (Firestore → Rules).
+6. **Keep-alive**: an external monitor (e.g. cron-job.org) calling
+   `GET https://<your-service>.onrender.com/health` every **10 minutes**.
+7. When ready: `REGISTRATIONS_OPEN=true`, update the notice banner, switch Razorpay to live keys.
 
 ### Staying awake on Render's free plan
 

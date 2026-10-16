@@ -1,3 +1,4 @@
+import type { IncomingMessage, ServerResponse } from "node:http";
 import cors from "cors";
 import express, { type NextFunction, type Request, type Response } from "express";
 import helmet from "helmet";
@@ -7,14 +8,25 @@ import { adminRouter } from "./routes/admin";
 import { registrationsRouter } from "./routes/registrations";
 import { webhookRouter } from "./routes/webhook";
 
-/** Builds the Express app (no listening) so tests can run it directly. */
-export function createApp() {
+/** The website's server (frontend built with NITRO_PRESET=node-middleware). */
+export type WebsiteHandler = (req: IncomingMessage, res: ServerResponse) => unknown;
+
+/**
+ * Builds the Express app (no listening) so tests can run it directly.
+ * With `website`, the same server also serves the website: /api/* and /health* are the API,
+ * every other path goes to the website. That lets both run as ONE Render service.
+ */
+export function createApp(options: { website?: WebsiteHandler; websitePublicDir?: string } = {}) {
   const app = express();
 
   // Render (and most hosts) put one proxy in front; trust it so req.ip is the real client IP
   app.set("trust proxy", 1);
   app.disable("x-powered-by");
-  app.use(helmet());
+
+  // strict security headers for the API only (the website needs its own scripts/styles/fonts)
+  const apiHelmet = helmet();
+  app.use("/api", apiHelmet);
+  app.use("/health", apiHelmet);
 
   // Liveness: cheap, no database — used by Render's health check and the keep-alive ping
   app.get("/health", (_req, res) => {
@@ -34,7 +46,7 @@ export function createApp() {
   // Razorpay calls this server-to-server; it needs the raw body, so it comes before express.json
   app.use("/api/razorpay/webhook", webhookRouter);
 
-  // Browser APIs: only the website's origins may call them from a browser
+  // Browser APIs: only the website's origins may call them cross-site (same-origin needs no CORS)
   app.use(
     "/api",
     cors({
@@ -52,17 +64,18 @@ export function createApp() {
     res.set("Cache-Control", "no-store");
     next();
   });
-  app.use(express.json({ limit: "32kb" }));
+  // JSON parsing ONLY for the API: the website's own server functions read their request bodies
+  app.use("/api", express.json({ limit: "32kb" }));
 
   app.use("/api/registrations", registrationsRouter);
   app.use("/api/admin", adminRouter);
 
-  app.use((_req, res) => {
+  app.use("/api", (_req, res) => {
     res.status(404).json({ ok: false, message: "Not found" });
   });
 
   // malformed JSON, oversized bodies, and anything unexpected: never leak internals
-  app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+  app.use("/api", (err: unknown, _req: Request, res: Response, _next: NextFunction) => {
     const status = (err as { status?: number }).status;
     if (status && status >= 400 && status < 500) {
       res.status(status).json({ ok: false, code: "invalid", message: "Invalid request." });
@@ -70,6 +83,50 @@ export function createApp() {
     }
     console.error("[server] unhandled error", err);
     res.status(500).json({ ok: false, code: "error", message: "Something went wrong." });
+  });
+
+  if (options.website) {
+    const website = options.website;
+    // light security headers that don't block the site's scripts, fonts, images or Razorpay
+    app.use(
+      helmet({
+        contentSecurityPolicy: false,
+        crossOriginEmbedderPolicy: false,
+        crossOriginResourcePolicy: false,
+        crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
+      }),
+    );
+    if (options.websitePublicDir) {
+      // built JS/CSS/images have content hashes in their names: cache them for a year
+      app.use(
+        "/assets",
+        express.static(`${options.websitePublicDir}/assets`, {
+          immutable: true,
+          maxAge: "365d",
+          fallthrough: false,
+        }),
+      );
+      // everything else in public/ (rulebook PDFs, favicon, video, robots.txt): revalidate
+      app.use(express.static(options.websitePublicDir, { maxAge: "1h", index: false }));
+    }
+    app.use((req, res) => {
+      void website(req, res);
+    });
+  } else {
+    app.use((_req, res) => {
+      res.status(404).json({ ok: false, message: "Not found" });
+    });
+  }
+
+  app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+    const status = (err as { status?: number }).status;
+    if (status && status >= 400 && status < 500) {
+      // e.g. a missing /assets file: a plain 404, not a server error
+      if (!res.headersSent) res.status(status).type("text").send(status === 404 ? "Not found" : "Bad request");
+      return;
+    }
+    console.error("[server] unhandled error", err);
+    if (!res.headersSent) res.status(500).type("text").send("Something went wrong.");
   });
 
   return app;

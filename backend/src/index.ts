@@ -1,4 +1,7 @@
-import { createApp } from "./app";
+import { existsSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { pathToFileURL } from "node:url";
+import { createApp, type WebsiteHandler } from "./app";
 import { optionalEnv, reportConfig } from "./config/env";
 import { startBackupScheduler } from "./jobs/backupScheduler";
 
@@ -7,8 +10,36 @@ const KEEP_ALIVE_MINUTES = 10;
 
 reportConfig();
 
-const server = createApp().listen(PORT, () => {
-  console.log(`[server] Udgam API listening on :${PORT}`);
+/**
+ * Optional: serve the website from this same server (one Render service for everything).
+ * WEBSITE_SERVER_ENTRY = path to the frontend built with NITRO_PRESET=node-middleware,
+ * e.g. ../frontend/.output/server/index.mjs
+ */
+async function loadWebsite(): Promise<{ handler: WebsiteHandler; publicDir: string } | undefined> {
+  const entry = optionalEnv("WEBSITE_SERVER_ENTRY");
+  if (!entry) return undefined;
+  const file = resolve(entry);
+  if (!existsSync(file)) {
+    // fail loudly: a half-deployed site (API up, website missing) is worse than a failed deploy
+    throw new Error(`WEBSITE_SERVER_ENTRY not found: ${file} (did the frontend build run?)`);
+  }
+  const mod = (await import(pathToFileURL(file).href)) as { middleware?: WebsiteHandler };
+  if (typeof mod.middleware !== "function") {
+    throw new Error(`${file} has no "middleware" export — build the frontend with NITRO_PRESET=node-middleware`);
+  }
+  // nitro output layout: .output/server/index.mjs + .output/public/
+  const publicDir = resolve(dirname(file), "..", "public");
+  if (!existsSync(publicDir)) throw new Error(`website public folder not found: ${publicDir}`);
+  console.log(`[server] serving the website from ${file}`);
+  return { handler: mod.middleware, publicDir };
+}
+
+const website = await loadWebsite();
+
+const server = createApp(
+  website ? { website: website.handler, websitePublicDir: website.publicDir } : {},
+).listen(PORT, () => {
+  console.log(`[server] Udgam ${website ? "website + API" : "API"} listening on :${PORT}`);
   startKeepAlive();
   startBackupScheduler();
 });

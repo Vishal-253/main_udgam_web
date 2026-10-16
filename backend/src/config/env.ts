@@ -17,7 +17,8 @@ type EnvName =
   | "FRONTEND_ORIGINS"
   | "KEEP_ALIVE_URL"
   | "RENDER_EXTERNAL_URL"
-  | "BACKUP_INTERVAL_MINUTES";
+  | "BACKUP_INTERVAL_MINUTES"
+  | "WEBSITE_SERVER_ENTRY";
 
 function read(name: EnvName): string | undefined {
   return process.env[name]?.trim() || undefined;
@@ -56,12 +57,13 @@ export function reportConfig(): void {
     "RAZORPAY_KEY_ID",
     "RAZORPAY_KEY_SECRET",
     "RAZORPAY_WEBHOOK_SECRET",
-    "FRONTEND_ORIGINS",
     "ADMIN_USERNAME",
     "ADMIN_PASSWORD",
     "ADMIN_SESSION_SECRET",
   ];
   const backup: EnvName[] = ["FIREBASE_PROJECT_ID", "FIREBASE_CLIENT_EMAIL", "FIREBASE_PRIVATE_KEY"];
+  // a separately hosted website must be allowed via FRONTEND_ORIGINS; served from here it needn't
+  if (!read("WEBSITE_SERVER_ENTRY")) required.push("FRONTEND_ORIGINS");
   const missing = required.filter((n) => !read(n));
   const missingBackup = backup.filter((n) => !read(n));
   if (missing.length) console.error(`[config] MISSING required settings: ${missing.join(", ")}`);

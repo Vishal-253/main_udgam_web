@@ -1,9 +1,13 @@
-// HTTP client for the Udgam backend (backend/ folder, deployed separately, e.g. on Render).
-// Set VITE_API_URL to its public URL, e.g. https://udgam-api.onrender.com (no trailing slash).
-// In local dev it defaults to the backend's dev server on http://localhost:4000.
+// HTTP client for the Udgam backend (backend/ folder).
+// - Website and API served by the SAME server (one Render service): leave VITE_API_URL unset;
+//   requests go to this site's own /api/... paths.
+// - API hosted separately: set VITE_API_URL to its public URL (no trailing slash).
+// - Local dev: defaults to the backend's dev server on http://localhost:4000.
 
-const configured = (import.meta.env["VITE_API_URL"] as string | undefined)?.replace(/\/+$/, "");
-export const API_URL = configured ?? (import.meta.env.DEV ? "http://localhost:4000" : "");
+const configured = (import.meta.env["VITE_API_URL"] as string | undefined)
+  ?.trim()
+  .replace(/\/+$/, "");
+export const API_URL = configured || (import.meta.env.DEV ? "http://localhost:4000" : "");
 
 export class ApiError extends Error {}
 
@@ -16,7 +20,6 @@ export async function apiFetch<T>(
   path: string,
   init: { method?: "GET" | "POST"; body?: unknown; token?: string | null; timeoutMs?: number } = {},
 ): Promise<T> {
-  if (!API_URL) throw new ApiError("The registration server is not configured (VITE_API_URL).");
   const headers: Record<string, string> = {};
   if (init.body !== undefined) headers["content-type"] = "application/json";
   if (init.token) headers["authorization"] = `Bearer ${init.token}`;

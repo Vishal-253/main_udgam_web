@@ -1,23 +1,32 @@
-# Render blueprint for the Udgam backend API (backend/ folder).
-# Render Dashboard -> New -> Blueprint -> pick this repo and set "Blueprint Path" to
-# backend/render.yaml. Then fill in the secret values (marked sync: false) under the
-# service's Environment tab. rootDir below is relative to the repository root.
+# Render blueprint for Udgam 2K26 — website + API as ONE free web service.
+#
+# Render Dashboard -> New -> Blueprint -> pick this repo, set "Blueprint Path" to
+# backend/render.yaml, then fill in the values marked `sync: false`.
+#
+# Why one service: Render's free plan has 750 instance-hours per workspace per month; one
+# service awake 24/7 uses ~744 h. The Express server in backend/ serves the API (/api, /health)
+# AND the website (built with NITRO_PRESET=node-middleware), so everything stays free and awake.
 services:
   - type: web
-    name: udgam-api
+    name: udgam
     runtime: node
     plan: free
-    rootDir: backend
-    buildCommand: npm ci && npm run build
-    startCommand: npm start
+    # no rootDir: the build needs both frontend/ and backend/
+    buildCommand: >-
+      cd frontend && npm ci && NITRO_PRESET=node-middleware npm run build &&
+      cd ../backend && npm ci && npm run build
+    startCommand: cd backend && npm start
     healthCheckPath: /health
     envVars:
       - key: NODE_VERSION
         value: "22"
+      # the website is served by this same server (path relative to backend/)
+      - key: WEBSITE_SERVER_ENTRY
+        value: ../frontend/.output/server/index.mjs
       - key: REGISTRATIONS_OPEN
         value: "false"
-      - key: FRONTEND_ORIGINS
-        sync: false
+      - key: BACKUP_INTERVAL_MINUTES
+        value: "5"
       - key: DATABASE_URL
         sync: false
       - key: RAZORPAY_KEY_ID
@@ -32,11 +41,11 @@ services:
         sync: false
       - key: FIREBASE_PRIVATE_KEY
         sync: false
-      - key: BACKUP_SYNC_TOKEN
-        generateValue: true
       - key: ADMIN_USERNAME
         sync: false
       - key: ADMIN_PASSWORD
         sync: false
       - key: ADMIN_SESSION_SECRET
+        generateValue: true
+      - key: BACKUP_SYNC_TOKEN
         generateValue: true
