@@ -263,11 +263,19 @@ export default function TeamPassCard({
     shell.addEventListener("pointermove", pointerMoveHandler);
     shell.addEventListener("pointerleave", pointerLeaveHandler);
 
-    const initialX = (shell.clientWidth || 0) - ANIMATION_CONFIG.INITIAL_X_OFFSET;
-    const initialY = ANIMATION_CONFIG.INITIAL_Y_OFFSET;
-    tiltEngine.setImmediate(initialX, initialY);
-    tiltEngine.toCenter();
-    tiltEngine.beginInitial(ANIMATION_CONFIG.INITIAL_DURATION);
+    // intro "settle" tilt: desktop only — on phones every visible card animating at once on
+    // page load is wasted work (they tilt with the gyroscope instead)
+    const canHover = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (canHover && !reduced) {
+      const initialX = (shell.clientWidth || 0) - ANIMATION_CONFIG.INITIAL_X_OFFSET;
+      const initialY = ANIMATION_CONFIG.INITIAL_Y_OFFSET;
+      tiltEngine.setImmediate(initialX, initialY);
+      tiltEngine.toCenter();
+      tiltEngine.beginInitial(ANIMATION_CONFIG.INITIAL_DURATION);
+    } else {
+      tiltEngine.setImmediate(shell.clientWidth / 2, shell.clientHeight / 2);
+    }
 
     return () => {
       shell.removeEventListener("pointerenter", pointerEnterHandler);

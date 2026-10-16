@@ -10,7 +10,6 @@ const links = [
   { to: "/team", label: "Team" },
   { to: "/merch", label: "Merch" },
   { to: "/about", label: "About Us" },
-  { to: "/calendar", label: "Day Calendar" },
 ] as const;
 
 export function Navbar() {

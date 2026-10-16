@@ -36,6 +36,11 @@ export default function HallOfFameRow({
   const frameRef = useRef(0);
   const travelRef = useRef(0);
   const activeRef = useRef(0);
+  // layout cache, refreshed only on resize: item centres (track coordinates) and the last
+  // depth written to each item, so scrolling never forces a layout read
+  const centersRef = useRef<number[]>([]);
+  const lastDepthRef = useRef<number[]>([]);
+  const viewWidthRef = useRef(0);
 
   const count = Children.count(children);
 
@@ -47,25 +52,40 @@ export default function HallOfFameRow({
     return () => mq.removeEventListener("change", onChange);
   }, []);
 
-  // Per-item depth, from the row's current horizontal position.
-  const applyDepth = useCallback(() => {
+  /** Caches each item's centre. offsetLeft ignores the items' 3D transforms, unlike getBoundingClientRect. */
+  const cacheLayout = useCallback(() => {
     const track = trackRef.current;
     if (!track) return;
+    const items = Array.from(track.children as HTMLCollectionOf<HTMLElement>);
+    centersRef.current = items.map((item) => item.offsetLeft + item.offsetWidth / 2);
+    lastDepthRef.current = items.map(() => NaN);
+    viewWidthRef.current = track.clientWidth;
+  }, []);
 
-    const viewCenter = track.getBoundingClientRect().left + track.clientWidth / 2;
-    const reach = track.clientWidth * 0.55;
+  // Per-item depth from the row's horizontal position: arithmetic only, writes only on change.
+  const applyDepth = useCallback((scrollLeft: number) => {
+    const track = trackRef.current;
+    if (!track) return;
+    const items = track.children as HTMLCollectionOf<HTMLElement>;
+    const centers = centersRef.current;
+    const last = lastDepthRef.current;
+    const viewCenter = scrollLeft + viewWidthRef.current / 2;
+    const reach = Math.max(1, viewWidthRef.current * 0.55);
     let nearest = 0;
     let nearestDist = Infinity;
-    Array.from(track.children as HTMLCollectionOf<HTMLElement>).forEach((item, i) => {
-      const r = item.getBoundingClientRect();
-      const offset = r.left + r.width / 2 - viewCenter;
-      const d = offset / reach;
-      item.style.setProperty("--hof-d", Math.max(-1.6, Math.min(1.6, d)).toFixed(3));
+    for (let i = 0; i < centers.length; i++) {
+      const center = centers[i] ?? 0;
+      const offset = center - viewCenter;
+      const d = Math.round(Math.max(-1.6, Math.min(1.6, offset / reach)) * 1000) / 1000;
+      if (d !== last[i]) {
+        last[i] = d;
+        items[i]?.style.setProperty("--hof-d", String(d));
+      }
       if (Math.abs(offset) < nearestDist) {
         nearestDist = Math.abs(offset);
         nearest = i;
       }
-    });
+    }
     if (nearest !== activeRef.current) {
       activeRef.current = nearest;
       setActiveIndex(nearest);
@@ -79,20 +99,14 @@ export default function HallOfFameRow({
     if (!pin || !galleryRef.current || !track) return;
 
     if (swipeMode) {
-      applyDepth();
+      applyDepth(track.scrollLeft);
       return;
     }
 
-    // Re-check the row length every frame: CSS, font or image changes can alter
-    // scrollWidth without resizing the track, which would leave the pin too short.
-    const travel = Math.max(track.scrollWidth - track.clientWidth, 0);
-    if (travel !== travelRef.current) {
-      travelRef.current = travel;
-      pin.style.height = `${window.innerHeight + travel}px`;
-    }
-    const progress = Math.min(Math.max(-pin.getBoundingClientRect().top, 0), travel);
+    // read first (one layout read), then write: no layout thrashing while scrolling
+    const progress = Math.min(Math.max(-pin.getBoundingClientRect().top, 0), travelRef.current);
     track.scrollLeft = progress;
-    applyDepth();
+    applyDepth(progress);
   }, [swipeMode, applyDepth]);
 
   const schedule = useCallback(() => {
@@ -110,8 +124,9 @@ export default function HallOfFameRow({
       // pinned for exactly as long as the row needs to travel
       pin.style.height = `${window.innerHeight + travelRef.current}px`;
     }
+    cacheLayout();
     schedule();
-  }, [swipeMode, schedule]);
+  }, [swipeMode, schedule, cacheLayout]);
 
   useEffect(() => {
     const track = trackRef.current;

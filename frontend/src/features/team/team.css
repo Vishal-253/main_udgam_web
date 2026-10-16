@@ -1091,3 +1091,63 @@
     padding-top: 104px;
   }
 }
+
+/* ==========================================================================
+   Performance overrides — same look, far less work per frame.
+   (kept together at the end so they win over the rules above)
+   ========================================================================== */
+
+/* committee row: item centres are measured relative to the track (HallOfFameRow) */
+.udgam-team .hof-track {
+  position: relative;
+}
+/* depth comes from transform + opacity only (GPU-composited). A filter that changes with
+   scroll position forced every committee card to be repainted on every scroll frame. */
+.udgam-team .hof-item {
+  filter: none;
+}
+
+/* card shadow: fixed. A shadow that followed the pointer/gyroscope repainted the whole card
+   on every tilt frame; the tilt itself (transform) stays. */
+.udgam-team .tc-card,
+.udgam-team.team-page-root .tc-card {
+  box-shadow: 0 10px 26px -8px color-mix(in oklab, var(--lake, #2a4a6a) 34%, transparent);
+}
+
+/* opening a committee: the overlay already blurs what's behind it, so don't also blur
+   (and re-render) the whole page underneath — just dim it */
+.udgam-team.team-page-has-deck-overlay .team-hierarchical-layout {
+  filter: none;
+  opacity: 0.4;
+}
+
+/* background petals: no per-petal blur filter while they animate */
+.udgam-team .tb-petal {
+  filter: none;
+}
+
+/* phones and tablets: drop effects that only show on hover, and halve the petals */
+@media (hover: none) and (pointer: coarse) {
+  .udgam-team .pc-glare,
+  .udgam-team .pc-behind,
+  .udgam-team .deck-behind-glow {
+    display: none;
+  }
+  .udgam-team .tb-petal:nth-child(2n) {
+    display: none;
+  }
+  .udgam-team .tb-world {
+    transform: none; /* the pointer lean never happens on touch */
+  }
+  .udgam-team .hof-swipe-cue,
+  .udgam-team.team-page-root .hof-swipe-cue,
+  .udgam-team.team-page-root .hof-swipe-count {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: oklch(1 0 0 / 0.9);
+  }
+  /* the swipe row scrolls natively: no need to keep every card on its own GPU layer */
+  .udgam-team .hof-mode-swipe .hof-item {
+    will-change: auto;
+  }
+}

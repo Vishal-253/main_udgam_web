@@ -33,10 +33,6 @@ function Home() {
   const progress = useRef(0);
   const zoneRef = useRef<HTMLDivElement>(null);
   const canvasWrap = useRef<HTMLDivElement>(null);
-  const videoSec = useRef<HTMLElement>(null);
-  const videoEl = useRef<HTMLVideoElement>(null);
-  const videoWrap = useRef<HTMLDivElement>(null); // video layer (shown only at the very end)
-  const videoTarget = useRef(0); // 0..1
   // the loader stays until the 3D scene has loaded and drawn its first frames
   const [sceneReady, setSceneReady] = useState(false);
   const [loadProgress, setLoadProgress] = useState<number | null>(null);
@@ -49,7 +45,6 @@ function Home() {
     const coarse = window.matchMedia?.("(pointer: coarse)").matches ?? false;
     return coarse || (nav.hardwareConcurrency ?? 8) <= 4 || (nav.deviceMemory ?? 8) <= 4;
   });
-  const [scenePaused, setScenePaused] = useState(false);
 
   useEffect(() => {
     const min = setTimeout(() => setMinTimePassed(true), MIN_LOADER_MS);
@@ -61,38 +56,14 @@ function Home() {
     };
   }, []);
   const onSceneReady = useCallback(() => setSceneReady(true), []);
-  // reloaded while already at the campus: the 3D scene is hidden and paused (so it can't signal
-  // "ready"), and there's nothing to wait for — drop the loader right away
-  useEffect(() => {
-    if (scenePaused) setSceneReady(true);
-  }, [scenePaused]);
   const onLoadProgress = useCallback((p: number) => setLoadProgress(p), []);
 
+  // scroll position drives the 3D camera; a ref (not React state), so scrolling never re-renders
   useEffect(() => {
     const clamp = (x: number) => Math.min(Math.max(x, 0), 1);
-    let videoPrimed = false;
     const onScroll = () => {
-      const vh = window.innerHeight;
-      const zoneH = zoneRef.current?.offsetHeight ?? 0;
-      const sectionH = videoSec.current?.offsetHeight ?? 0;
-      // 3D journey = scroll range of the first block only
-      const max3d = zoneH - vh;
-      const p = max3d > 0 ? clamp(window.scrollY / max3d) : 0;
-      progress.current = p;
-      // start fetching the campus video only once the visitor is well into the journey
-      if (!videoPrimed && p > 0.5 && videoEl.current) {
-        videoPrimed = true;
-        videoEl.current.preload = "auto";
-      }
-      // the campus appears only at the VERY end of the 3D journey (no cross-fade)
-      const atEnd = max3d > 0 && window.scrollY >= max3d - 1;
-      if (videoWrap.current) videoWrap.current.style.visibility = atEnd ? "visible" : "hidden";
-      // scrubbing runs over the campus section, starting exactly at the end of the journey
-      const maxV = sectionH - vh;
-      videoTarget.current = atEnd && maxV > 0 ? clamp((window.scrollY - max3d) / maxV) : 0;
-      // the video covers the canvas from here on: hide it and stop the WebGL render loop
-      if (canvasWrap.current) canvasWrap.current.style.visibility = atEnd ? "hidden" : "visible";
-      setScenePaused(atEnd);
+      const max3d = (zoneRef.current?.offsetHeight ?? 0) - window.innerHeight;
+      progress.current = max3d > 0 ? clamp(window.scrollY / max3d) : 0;
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -103,25 +74,6 @@ function Home() {
     };
   }, [loading]);
 
-  // Scroll-scrubbed video: ease currentTime toward the scroll position
-  useEffect(() => {
-    const v = videoEl.current;
-    if (!v) return;
-    v.pause();
-    let raf = 0;
-    let cur = 0;
-    const tick = () => {
-      if (v.duration && isFinite(v.duration)) {
-        const target = videoTarget.current * (v.duration - 0.05);
-        cur += (target - cur) * 0.12;
-        if (Math.abs(v.currentTime - cur) > 0.03 && !v.seeking) v.currentTime = cur;
-      }
-      raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, []);
-
   return (
     <>
       <AnimatePresence>{loading && <BlossomLoader progress={loadProgress} />}</AnimatePresence>
@@ -130,7 +82,6 @@ function Home() {
           <BlossomScene
             progress={progress}
             low={low}
-            paused={scenePaused}
             onLoadProgress={onLoadProgress}
             onReady={onSceneReady}
           />
@@ -179,33 +130,10 @@ function Home() {
           </motion.div>
         </section>
 
-        {/* scroll room for the 3D journey; the campus starts right at its very end */}
+        {/* scroll room for the 3D journey */}
         <div className="h-[300vh]" />
         </div>
 
-        {/* Campus walkthrough: appears only at the very end of the 3D journey, then
-            scrolling moves forward from the main gate to the football ground */}
-        <section ref={videoSec} className="pointer-events-none relative h-[600vh]" style={{ marginTop: "-100vh" }}>
-          <div className="sticky top-0 h-screen w-full overflow-hidden">
-            <div ref={videoWrap} className="absolute inset-0" style={{ visibility: "hidden" }}>
-              <video
-                ref={videoEl}
-                src="/campus.mp4"
-                muted
-                playsInline
-                preload="metadata"
-                className="h-full w-full object-cover"
-                style={{ filter: "saturate(1.05) brightness(1.02)" }}
-              />
-              {/* permanent soft cherry-blossom grade + pink vignette */}
-              <div className="absolute inset-0" style={{ background: "rgba(255,170,205,0.04)", mixBlendMode: "soft-light" }} />
-              <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at center, rgba(255,200,222,0) 50%, rgba(240,120,165,0.12) 100%)" }} />
-              <div className="absolute bottom-10 left-1/2 -translate-x-1/2 rounded-full bg-pink-950/40 px-5 py-2 text-sm text-white backdrop-blur">
-                Main Gate → Football Ground · keep scrolling
-              </div>
-            </div>
-          </div>
-        </section>
       </main>
     </>
   );

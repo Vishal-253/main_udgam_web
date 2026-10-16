@@ -43,7 +43,9 @@ const ROAD_HALF_W = 1.575;
 type TreeSpec = { pos: THREE.Vector3; scale: number; texIdx: number };
 
 /* ─── Forest: ONE pair of trees per ~6 units of road ── */
-function Forest() {
+/* low = phones / weak devices: alpha-tested cut-outs instead of blended transparency (far less
+   overdraw), and fewer background trees */
+function Forest({ low = false }: { low?: boolean }) {
   const texs = useTexture([tree1, tree2, tree3]);
   texs.forEach((t) => {
     t.colorSpace = THREE.SRGBColorSpace;
@@ -87,8 +89,8 @@ function Forest() {
               <planeGeometry args={[w, h]} />
               <meshStandardMaterial
                 map={texture}
-                alphaTest={0.07}
-                transparent={true}
+                alphaTest={low ? 0.5 : 0.07}
+                transparent={!low}
                 side={THREE.DoubleSide}
                 roughness={0.88}
                 metalness={0.0}
@@ -103,7 +105,7 @@ function Forest() {
 }
 
 /* ─── Background treeline for depth ─────────────────── */
-function BackgroundTrees() {
+function BackgroundTrees({ low = false }: { low?: boolean }) {
   const texs = useTexture([tree1, tree2, tree3]);
   texs.forEach((t) => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; });
 
@@ -119,8 +121,8 @@ function BackgroundTrees() {
         texIdx: i % 3,
       });
     }
-    return list;
-  }, []);
+    return low ? list.filter((_, idx) => idx % 2 === 0) : list;
+  }, [low]);
 
   return (
     <group>
@@ -134,8 +136,8 @@ function BackgroundTrees() {
               <planeGeometry args={[h * 0.9, h]} />
               <meshStandardMaterial
                 map={tex}
-                alphaTest={0.1}
-                transparent={true}
+                alphaTest={low ? 0.5 : 0.1}
+                transparent={!low}
                 side={THREE.DoubleSide}
                 roughness={0.95}
                 depthWrite={true}
@@ -1296,15 +1298,21 @@ export function BlossomScene({
 }) {
   // Drops resolution automatically if the frame rate can't keep up
   const [dpr, setDpr] = useState(1.5);
+  const [lowDpr, setLowDpr] = useState(1);
   return (
     <Canvas
       shadows={!low}
-      dpr={low ? 1 : dpr}
+      dpr={low ? lowDpr : dpr}
       frameloop={paused ? "never" : "always"}
       camera={{ fov: 60, position: [0, 1.7, 10] }}
       gl={{ antialias: !low, powerPreference: "high-performance" }}
     >
-      <PerformanceMonitor onDecline={() => setDpr(1)} onIncline={() => setDpr(1.5)} flipflops={3} onFallback={() => setDpr(1)} />
+      <PerformanceMonitor
+        onDecline={() => (low ? setLowDpr(0.75) : setDpr(1))}
+        onIncline={() => (low ? setLowDpr(1) : setDpr(1.5))}
+        flipflops={3}
+        onFallback={() => (low ? setLowDpr(0.75) : setDpr(1))}
+      />
       <color attach="background" args={["#dbe7fb"]} />
       <fog attach="fog" args={["#dbe7fb", 10, 68]} />
       <ambientLight intensity={0.7} color="#f0f4ff" />
@@ -1318,8 +1326,8 @@ export function BlossomScene({
       <Suspense fallback={null}>
         <DistantHimalayas />
         <Ground />
-        <Forest />
-        <BackgroundTrees />
+        <Forest low={low} />
+        <BackgroundTrees low={low} />
         <ForestSign label="NIT SIKKIM" position={[2.4, 0, -12]} rotation={-0.12} accent="#d9b66f" />
         <GameArcadeZone position={[-3.2, 0, -22]} />
         <ForestSign label="UDGAM 2K26" position={[-2.6, 0, -32]} rotation={0.14} accent="#e9a9bd" />
@@ -1330,7 +1338,7 @@ export function BlossomScene({
         <HotAirBalloon progress={progress} />
         <ReadySignal onReady={onReady} />
       </Suspense>
-      <Petals count={low ? 1500 : 4500} progress={progress} />
+      <Petals count={low ? 700 : 4500} progress={progress} />
     </Canvas>
   );
 }
