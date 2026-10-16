@@ -281,3 +281,68 @@ export async function registrationStatus(
   const r = rows[0];
   return r ? { status: r.status, eventId: r.event_id } : null;
 }
+
+export interface RegistrationReceipt {
+  registrationId: string;
+  eventId: string;
+  eventName: string;
+  teamName: string | null;
+  status: string;
+  amountPaise: number;
+  members: { name: string; rollNo: string; isLeader: boolean }[];
+  leaderEmail: string;
+  leaderPhone: string;
+  paymentId: string | null;
+  createdAt: string;
+  confirmedAt: string | null;
+}
+
+const maskEmail = (e: string) => {
+  const [user = "", domain = ""] = e.split("@");
+  return `${user.slice(0, 2)}${"*".repeat(Math.max(1, user.length - 2))}@${domain}`;
+};
+const maskPhone = (p: string) => `${"*".repeat(Math.max(0, p.length - 4))}${p.slice(-4)}`;
+const isoOrNull = (v: Date | string | null) => (v === null ? null : new Date(v).toISOString());
+
+/**
+ * Receipt for the registration page. The id is an unguessable UUID; contact details are masked
+ * anyway so a leaked receipt link exposes nothing beyond names and roll numbers.
+ */
+export async function registrationReceipt(registrationId: string): Promise<RegistrationReceipt | null> {
+  const rows = (await db()`
+    SELECT id, event_id, team_name, status, amount_paise, members, leader_email, leader_phone,
+           razorpay_payment_id, created_at, confirmed_at
+      FROM registrations WHERE id = ${registrationId}::uuid`) as {
+    id: string;
+    event_id: string;
+    team_name: string | null;
+    status: string;
+    amount_paise: number;
+    members: { name: string; roll_no: string; is_leader?: boolean }[];
+    leader_email: string;
+    leader_phone: string;
+    razorpay_payment_id: string | null;
+    created_at: Date | string;
+    confirmed_at: Date | string | null;
+  }[];
+  const r = rows[0];
+  if (!r) return null;
+  return {
+    registrationId: r.id,
+    eventId: r.event_id,
+    eventName: EVENTS.find((e) => e.id === r.event_id)?.name ?? r.event_id,
+    teamName: r.team_name,
+    status: r.status,
+    amountPaise: r.amount_paise,
+    members: (Array.isArray(r.members) ? r.members : []).map((m) => ({
+      name: m.name,
+      rollNo: m.roll_no,
+      isLeader: m.is_leader === true,
+    })),
+    leaderEmail: maskEmail(r.leader_email),
+    leaderPhone: maskPhone(r.leader_phone),
+    paymentId: r.razorpay_payment_id,
+    createdAt: isoOrNull(r.created_at) ?? "",
+    confirmedAt: isoOrNull(r.confirmed_at),
+  };
+}

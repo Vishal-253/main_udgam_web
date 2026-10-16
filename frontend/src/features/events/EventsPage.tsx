@@ -8,7 +8,7 @@ import {
   type FestEvent,
 } from "./data/eventDetails";
 import { feeLabel, feePill, formatFee } from "./format";
-import { useEventPass } from "./hooks/useEventPass";
+import { useRegistrations } from "./hooks/useRegistrations";
 import { CategoryChip, RegisterButton, RotatingTagline } from "./components/EventBits";
 import { categoryOf } from "./utils";
 import {
@@ -20,7 +20,7 @@ import {
   SearchIcon,
 } from "./components/eventIcons";
 import EventDrawer from "./components/EventDrawer";
-import RegistrationTray from "./components/RegistrationTray";
+import RegistrationModal from "./components/RegistrationModal";
 import HeadlinerCarousel from "./components/HeadlinerCarousel";
 import NoticeTicker from "./components/NoticeTicker";
 import RulebookViewer from "./components/RulebookViewer";
@@ -75,12 +75,9 @@ export default function EventsPage({
   const [openId, setOpenId] = useState<string | null>(null);
   const [rulebookEvent, setRulebookEvent] = useState<FestEvent | null>(null);
   const eventIds = useMemo(() => events.map((e) => e.id), [events]);
-  const {
-    pass,
-    toggle: togglePass,
-    remove: removeFromPass,
-    clear: clearPass,
-  } = useEventPass(eventIds);
+  const { registered, record } = useRegistrations(eventIds);
+  // the event whose registration form (or receipt) is open
+  const [registering, setRegistering] = useState<FestEvent | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
 
   // "/" focuses search (desktop convenience)
@@ -147,8 +144,8 @@ export default function EventsPage({
           Pick your <em>stage.</em>
         </h1>
         <p className="ep-lede">
-          {events.length} events across games, sport, performance, food and more. Add the ones you
-          want to your pass, then register your team for each one.
+          {events.length} events across games, sport, performance, food and more. Tap Register on
+          any event to sign up your team and get your receipt instantly.
         </p>
         <dl className="ep-stats">
           <div>
@@ -279,8 +276,8 @@ export default function EventsPage({
                 <HeadlinerTile
                   event={e}
                   index={i}
-                  added={pass.includes(e.id)}
-                  onToggle={() => togglePass(e.id)}
+                  registered={!!registered[e.id]}
+                  onRegister={() => setRegistering(e)}
                   onOpen={() => setOpenId(e.id)}
                   onOpenRulebook={setRulebookEvent}
                 />
@@ -293,8 +290,8 @@ export default function EventsPage({
                   key={e.id}
                   event={e}
                   index={i}
-                  added={pass.includes(e.id)}
-                  onToggle={() => togglePass(e.id)}
+                  registered={!!registered[e.id]}
+                  onRegister={() => setRegistering(e)}
                   onOpen={() => setOpenId(e.id)}
                   onOpenRulebook={setRulebookEvent}
                 />
@@ -316,8 +313,8 @@ export default function EventsPage({
               <TicketCard
                 key={e.id}
                 event={e}
-                added={pass.includes(e.id)}
-                onToggle={() => togglePass(e.id)}
+                registered={!!registered[e.id]}
+                onRegister={() => setRegistering(e)}
                 onOpen={() => setOpenId(e.id)}
                 onOpenRulebook={setRulebookEvent}
               />
@@ -348,19 +345,22 @@ export default function EventsPage({
 
       <EventDrawer
         event={openEvent}
-        added={openEvent ? pass.includes(openEvent.id) : false}
-        onToggle={() => {
-          if (openEvent) togglePass(openEvent.id);
+        registered={openEvent ? !!registered[openEvent.id] : false}
+        onRegister={() => {
+          if (openEvent) setRegistering(openEvent);
         }}
         onClose={() => setOpenId(null)}
       />
 
-      <RegistrationTray
-        items={pass.map((id) => events.find((e) => e.id === id)).filter((e): e is FestEvent => !!e)}
-        onRemove={removeFromPass}
-        onClear={clearPass}
-        onOpenEvent={setOpenId}
-      />
+      {registering && (
+        <RegistrationModal
+          key={registering.id}
+          event={registering}
+          receiptId={registered[registering.id]}
+          onClose={() => setRegistering(null)}
+          onRegistered={record}
+        />
+      )}
 
       {/* Direct rulebook PDF modal */}
       {rulebookEvent && rulebookEvent.rulebookPdf && (
@@ -376,8 +376,8 @@ export default function EventsPage({
 
 interface CardProps {
   event: FestEvent;
-  added: boolean;
-  onToggle: () => void;
+  registered: boolean;
+  onRegister: () => void;
   onOpen: () => void;
   onOpenRulebook: (event: FestEvent) => void;
 }
@@ -385,14 +385,17 @@ interface CardProps {
 function HeadlinerTile({
   event,
   index,
-  added,
-  onToggle,
+  registered,
+  onRegister,
   onOpen,
   onOpenRulebook,
 }: CardProps & { index: number }) {
   const cat = categoryOf(event.category);
   return (
-    <article className={`ep-tile ${added ? "is-added" : ""}`} style={cssVars({ "--hue": cat.hue })}>
+    <article
+      className={`ep-tile ${registered ? "is-added" : ""}`}
+      style={cssVars({ "--hue": cat.hue })}
+    >
       <CategoryIcon id={cat.id} className="ep-tile-glyph" />
       <div className="ep-tile-top">
         <span className="ep-tile-index">{String(index + 1).padStart(2, "0")}</span>
@@ -412,7 +415,7 @@ function HeadlinerTile({
       )}
 
       <div className="ep-tile-actions">
-        <RegisterButton added={added} onToggle={onToggle} eventName={event.name} />
+        <RegisterButton registered={registered} onRegister={onRegister} eventName={event.name} />
         {event.rulebookPdf ? (
           <button
             type="button"
@@ -444,13 +447,13 @@ function HeadlinerTile({
   );
 }
 
-function TicketCard({ event, added, onToggle, onOpen, onOpenRulebook }: CardProps) {
+function TicketCard({ event, registered, onRegister, onOpen, onOpenRulebook }: CardProps) {
   const cat = categoryOf(event.category);
   const meta: string[] = [];
   if (event.rounds) meta.push(`${event.rounds.length} rounds`);
   return (
     <article
-      className={`ep-ticket ${added ? "is-added" : ""}`}
+      className={`ep-ticket ${registered ? "is-added" : ""}`}
       style={cssVars({ "--hue": cat.hue })}
     >
       <div className="ep-ticket-body">
@@ -476,7 +479,12 @@ function TicketCard({ event, added, onToggle, onOpen, onOpenRulebook }: CardProp
         <span className="ep-ticket-fee">{formatFee(event.fee)}</span>
         <span className="ep-ticket-fee-label">{feeLabel(event)}</span>
         <div className="ep-ticket-stub-actions">
-          <RegisterButton added={added} onToggle={onToggle} eventName={event.name} size="sm" />
+          <RegisterButton
+            registered={registered}
+            onRegister={onRegister}
+            eventName={event.name}
+            size="sm"
+          />
           {event.rulebookPdf ? (
             <button
               type="button"

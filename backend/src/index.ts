@@ -1,5 +1,6 @@
 import { createApp } from "./app";
 import { optionalEnv, reportConfig } from "./config/env";
+import { startBackupScheduler } from "./jobs/backupScheduler";
 
 const PORT = Number(process.env["PORT"] ?? 4000);
 const KEEP_ALIVE_MINUTES = 10;
@@ -9,6 +10,7 @@ reportConfig();
 const server = createApp().listen(PORT, () => {
   console.log(`[server] Udgam API listening on :${PORT}`);
   startKeepAlive();
+  startBackupScheduler();
 });
 
 /**

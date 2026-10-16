@@ -16,7 +16,8 @@ type EnvName =
   | "ADMIN_SESSION_SECRET"
   | "FRONTEND_ORIGINS"
   | "KEEP_ALIVE_URL"
-  | "RENDER_EXTERNAL_URL";
+  | "RENDER_EXTERNAL_URL"
+  | "BACKUP_INTERVAL_MINUTES";
 
 function read(name: EnvName): string | undefined {
   return process.env[name]?.trim() || undefined;

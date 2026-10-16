@@ -2004,3 +2004,264 @@
     flex: 1;
   }
 }
+
+/* ---------------------------------------------------------------- Registration receipt */
+.udgam-events .ep-receipt-wrap {
+  gap: 14px;
+  padding-bottom: 22px;
+}
+.udgam-events .ep-receipt {
+  position: relative;
+  overflow: hidden;
+  border-radius: 22px;
+  background: #fffaf7;
+  color: #2a0f1d;
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.8) inset,
+    0 24px 50px -24px color-mix(in oklab, var(--blossom-deep) 60%, transparent);
+  border: 1px solid #f3d6e1;
+}
+.udgam-events .ep-receipt-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 20px 16px;
+  background:
+    radial-gradient(circle at 85% -20%, rgb(255 255 255 / 0.35), transparent 45%),
+    linear-gradient(135deg, #e8547a 0%, #f08aa8 55%, #f6c9a8 100%);
+  color: #fff;
+}
+.udgam-events .ep-receipt-brand {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.92;
+}
+.udgam-events .ep-receipt-kicker {
+  margin: 2px 0 0;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+.udgam-events .ep-receipt-stamp {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  border: 2px solid currentColor;
+  border-radius: 10px;
+  background: rgb(255 255 255 / 0.92);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transform: rotate(-4deg);
+}
+.udgam-events .ep-receipt-stamp.is-ok {
+  color: #1f7a4d;
+}
+.udgam-events .ep-receipt-stamp.is-warn {
+  color: #a15c00;
+}
+.udgam-events .ep-receipt-stamp.is-bad {
+  color: #b42318;
+}
+.udgam-events .ep-receipt-hero {
+  padding: 18px 20px 6px;
+}
+.udgam-events .ep-receipt-label {
+  margin: 0 0 3px;
+  color: #9a6b7f;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.udgam-events .ep-receipt-event {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  font-weight: 600;
+  line-height: 1.1;
+}
+.udgam-events .ep-receipt-team {
+  margin: 4px 0 0;
+  color: #b0306a;
+  font-weight: 700;
+}
+.udgam-events .ep-receipt-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 18px;
+  padding: 14px 20px 18px;
+}
+.udgam-events .ep-receipt-value {
+  margin: 0;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.udgam-events .ep-receipt-mono {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.82em;
+}
+.udgam-events .ep-receipt-perf {
+  position: relative;
+  height: 0;
+  margin: 0 18px;
+  border-top: 2px dashed #efc3d3;
+}
+.udgam-events .ep-receipt-perf::before,
+.udgam-events .ep-receipt-perf::after {
+  content: "";
+  position: absolute;
+  top: -12px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--popover);
+  border: 1px solid #f3d6e1;
+}
+.udgam-events .ep-receipt-perf::before {
+  left: -30px;
+}
+.udgam-events .ep-receipt-perf::after {
+  right: -30px;
+}
+.udgam-events .ep-receipt-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: start;
+  padding: 18px 20px;
+}
+.udgam-events .ep-receipt-members {
+  margin: 4px 0 10px;
+  padding: 0;
+  list-style: none;
+  counter-reset: member;
+}
+.udgam-events .ep-receipt-members li {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid #f6e3ea;
+  counter-increment: member;
+}
+.udgam-events .ep-receipt-members li::before {
+  content: counter(member) ".";
+  min-width: 1.4em;
+  color: #c2849e;
+  font-weight: 700;
+}
+.udgam-events .ep-receipt-name {
+  font-weight: 700;
+}
+.udgam-events .ep-receipt-roll {
+  color: #7d5367;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.85rem;
+}
+.udgam-events .ep-receipt-badge {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: #fde6ee;
+  color: #b0306a;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.udgam-events .ep-receipt-contact {
+  margin: 0;
+  color: #7d5367;
+  font-size: 0.82rem;
+}
+.udgam-events .ep-receipt-qr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid #f3d6e1;
+}
+.udgam-events .ep-receipt-qr img {
+  display: block;
+  width: 132px;
+  height: 132px;
+  image-rendering: pixelated;
+}
+.udgam-events .ep-receipt-qr p {
+  margin: 0;
+  color: #7d5367;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-align: center;
+}
+.udgam-events .ep-receipt-foot {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 20px;
+  background: #fdeef3;
+  color: #9a6b7f;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.udgam-events .ep-receipt-note {
+  margin: 0;
+}
+.udgam-events .ep-receipt-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+.udgam-events .ep-receipt-actions .ep-btn-ghost {
+  margin-top: 0;
+}
+.udgam-events .ep-receipt-actions .ep-checkout {
+  flex: 1;
+  min-width: 140px;
+}
+@media (max-width: 520px) {
+  .udgam-events .ep-receipt-body {
+    grid-template-columns: 1fr;
+  }
+  .udgam-events .ep-receipt-qr {
+    justify-self: center;
+  }
+  .udgam-events .ep-receipt-event {
+    font-size: 1.55rem;
+  }
+}
+
+/* Print / Save as PDF: only the receipt (RegistrationReceipt adds the class while printing) */
+@media print {
+  html.ep-printing-receipt body * {
+    visibility: hidden !important;
+  }
+  html.ep-printing-receipt .ep-receipt,
+  html.ep-printing-receipt .ep-receipt * {
+    visibility: visible !important;
+  }
+  html.ep-printing-receipt .ep-receipt {
+    position: fixed;
+    inset: 0 auto auto 0;
+    width: 100%;
+    max-width: 680px;
+    margin: 0;
+    box-shadow: none;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  html.ep-printing-receipt .ep-receipt-perf::before,
+  html.ep-printing-receipt .ep-receipt-perf::after {
+    background: #fff;
+  }
+}

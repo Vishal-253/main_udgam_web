@@ -65,8 +65,11 @@ backend/
   (team, members, leader contact, status, payment IDs; document ID = registration ID).
 - Every change bumps `registrations.version`; a registration counts as backed up only when that
   exact version is in Firestore, and an older copy can never overwrite a newer one.
-- If Firebase is down, registration still works; the change waits in the `udgam_unsynced` view and
-  is copied by `POST /api/admin/backup-sync` (cron, below) and by the Razorpay webhook.
+- If Firebase is down, registration still works; the change waits in the `udgam_unsynced` view.
+- **Automatic backup:** the server itself copies everything not yet backed up **every 5 minutes**
+  (`src/jobs/backupScheduler.ts`; first run 30 s after start; `BACKUP_INTERVAL_MINUTES` changes the
+  interval, `0` disables it). Runs never overlap and a failed run is retried next time. The Razorpay
+  webhook and `POST /api/admin/backup-sync` (admin "Back up now" button) trigger extra syncs.
 - Rows in `registrations` can't be deleted (a trigger blocks DELETE).
 
 ## Run locally
@@ -100,9 +103,10 @@ The website's dev server (`cd ../frontend && npm run dev`, port 8080) calls
 6. **Firebase**: Project settings → Service accounts → *Generate new private key* → put
    `project_id`, `client_email`, `private_key` into the `FIREBASE_*` variables. Create Firestore
    (Native mode) and publish `db/firestore.rules`.
-7. **Cron** (backup + second keep-alive): on [cron-job.org](https://cron-job.org) add a job every
-   **5 minutes**: `POST https://udgam-api.onrender.com/api/admin/backup-sync` with header
-   `Authorization: Bearer <BACKUP_SYNC_TOKEN>`. The answer `"remaining": 0` means fully backed up.
+7. **Optional cron** (extra keep-alive): backups already run automatically every 5 minutes inside
+   the server. As a second safety net you can add a [cron-job.org](https://cron-job.org) job every
+   5 minutes: `POST https://udgam-api.onrender.com/api/admin/backup-sync` with header
+   `Authorization: Bearer <BACKUP_SYNC_TOKEN>` (it also wakes the server if it ever fell asleep).
 8. When ready: `REGISTRATIONS_OPEN=true`, and update the "do not register yet" lines in
    `frontend/src/features/events/components/NoticeTicker.tsx`.
 
@@ -114,7 +118,7 @@ Two things keep it awake around the clock:
 
 - **Self ping** — while running, the server calls its own public URL (`RENDER_EXTERNAL_URL`, set by
   Render automatically) `/health` every **10 minutes**. Logged as `[keep-alive] pinging …`.
-- **External cron** — the 5-minute backup-sync job above also counts as traffic, and wakes the
+- **Optional external cron** — the backup-sync job above also counts as traffic, and wakes the
   service again if it ever restarted and fell asleep.
 
 A free service running all month uses ~730 of Render's 750 free instance hours, so keep only this

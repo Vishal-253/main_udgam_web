@@ -25,6 +25,8 @@ const COVER_DIR = "/assets/team/committees";
 
 // Dinesh Saini leads the General Secretary row
 const GENSEC_FIRST = "dinesh-saini";
+/** committee deck shown first in the organising committee section */
+const FIRST_COMMITTEE = "web-dev";
 
 const DECK_TITLES: Record<string, string> = {
   "web-dev": "Web Development",
@@ -39,9 +41,10 @@ export function buildTeamDirectory(): TeamDirectory {
     (a, b) => Number(b.id === GENSEC_FIRST) - Number(a.id === GENSEC_FIRST),
   );
 
-  // the 15 operational wings, starting from Sponsorship
+  // the 15 operational wings: Web Dev leads, the rest keep their order (Sponsorship onwards)
   const committees = committeeCategories
     .filter((c) => c.id !== "all")
+    .sort((a, b) => Number(b.id === FIRST_COMMITTEE) - Number(a.id === FIRST_COMMITTEE))
     .map((cat): CommitteeDeck => {
       const members = committeeMembers.filter((m) => m.committeeId === cat.id);
       const title = DECK_TITLES[cat.id] ?? cat.label;

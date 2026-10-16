@@ -51,3 +51,23 @@ export const getRegistrationStatus = ({ data }: { data: { registrationId: string
   apiFetch<{ status: string; eventId: string } | null>(
     `/api/registrations/${encodeURIComponent(data.registrationId)}/status`,
   );
+
+export interface RegistrationReceipt {
+  registrationId: string;
+  eventId: string;
+  eventName: string;
+  teamName: string | null;
+  status: string;
+  amountPaise: number;
+  members: { name: string; rollNo: string; isLeader: boolean }[];
+  leaderEmail: string;
+  leaderPhone: string;
+  paymentId: string | null;
+  createdAt: string;
+  confirmedAt: string | null;
+}
+
+export const getRegistrationReceipt = (registrationId: string) =>
+  apiFetch<RegistrationReceipt | null>(
+    `/api/registrations/${encodeURIComponent(registrationId)}/receipt`,
+  );

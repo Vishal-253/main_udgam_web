@@ -156,6 +156,31 @@ describe("registration over HTTP", () => {
     expect(ok).toMatchObject({ ok: true, status: "confirmed" });
   });
 
+  it("serves a receipt with members, payment and masked contact details", async () => {
+    const list = await run("select id from registrations where team_name = 'Hues'");
+    const id = (list[0] as { id: string }).id;
+    const res = await fetch(`${base}/api/registrations/${id}/receipt`);
+    expect(res.status).toBe(200);
+    const r = await res.json();
+    expect(r).toMatchObject({
+      registrationId: id,
+      eventName: "Rangoli",
+      teamName: "Hues",
+      status: "confirmed",
+      amountPaise: 8000,
+      paymentId: "pay_HTTP1abc",
+      leaderPhone: "******3210",
+    });
+    expect(r.leaderEmail).toBe("b2*****@example.com");
+    expect(r.members).toHaveLength(4);
+    expect(r.members[0]).toEqual({ name: "Asha Rai", rollNo: "B23HR09", isLeader: true });
+    expect(JSON.stringify(r)).not.toContain("9876543210");
+    expect((await fetch(`${base}/api/registrations/not-a-uuid/receipt`)).status).toBe(400);
+    expect(
+      (await fetch(`${base}/api/registrations/00000000-0000-4000-8000-000000000000/receipt`)).status,
+    ).toBe(404);
+  });
+
   it("rejects malformed verify/cancel/status input with 400", async () => {
     expect((await post("/api/registrations/verify-payment", { orderId: "x" })).status).toBe(400);
     expect((await post("/api/registrations/cancel", { registrationId: "nope" })).status).toBe(400);

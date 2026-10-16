@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import type { EventCategoryId } from "../data/eventDetails";
 import { categoryOf, prefersReducedMotion } from "../utils";
 import { cssVars } from "@/lib/css-vars";
-import { CategoryIcon, CheckIcon, PlusIcon } from "./eventIcons";
+import { ArrowIcon, CategoryIcon, CheckIcon } from "./eventIcons";
 
 /** Cycles through taglines with a soft cross-fade; pauses while hovered. */
 export function RotatingTagline({
@@ -50,34 +50,36 @@ export function CategoryChip({ id, small = false }: { id: EventCategoryId; small
   );
 }
 
+/** Opens the registration form for this event; after registering it reopens the receipt. */
 export function RegisterButton({
-  added,
-  onToggle,
+  registered,
+  onRegister,
   eventName,
   size = "md",
 }: {
-  added: boolean;
-  onToggle: () => void;
+  registered: boolean;
+  onRegister: () => void;
   eventName: string;
   size?: "sm" | "md" | "lg";
 }) {
   return (
     <button
       type="button"
-      className={`ep-register ${added ? "is-added" : ""} is-${size}`}
-      aria-pressed={added}
-      aria-label={added ? `Remove ${eventName} from your pass` : `Add ${eventName} to your pass`}
+      className={`ep-register ${registered ? "is-added" : ""} is-${size}`}
+      aria-label={
+        registered ? `View your ${eventName} registration receipt` : `Register for ${eventName}`
+      }
       onClick={(e) => {
         e.stopPropagation();
-        onToggle();
+        onRegister();
       }}
     >
-      {added ? (
+      {registered ? (
         <CheckIcon className="ep-register-icon" />
       ) : (
-        <PlusIcon className="ep-register-icon" />
+        <ArrowIcon className="ep-register-icon" />
       )}
-      <span>{added ? "Added" : "Register"}</span>
+      <span>{registered ? "Registered" : "Register"}</span>
     </button>
   );
 }

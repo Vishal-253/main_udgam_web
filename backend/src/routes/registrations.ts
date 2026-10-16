@@ -5,6 +5,7 @@ import { verifyCheckoutSignature } from "../services/razorpay";
 import {
   cancelPending,
   confirmPaidOrder,
+  registrationReceipt,
   registrationStatus,
   startRegistration,
 } from "../services/registrations";
@@ -15,6 +16,7 @@ import { normalizeRollNo } from "../validation/registration";
 //   POST /api/registrations/verify-payment  Razorpay Checkout success callback
 //   POST /api/registrations/cancel          leader releases an unpaid registration
 //   GET  /api/registrations/:id/status      status only (no personal data)
+//   GET  /api/registrations/:id/receipt     receipt details (contact details masked)
 
 export const registrationsRouter = Router();
 
@@ -111,6 +113,21 @@ registrationsRouter.get("/:id/status", followUpLimiter, async (req, res) => {
     res.json(await registrationStatus(id.data));
   } catch (err) {
     console.error("[registration] status failed", id.data, err);
+    res.status(500).json(null);
+  }
+});
+
+registrationsRouter.get("/:id/receipt", followUpLimiter, async (req, res) => {
+  const id = z.string().uuid().safeParse(req.params["id"]);
+  if (!id.success) {
+    res.status(400).json(null);
+    return;
+  }
+  try {
+    const receipt = await registrationReceipt(id.data);
+    res.status(receipt ? 200 : 404).json(receipt);
+  } catch (err) {
+    console.error("[registration] receipt failed", id.data, err);
     res.status(500).json(null);
   }
 });

@@ -10,13 +10,13 @@ import RulebookViewer from "./RulebookViewer";
 /** Side sheet on desktop, bottom sheet on phones, with the full event details. */
 export default function EventDrawer({
   event,
-  added,
-  onToggle,
+  registered,
+  onRegister,
   onClose,
 }: {
   event: FestEvent | null;
-  added: boolean;
-  onToggle: () => void;
+  registered: boolean;
+  onRegister: () => void;
   onClose: () => void;
 }) {
   // keep the last event rendered while the sheet animates closed
@@ -196,7 +196,12 @@ export default function EventDrawer({
               <span className="ep-drawer-fee">{formatFee(shown.fee)}</span>
               <span className="ep-drawer-fee-label">{feeLabel(shown)}</span>
             </div>
-            <RegisterButton added={added} onToggle={onToggle} eventName={shown.name} size="lg" />
+            <RegisterButton
+              registered={registered}
+              onRegister={onRegister}
+              eventName={shown.name}
+              size="lg"
+            />
           </div>
         </aside>
       </div>

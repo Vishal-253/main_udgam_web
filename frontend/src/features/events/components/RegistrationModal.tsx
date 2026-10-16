@@ -17,6 +17,7 @@ import {
 } from "../registration/schema";
 import { payWithRazorpay } from "../registration/razorpayCheckout";
 import { CloseIcon } from "./eventIcons";
+import RegistrationReceipt from "./RegistrationReceipt";
 
 type Phase = "form" | "submitting" | "paying" | "verifying" | "unpaid" | "done" | "failed";
 
@@ -93,18 +94,21 @@ export default function RegistrationModal({
   event,
   onClose,
   onRegistered,
+  receiptId,
 }: {
   event: FestEvent;
   onClose: () => void;
-  onRegistered: (eventId: string) => void;
+  onRegistered: (eventId: string, registrationId: string) => void;
+  /** open straight on the receipt of an existing registration */
+  receiptId?: string | undefined;
 }) {
   const [form, setForm] = useState<FormState>(() => emptyForm(event));
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [problems, setProblems] = useState<string[]>([]);
-  const [phase, setPhase] = useState<Phase>("form");
+  const [phase, setPhase] = useState<Phase>(receiptId ? "done" : "form");
   const [message, setMessage] = useState<string | null>(null);
   const [pending, setPending] = useState<PendingPayment | null>(null);
-  const [registrationId, setRegistrationId] = useState<string | null>(null);
+  const [registrationId, setRegistrationId] = useState<string | null>(receiptId ?? null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const busy = phase === "submitting" || phase === "paying" || phase === "verifying";
   const busyRef = useRef(busy);
@@ -123,6 +127,7 @@ export default function RegistrationModal({
   // resume an unpaid registration from earlier in this browser session — but ask the server
   // first, so a payment that already went through is never offered for payment again
   useEffect(() => {
+    if (receiptId) return undefined; // showing an existing receipt
     const p = loadPending(event.id);
     if (!p) return undefined;
     let alive = true;
@@ -137,7 +142,7 @@ export default function RegistrationModal({
           savePending(event.id, null);
           setPending(null);
           setPhase("done");
-          onRegisteredRef.current(event.id);
+          onRegisteredRef.current(event.id, p.registrationId);
         } else if (s === undefined || s?.status === "pending") {
           // pending, or status unknown (offline): let them pay or cancel
           setPhase("unpaid");
@@ -155,7 +160,7 @@ export default function RegistrationModal({
     return () => {
       alive = false;
     };
-  }, [event.id]);
+  }, [event.id, receiptId]);
 
   useEffect(() => {
     const prevOverflow = document.body.style.overflow;
@@ -227,12 +232,23 @@ export default function RegistrationModal({
     setErrors(fieldErrors);
   };
 
+  /** Fresh, empty form (after a successful registration on a shared device). */
+  const startOver = () => {
+    setForm(emptyForm(event));
+    setErrors({});
+    setProblems([]);
+    setMessage(null);
+    setPending(null);
+    setRegistrationId(null);
+    setPhase("form");
+  };
+
   const finishRegistered = (id: string) => {
     savePending(event.id, null);
     setPending(null);
     setRegistrationId(id);
     setPhase("done");
-    onRegistered(event.id);
+    onRegistered(event.id, id);
   };
 
   /** After a payment the browser couldn't confirm, the webhook may still confirm it. */
@@ -407,7 +423,7 @@ export default function RegistrationModal({
               {sizeText(event)} · {feePill(event)}
             </p>
             <h2 id="ep-reg-title" className="ep-reg-title">
-              Register for {event.name}
+              {phase === "done" ? `You're in — ${event.name} 🌸` : `Register for ${event.name}`}
             </h2>
           </div>
           <button
@@ -421,21 +437,12 @@ export default function RegistrationModal({
           </button>
         </div>
 
-        {phase === "done" ? (
-          <div className="ep-reg-body ep-reg-result">
-            <p className="ep-reg-result-title">You're registered! 🌸</p>
-            <p>
-              Your {isTeam ? "team is" : "spot is"} confirmed for <strong>{event.name}</strong>.
-            </p>
-            {registrationId && (
-              <p className="ep-reg-muted">
-                Registration ID: <code>{registrationId}</code>
-              </p>
-            )}
-            <button type="button" className="ep-checkout" onClick={onClose}>
-              Done
-            </button>
-          </div>
+        {phase === "done" && registrationId ? (
+          <RegistrationReceipt
+            registrationId={registrationId}
+            onClose={onClose}
+            onRegisterAnother={startOver}
+          />
         ) : phase === "failed" ? (
           <div className="ep-reg-body ep-reg-result">
             <p className="ep-reg-result-title">Payment needs attention</p>

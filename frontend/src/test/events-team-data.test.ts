@@ -61,6 +61,12 @@ describe("team directory", () => {
     }
   });
 
+  it("shows the Web Dev committee first, others in their usual order", () => {
+    expect(team.committees[0]?.id).toBe("web-dev");
+    expect(team.committees[1]?.id).toBe("sponsorship");
+    expect(new Set(team.committees.map((d) => d.id)).size).toBe(15);
+  });
+
   it("has unique member ids", () => {
     const ids = [...teamMembers, ...committeeMembers].map((m) => m.id);
     expect(new Set(ids).size).toBe(ids.length);
