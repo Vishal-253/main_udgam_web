@@ -14,6 +14,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as EventsRouteImport } from './routes/events'
 import { Route as MerchRouteImport } from './routes/merch'
+import { Route as TeamRouteImport } from './routes/team'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -40,6 +41,11 @@ const MerchRoute = MerchRouteImport.update({
   path: '/merch',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TeamRoute = TeamRouteImport.update({
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -47,6 +53,7 @@ export interface FileRoutesByFullPath {
   '/calendar': typeof CalendarRoute
   '/events': typeof EventsRoute
   '/merch': typeof MerchRoute
+  '/team': typeof TeamRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -54,6 +61,7 @@ export interface FileRoutesByTo {
   '/calendar': typeof CalendarRoute
   '/events': typeof EventsRoute
   '/merch': typeof MerchRoute
+  '/team': typeof TeamRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -62,13 +70,14 @@ export interface FileRoutesById {
   '/calendar': typeof CalendarRoute
   '/events': typeof EventsRoute
   '/merch': typeof MerchRoute
+  '/team': typeof TeamRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/calendar' | '/events' | '/merch'
+  fullPaths: '/' | '/about' | '/calendar' | '/events' | '/merch' | '/team'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/calendar' | '/events' | '/merch'
-  id: '__root__' | '/' | '/about' | '/calendar' | '/events' | '/merch'
+  to: '/' | '/about' | '/calendar' | '/events' | '/merch' | '/team'
+  id: '__root__' | '/' | '/about' | '/calendar' | '/events' | '/merch' | '/team'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -77,6 +86,7 @@ export interface RootRouteChildren {
   CalendarRoute: typeof CalendarRoute
   EventsRoute: typeof EventsRoute
   MerchRoute: typeof MerchRoute
+  TeamRoute: typeof TeamRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -116,6 +126,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MerchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/team': {
+      id: '/team'
+      path: '/team'
+      fullPath: '/team'
+      preLoaderRoute: typeof TeamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -125,6 +142,7 @@ const rootRouteChildren: RootRouteChildren = {
   CalendarRoute: CalendarRoute,
   EventsRoute: EventsRoute,
   MerchRoute: MerchRoute,
+  TeamRoute: TeamRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
