@@ -1033,14 +1033,6 @@
   color: oklch(0.4 0.12 var(--hue));
   font-family: var(--font-display);
 }
-.udgam-events .ep-games {
-  display: grid;
-  gap: 14px;
-}
-.udgam-events .ep-game-name {
-  margin: 0 0 6px;
-  font-weight: 700;
-}
 .udgam-events .ep-doc-link {
   display: flex;
   align-items: center;
@@ -1098,13 +1090,6 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--ep-muted);
-}
-.udgam-events .ep-drawer-fee-note {
-  display: block;
-  margin-top: 4px;
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--secondary-foreground);
 }
 .udgam-events .ep-tray {
   position: fixed;

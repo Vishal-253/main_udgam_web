@@ -11,11 +11,6 @@ export interface EventCategory {
   hue: number;
 }
 
-export interface EventGame {
-  name: string;
-  taglines: string[];
-}
-
 export interface FestEvent {
   id: string;
   name: string;
@@ -25,12 +20,9 @@ export interface FestEvent {
   fee: number | null;
   /** what the fee covers; omitted for free / unannounced fees and flat fees */
   feeUnit?: "team" | "person";
-  /** extra pricing detail, e.g. a different fee for one title */
-  feeNote?: string;
   taglines: string[];
   description?: string;
   rounds?: string[];
-  games?: EventGame[];
   docUrl?: string;
 }
 
@@ -215,41 +207,46 @@ export const EVENTS: FestEvent[] = [
     ],
   },
   {
-    id: "e-games",
-    name: "E-Games",
+    id: "free-fire",
+    name: "Free Fire",
     tier: "regular",
     category: "esports",
     fee: 200,
-    feeNote: "₹50 for eFootball",
-    description: "Compete in four titles: MLBB, Free Fire, BGMI and eFootball.",
-    games: [
-      {
-        name: "Free Fire",
-        taglines: [
-          "Drop, loot, survive — Booyah or bust!",
-          "One zone, one winner — are you ready?",
-        ],
-      },
-      {
-        name: "BGMI",
-        taglines: ["Chicken dinner isn't served — it's earned!", "Not just a game — it's war!"],
-      },
-      {
-        name: "MLBB",
-        taglines: [
-          "Legends aren't born — they're made in the arena!",
-          "Five heroes, one goal — total annihilation!",
-        ],
-      },
-      {
-        name: "eFootball",
-        taglines: [
-          "One ball, one dream — kick your way to glory!",
-          "If you can dream the goal, come score it.",
-        ],
-      },
+    feeUnit: "team",
+    taglines: ["Drop, loot, survive — Booyah or bust!", "One zone, one winner — are you ready?"],
+  },
+  {
+    id: "bgmi",
+    name: "BGMI",
+    tier: "regular",
+    category: "esports",
+    fee: 200,
+    feeUnit: "team",
+    taglines: ["Chicken dinner isn't served — it's earned!", "Not just a game — it's war!"],
+  },
+  {
+    id: "mlbb",
+    name: "MLBB",
+    tier: "regular",
+    category: "esports",
+    fee: 200,
+    feeUnit: "team",
+    taglines: [
+      "Legends aren't born — they're made in the arena!",
+      "Five heroes, one goal — total annihilation!",
     ],
-    taglines: [],
+  },
+  {
+    id: "efootball",
+    name: "eFootball",
+    tier: "regular",
+    category: "esports",
+    fee: 50,
+    feeUnit: "person",
+    taglines: [
+      "One ball, one dream — kick your way to glory!",
+      "If you can dream the goal, come score it.",
+    ],
   },
   {
     id: "guess-the-juice",
@@ -383,7 +380,3 @@ export const EVENTS: FestEvent[] = [
     docUrl: DOC("10ks3HiBXkjX-6R5NMs7qaBhgKSIEGs-A28bJmBrDI5w", "edit?usp=drivesdk"),
   },
 ];
-
-/** Taglines to rotate on a card; E-Games pulls one line from each title. */
-export const cardTaglines = (event: FestEvent): string[] =>
-  event.games ? event.games.map((g) => `${g.name}: ${g.taglines[0]}`) : event.taglines;

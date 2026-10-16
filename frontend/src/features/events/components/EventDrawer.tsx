@@ -106,24 +106,6 @@ export default function EventDrawer({
             </section>
           )}
 
-          {shown.games && (
-            <section className="ep-drawer-block">
-              <h3>Titles</h3>
-              <div className="ep-games">
-                {shown.games.map((g) => (
-                  <div key={g.name} className="ep-game">
-                    <p className="ep-game-name">{g.name}</p>
-                    {g.taglines.map((t) => (
-                      <p key={t} className="ep-quote">
-                        {t}
-                      </p>
-                    ))}
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-
           {shown.taglines.length > 0 && (
             <section className="ep-drawer-block">
               <h3>The vibe</h3>
@@ -161,7 +143,6 @@ export default function EventDrawer({
           <div>
             <span className="ep-drawer-fee">{formatFee(shown.fee)}</span>
             <span className="ep-drawer-fee-label">{feeLabel(shown)}</span>
-            {shown.feeNote && <span className="ep-drawer-fee-note">{shown.feeNote}</span>}
           </div>
           <RegisterButton added={added} onToggle={onToggle} eventName={shown.name} size="lg" />
         </div>

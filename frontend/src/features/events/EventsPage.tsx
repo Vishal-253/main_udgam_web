@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { cssVars } from "@/lib/css-vars";
 import {
-  cardTaglines,
   type EventCategory,
   type EventCategoryId,
   type EventTier,
@@ -49,14 +48,7 @@ const TIERS: { id: EventTier | "all"; label: string }[] = [
 ];
 
 const searchText = (e: FestEvent) =>
-  [
-    e.name,
-    categoryOf(e.category).label,
-    e.description,
-    ...e.taglines,
-    ...(e.rounds ?? []),
-    ...(e.games ?? []).flatMap((g) => [g.name, ...g.taglines]),
-  ]
+  [e.name, categoryOf(e.category).label, e.description, ...e.taglines, ...(e.rounds ?? [])]
     .filter(Boolean)
     .join(" ")
     .toLowerCase();
@@ -379,9 +371,9 @@ function HeadlinerTile({ event, index, added, onToggle, onOpen }: CardProps & { 
           {event.name}
         </button>
       </h3>
-      <RotatingTagline lines={cardTaglines(event)} />
+      <RotatingTagline lines={event.taglines} />
       {event.description && <p className="ep-tile-desc">{event.description}</p>}
-      {!event.description && !cardTaglines(event).length && (
+      {!event.description && !event.taglines.length && (
         <p className="ep-tile-desc">Full format in the event document.</p>
       )}
 
@@ -399,7 +391,6 @@ function TicketCard({ event, added, onToggle, onOpen }: CardProps) {
   const cat = categoryOf(event.category);
   const meta: string[] = [];
   if (event.rounds) meta.push(`${event.rounds.length} rounds`);
-  if (event.games) meta.push(event.games.map((g) => g.name).join(" · "));
   return (
     <article
       className={`ep-ticket ${added ? "is-added" : ""}`}
@@ -412,7 +403,7 @@ function TicketCard({ event, added, onToggle, onOpen }: CardProps) {
             {event.name}
           </button>
         </h3>
-        <RotatingTagline lines={cardTaglines(event)} interval={4200} />
+        <RotatingTagline lines={event.taglines} interval={4200} />
         <div className="ep-ticket-meta">
           {meta.map((m) => (
             <span key={m}>{m}</span>

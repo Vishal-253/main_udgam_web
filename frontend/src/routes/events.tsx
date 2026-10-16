@@ -10,7 +10,7 @@ export const Route = createFileRoute("/events")({
       {
         name: "description",
         content:
-          "26 events across games, sport, performance, food and e-sports at Udgam 2K26. Pick your stage.",
+          "Every event at Udgam 2K26: games, sport, performance, food and e-sports. Pick your stage.",
       },
       { property: "og:title", content: "Events — Udgam 2K26" },
       {
