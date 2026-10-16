@@ -1,0 +1,1093 @@
+/* ==========================================================================
+   TEAM PAGE (/team)
+   Every rule is scoped under .udgam-team so nothing leaks into the rest of
+   the site. Colour tokens come from src/styles.css; the page re-tints a few
+   of them to match its lakeside backdrop (see .udgam-team.team-page-root).
+   ========================================================================== */
+
+.udgam-team {
+  /* styles.css declares the fonts in `@theme inline`, which does not emit CSS
+     variables, so the page defines the ones its rules use */
+  --font-display: "Fraunces", Georgia, serif;
+  --font-serif: var(--font-display);
+  --font-sans: "Quicksand", system-ui, sans-serif;
+  --shadow-hover: 0 18px 48px -12px color-mix(in oklab, var(--blossom-deep) 60%, transparent);
+  font-family: var(--font-sans);
+}
+
+.udgam-team.team-page-root {
+  position: relative;
+  min-height: 100vh;
+  padding: 120px 24px 80px;
+  background: radial-gradient(
+    ellipse 1100px 580px at 50% 0%,
+    rgba(195, 50, 70, 0.28) 0%,
+    rgba(26, 12, 23, 0.98) 55%,
+    #0d080f 100%
+  );
+  color: #f8fafc;
+  overflow-x: clip;
+  z-index: 2;
+}
+@media (max-width: 600px) {
+  .udgam-team.team-page-root {
+    padding: 100px 16px 60px;
+  }
+}
+.udgam-team .team-pass-card-wrapper {
+  perspective: 750px;
+  transform: translate3d(0, 0, 0.1px);
+  position: relative;
+  touch-action: manipulation;
+  width: 100%;
+  max-width: 264px;
+  display: flex;
+  flex-direction: column;
+  --pointer-x: 50%;
+  --pointer-y: 50%;
+  --pointer-from-center: 0;
+  --pointer-from-top: 0.5;
+  --pointer-from-left: 0.5;
+  --card-opacity: 0;
+  --rotate-x: 0deg;
+  --rotate-y: 0deg;
+  --behind-glow-color: rgba(245, 183, 41, 0.42);
+  --behind-glow-size: 55%;
+}
+.udgam-team .team-pass-card-wrapper .pc-behind {
+  position: absolute;
+  inset: -10px;
+  border-radius: 26px;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at var(--pointer-x, 50%) var(--pointer-y, 50%),
+    var(--behind-glow-color) 0%,
+    transparent var(--behind-glow-size)
+  );
+  filter: blur(32px) saturate(1.2);
+  opacity: calc(0.85 * var(--card-opacity, 0));
+  transition: opacity 220ms ease;
+}
+.udgam-team .team-pass-card-wrapper:hover,
+.udgam-team .team-pass-card-wrapper.active {
+  --card-opacity: 1;
+}
+.udgam-team .team-pass-shell {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.udgam-team.team-page-root {
+  min-height: 100vh;
+  padding: 130px 24px 90px;
+  position: relative;
+  background: #0d080f;
+  overflow-x: clip;
+}
+.udgam-team .team-hierarchical-layout {
+  position: relative;
+  z-index: 1;
+  max-width: 1180px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 52px;
+  align-items: center;
+}
+.udgam-team .team-tier-section {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+.udgam-team .leadership-card-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 264px;
+}
+.udgam-team .leadership-role-title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.35rem, 2.2vw, 1.75rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #f5b729;
+  text-transform: uppercase;
+  text-align: center;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  text-shadow: 0 0 16px rgba(245, 183, 41, 0.4);
+}
+.udgam-team .leadership-role-title::before,
+.udgam-team .leadership-role-title::after {
+  content: "";
+  display: inline-block;
+  width: 22px;
+  height: 1.5px;
+  background: linear-gradient(90deg, transparent, rgba(245, 183, 41, 0.6));
+}
+.udgam-team .leadership-role-title::after {
+  background: linear-gradient(90deg, rgba(245, 183, 41, 0.6), transparent);
+}
+.udgam-team .tier-pair {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 48px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+.udgam-team .tier-organising-committee {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 14px;
+}
+.udgam-team .organising-committee-header {
+  text-align: center;
+  margin-bottom: 40px;
+  width: 100%;
+}
+.udgam-team .organising-committee-title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.85rem, 3.4vw, 2.65rem);
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+  margin: 0;
+  background: linear-gradient(135deg, #ffffff 40%, #f5b729 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+.udgam-team .organising-committee-title::before,
+.udgam-team .organising-committee-title::after {
+  content: "";
+  display: inline-block;
+  width: 44px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(245, 183, 41, 0.7));
+}
+.udgam-team .organising-committee-title::after {
+  background: linear-gradient(90deg, rgba(245, 183, 41, 0.7), transparent);
+}
+.udgam-team .team-deck-container {
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  flex: 0 0 auto;
+}
+.udgam-team .team-deck-container.deck-active-open .team-deck-stack {
+  transform: translateY(-8px) scale(1.02);
+}
+.udgam-team .team-deck-stack {
+  position: relative;
+  width: 252px;
+  height: 405px;
+  cursor: pointer;
+  user-select: none;
+  perspective: 900px;
+  transform-style: preserve-3d;
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+  outline: none;
+}
+.udgam-team .team-deck-stack:focus-visible {
+  outline: 2px solid #f5b729;
+  border-radius: 20px;
+}
+.udgam-team .deck-behind-glow {
+  position: absolute;
+  inset: -15px;
+  border-radius: 30px;
+  background: radial-gradient(circle at 50% 50%, rgba(245, 183, 41, 0.32) 0%, transparent 68%);
+  filter: blur(28px);
+  opacity: 0.6;
+  transition:
+    opacity 0.35s ease,
+    transform 0.35s ease;
+  z-index: 0;
+  pointer-events: none;
+}
+.udgam-team .team-deck-stack:hover .deck-behind-glow {
+  opacity: 1;
+  transform: scale(1.15);
+}
+.udgam-team .deck-card-layer {
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  background: linear-gradient(180deg, #18121d 0%, #100b14 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.7);
+  transition:
+    transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.4s ease;
+  pointer-events: none;
+}
+.udgam-team .deck-card-layer.layer-back {
+  z-index: 1;
+  transform: rotate(-5deg) translate(-4px, 3px);
+  opacity: 0.75;
+}
+.udgam-team .deck-card-layer.layer-mid {
+  z-index: 2;
+  transform: rotate(4deg) translate(3px, -2px);
+  opacity: 0.88;
+}
+.udgam-team .deck-layer-card-inner {
+  width: 100%;
+  height: 100%;
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  opacity: 0.4;
+}
+.udgam-team .deck-layer-slot {
+  width: 48px;
+  height: 8px;
+  background: #09060b;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.udgam-team .deck-layer-border-lines {
+  width: 82%;
+  height: 68%;
+  margin-top: 24px;
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+}
+.udgam-team .deck-card-cover {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+  transition:
+    transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.4s ease;
+}
+.udgam-team .team-deck-stack:hover .deck-card-layer.layer-back {
+  transform: rotate(-9deg) translate(-10px, 5px);
+  box-shadow: -8px 12px 28px rgba(0, 0, 0, 0.85);
+}
+.udgam-team .team-deck-stack:hover .deck-card-layer.layer-mid {
+  transform: rotate(8deg) translate(9px, -4px);
+  box-shadow: 8px 12px 28px rgba(0, 0, 0, 0.85);
+}
+.udgam-team .team-deck-stack:hover .deck-card-cover {
+  transform: translateY(-8px) scale(1.02);
+}
+.udgam-team.team-page-has-deck-overlay {
+  overflow: hidden;
+}
+.udgam-team .team-hierarchical-layout {
+  transition:
+    opacity 0.4s ease,
+    filter 0.4s ease;
+}
+.udgam-team.team-page-has-deck-overlay .team-hierarchical-layout {
+  opacity: 0.5;
+  filter: blur(3px) brightness(0.7);
+  pointer-events: none;
+  user-select: none;
+}
+.udgam-team .deck-page-overlay-root {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(9, 6, 13, 0.62);
+  backdrop-filter: blur(8px) saturate(120%);
+  -webkit-backdrop-filter: blur(8px) saturate(120%);
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: deckOverlayFadeIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes deckOverlayFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.udgam-team .deck-overlay-ambient-halo {
+  position: fixed;
+  top: 15%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 75vw;
+  height: 500px;
+  background: radial-gradient(
+    ellipse at 50% 35%,
+    rgba(245, 183, 41, 0.16) 0%,
+    rgba(255, 107, 139, 0.08) 45%,
+    transparent 70%
+  );
+  filter: blur(60px);
+  pointer-events: none;
+  z-index: 0;
+}
+.udgam-team .deck-overlay-content {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 56px 20px 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.udgam-team .deck-deal-table {
+  width: 100%;
+  max-width: 848px;
+  margin: auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 36px 28px;
+  perspective: 1400px;
+  perspective-origin: 50% 100%;
+}
+.udgam-team .deck-deal-card-slot {
+  flex: 0 0 264px;
+  width: 264px;
+  max-width: 100%;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  transform-origin: 50% 100%;
+  will-change: transform, opacity;
+  animation: deckDealIn 0.78s cubic-bezier(0.22, 0.8, 0.24, 1) var(--deal-delay, 0ms) both;
+}
+.udgam-team .deck-deal-card-slot::before {
+  content: "";
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  bottom: 2%;
+  height: 12%;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  filter: blur(14px);
+  z-index: -1;
+  pointer-events: none;
+  animation: deckDealShadow 0.78s cubic-bezier(0.22, 0.8, 0.24, 1) var(--deal-delay, 0ms) both;
+}
+@keyframes deckDealIn {
+  0% {
+    opacity: 0;
+    transform: translate3d(var(--from-x, 0px), var(--from-y, 100vh), 0) rotateX(16deg)
+      rotateZ(var(--deal-rot, 0deg)) scale(0.88);
+  }
+  12% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotateX(0deg) rotateZ(0deg) scale(1);
+  }
+}
+@keyframes deckDealShadow {
+  0% {
+    opacity: 0;
+    transform: translateY(24px) scale(1.15);
+  }
+  60% {
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 0.75;
+    transform: none;
+  }
+}
+.udgam-team .deck-page-overlay-root.is-closing {
+  pointer-events: none;
+  animation: deckOverlayFadeOut 0.42s ease-in 0.3s forwards;
+}
+.udgam-team .deck-page-overlay-root.is-closing .deck-deal-card-slot {
+  animation: deckDealOut 0.52s cubic-bezier(0.5, 0, 0.75, 0.4) var(--out-delay, 0ms) both;
+}
+.udgam-team .deck-page-overlay-root.is-closing .deck-deal-card-slot::before {
+  animation: none;
+  opacity: 0;
+}
+@keyframes deckDealOut {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotateX(0deg) rotateZ(0deg) scale(1);
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--from-x, 0px), var(--from-y, 100vh), 0) rotateX(14deg)
+      rotateZ(calc(var(--deal-rot, 0deg) * -0.7)) scale(0.9);
+  }
+}
+@keyframes deckOverlayFadeOut {
+  to {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .udgam-team .deck-deal-card-slot,
+  .udgam-team .deck-deal-card-slot::before,
+  .udgam-team .deck-page-overlay-root.is-closing .deck-deal-card-slot {
+    animation: none;
+  }
+  .udgam-team .deck-page-overlay-root,
+  .udgam-team .deck-page-overlay-root.is-closing {
+    animation-duration: 0.01s;
+    animation-delay: 0s;
+  }
+}
+@media (max-width: 768px) {
+  .udgam-team.team-page-root {
+    padding: 110px 16px 60px;
+  }
+  .udgam-team .team-hierarchical-layout {
+    gap: 40px;
+  }
+  .udgam-team .tier-pair {
+    gap: 28px;
+  }
+  .udgam-team .deck-deal-table {
+    gap: 28px 20px;
+  }
+}
+.udgam-team .hof-pin {
+  position: relative;
+  align-self: stretch;
+  width: auto;
+  margin-inline: calc(50% - 50vw);
+}
+.udgam-team .hof-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.udgam-team .hof-heading .organising-committee-header {
+  margin-bottom: 0;
+}
+.udgam-team .hof-gallery {
+  position: relative;
+  width: 100%;
+  padding: 0 0 40px;
+  overflow: hidden;
+  isolation: isolate;
+}
+.udgam-team .hof-track {
+  display: flex;
+  align-items: flex-start;
+  gap: 104px;
+  padding: 20px max(7vw, 32px) 40px;
+  overflow: hidden;
+  perspective: 1400px;
+}
+.udgam-team .hof-item {
+  --hof-d: 1;
+  flex: 0 0 auto;
+  --hof-far: min(max(var(--hof-d), calc(var(--hof-d) * -1)), 1);
+  transform: translateZ(calc(var(--hof-far) * -90px)) rotateY(calc(var(--hof-d) * -9deg));
+  opacity: calc(1 - var(--hof-far) * 0.4);
+  transform-origin: 50% 60%;
+  will-change: transform, opacity;
+}
+@media (max-width: 768px) {
+  .udgam-team .hof-track {
+    gap: 56px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .udgam-team .hof-item {
+    transform: none;
+    opacity: 1;
+  }
+}
+.udgam-team .tc-card {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  padding: 9% 7% 13%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background: #fdfcfb;
+  border: 1px solid #d9cfd0;
+  border-radius: 24px;
+  overflow: hidden;
+  color: #111;
+  box-shadow: rgba(0, 0, 0, 0.55) calc((var(--pointer-from-left, 0.5) * 10px) - 5px)
+    calc((var(--pointer-from-top, 0.5) * 16px) - 8px) 26px -6px;
+  transform: translateZ(0) rotateX(var(--rotate-y, 0deg)) rotateY(var(--rotate-x, 0deg));
+  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  user-select: none;
+}
+.udgam-team .team-pass-card-wrapper:hover .tc-card,
+.udgam-team .team-pass-card-wrapper.active .tc-card {
+  transition: none;
+}
+.udgam-team .team-pass-shell.entering .tc-card {
+  transition: transform 180ms ease-out;
+}
+.udgam-team .tc-card .pc-glare {
+  mix-blend-mode: soft-light;
+}
+.udgam-team .tc-art {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 20%;
+  pointer-events: none;
+}
+.udgam-team .tc-art-wave {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.udgam-team .tc-art-flower {
+  position: absolute;
+  right: 6%;
+  bottom: 18%;
+  width: 12%;
+}
+.udgam-team .tc-crew {
+  font-family: var(--font-serif);
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.26em;
+  color: #1a1a1a;
+  white-space: nowrap;
+}
+.udgam-team .tc-avatar-ring {
+  width: 64%;
+  aspect-ratio: 1;
+  margin-top: 9%;
+  padding: 5%;
+  border: 1px solid #d3c7c9;
+  border-radius: 50%;
+  background: #fff;
+  transform: translateZ(14px);
+}
+.udgam-team .tc-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 38%;
+  overflow: hidden;
+  background: #ece8e8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.udgam-team .tc-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.udgam-team .tc-silhouette {
+  width: 78%;
+  height: 78%;
+}
+.udgam-team .tc-name {
+  margin: 8% 0 0;
+  font-family: var(--font-serif);
+  font-size: 1.14rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: #0b0b0b;
+  max-width: 100%;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  text-wrap: balance;
+}
+.udgam-team .tc-role {
+  margin-top: 3%;
+  font-family: var(--font-serif);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #a8474f;
+}
+.udgam-team .tc-contacts {
+  position: relative;
+  z-index: 2;
+  margin-top: auto;
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+.udgam-team .tc-icon-btn {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: 50%;
+  background: var(--gradient-blossom, #b4505c);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 6px 16px -6px color-mix(in oklab, var(--blossom-deep, #b4505c) 70%, transparent);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.udgam-team .tc-icon-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px -8px color-mix(in oklab, var(--blossom-deep, #b4505c) 80%, transparent);
+}
+.udgam-team .tc-icon-btn:focus-visible {
+  outline: 2px solid var(--ring, #b4505c);
+  outline-offset: 3px;
+}
+.udgam-team .tc-icon-btn.copied {
+  background: var(--accent-foreground, #2f5a3a);
+}
+.udgam-team .team-pass-card-wrapper.gyro {
+  --card-opacity: 0.6;
+}
+.udgam-team .team-pass-card-wrapper.gyro .pc-behind {
+  opacity: 0;
+}
+.udgam-team .tilt-prompt {
+  position: fixed;
+  left: 50%;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 6px 6px 16px;
+  transform: translateX(-50%);
+  border-radius: 9999px;
+  background: oklch(1 0 0 / 0.85);
+  backdrop-filter: blur(14px) saturate(1.3);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3);
+  border: 1px solid var(--border, rgba(0, 0, 0, 0.1));
+  box-shadow: var(--shadow-glow, 0 8px 24px rgba(0, 0, 0, 0.2));
+  color: var(--foreground, #333);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  white-space: nowrap;
+  animation: tiltPromptIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.udgam-team .tilt-prompt-enable {
+  border: none;
+  border-radius: 9999px;
+  padding: 8px 14px;
+  margin-left: 8px;
+  background: var(--gradient-blossom, #b4505c);
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.udgam-team .tilt-prompt-dismiss {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted-foreground, #777);
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+}
+@keyframes tiltPromptIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 16px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .udgam-team .tilt-prompt {
+    animation: none;
+  }
+}
+.udgam-team .hof-mode-swipe .hof-sticky {
+  position: static;
+  height: auto;
+  display: block;
+}
+.udgam-team .hof-mode-swipe .hof-gallery {
+  padding: 0 0 20px;
+}
+.udgam-team .hof-mode-swipe .hof-track {
+  gap: 28px;
+  padding: 28px calc(50% - 126px) 32px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: calc(50% - 126px);
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.udgam-team .hof-mode-swipe .hof-track::-webkit-scrollbar {
+  display: none;
+}
+.udgam-team .hof-mode-swipe .hof-item {
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+}
+.udgam-team .hof-swipe-hint {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: -8px;
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  color: var(--muted-foreground, #8a7a80);
+}
+.udgam-team .hof-swipe-cue {
+  position: absolute;
+  right: calc(50% + 34px);
+  white-space: nowrap;
+  transition: opacity 0.5s ease;
+}
+.udgam-team .hof-swipe-cue.is-faded {
+  opacity: 0;
+}
+.udgam-team .hof-swipe-arrow {
+  color: var(--blossom-deep, #b4505c);
+  font-size: 1rem;
+}
+.udgam-team .hof-swipe-count {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--secondary-foreground, #6b4a55);
+}
+.udgam-team.team-page-root {
+  background:
+    radial-gradient(
+      ellipse 1100px 560px at 50% 0%,
+      color-mix(in oklab, var(--blossom) 45%, transparent) 0%,
+      transparent 70%
+    ),
+    transparent;
+  color: var(--foreground);
+}
+.udgam-team .leadership-role-title {
+  color: var(--blossom-deep);
+  text-shadow: none;
+}
+.udgam-team .leadership-role-title::before,
+.udgam-team .organising-committee-title::before {
+  background: linear-gradient(90deg, transparent, var(--ring));
+}
+.udgam-team .leadership-role-title::after,
+.udgam-team .organising-committee-title::after {
+  background: linear-gradient(90deg, var(--ring), transparent);
+}
+.udgam-team .organising-committee-title {
+  background: var(--gradient-blossom);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+.udgam-team .team-pass-card-wrapper {
+  --behind-glow-color: color-mix(in oklab, var(--blossom) 70%, transparent);
+}
+.udgam-team .tc-card {
+  background: oklch(0.995 0.005 350);
+  border: 1px solid var(--border);
+  color: var(--foreground);
+  box-shadow: color-mix(in oklab, var(--blossom-deep) 30%, transparent)
+    calc((var(--pointer-from-left, 0.5) * 10px) - 5px)
+    calc((var(--pointer-from-top, 0.5) * 16px) - 8px) 30px -8px;
+}
+.udgam-team .tc-crew,
+.udgam-team .tc-name {
+  color: var(--foreground);
+}
+.udgam-team .tc-role {
+  color: var(--blossom-deep);
+}
+.udgam-team .tc-avatar-ring {
+  border-color: var(--border);
+}
+.udgam-team .tc-avatar {
+  background: var(--muted);
+}
+.udgam-team .deck-card-layer {
+  background: linear-gradient(180deg, oklch(0.99 0.01 350), oklch(0.95 0.03 350));
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 24px -10px color-mix(in oklab, var(--blossom-deep) 45%, transparent);
+}
+.udgam-team .team-deck-stack:hover .deck-card-layer.layer-back,
+.udgam-team .team-deck-stack:hover .deck-card-layer.layer-mid {
+  box-shadow: 0 14px 30px -10px color-mix(in oklab, var(--blossom-deep) 55%, transparent);
+}
+.udgam-team .deck-layer-slot {
+  background: var(--muted);
+  border: 1px solid var(--border);
+  box-shadow: inset 0 1px 2px color-mix(in oklab, var(--foreground) 20%, transparent);
+}
+.udgam-team .deck-layer-border-lines {
+  border-color: var(--border);
+}
+.udgam-team .deck-behind-glow {
+  background: radial-gradient(
+    circle at 50% 50%,
+    color-mix(in oklab, var(--blossom) 60%, transparent) 0%,
+    transparent 68%
+  );
+}
+.udgam-team .team-deck-stack:focus-visible {
+  outline: 2px solid var(--ring);
+}
+.udgam-team .deck-cover-image {
+  border-radius: 14px;
+  box-shadow: var(--shadow-glow);
+}
+.udgam-team .team-deck-stack:hover .deck-cover-image {
+  box-shadow: var(--shadow-hover);
+}
+.udgam-team .team-deck-container.deck-active-open .deck-cover-image {
+  box-shadow:
+    0 0 0 2px var(--ring),
+    var(--shadow-hover);
+}
+.udgam-team .deck-page-overlay-root {
+  background: color-mix(in oklab, var(--background) 55%, transparent);
+  backdrop-filter: blur(10px) saturate(1.2);
+  -webkit-backdrop-filter: blur(10px) saturate(1.2);
+}
+.udgam-team.team-page-has-deck-overlay .team-hierarchical-layout {
+  opacity: 0.55;
+  filter: blur(3px);
+}
+.udgam-team .deck-overlay-ambient-halo {
+  background: radial-gradient(
+    ellipse at 50% 35%,
+    color-mix(in oklab, var(--blossom) 50%, transparent) 0%,
+    transparent 70%
+  );
+}
+.udgam-team .deck-deal-card-slot::before {
+  background: color-mix(in oklab, var(--blossom-deep) 40%, transparent);
+}
+.udgam-team.team-page-root {
+  --lake-ink: oklch(0.3 0.07 248);
+  --lake: oklch(0.5 0.12 240);
+  --sky: oklch(0.74 0.11 232);
+  --sakura: oklch(0.66 0.15 355);
+  --spring: oklch(0.72 0.14 135);
+  --foreground: var(--lake-ink);
+  --muted-foreground: oklch(0.48 0.06 240);
+  --text-secondary: oklch(0.4 0.06 240);
+  --border: oklch(0.86 0.04 230 / 0.7);
+  --ring: var(--sky);
+  --blossom: oklch(0.86 0.08 355);
+  --blossom-deep: var(--sakura);
+  --gradient-blossom: linear-gradient(
+    120deg,
+    var(--lake) 10%,
+    oklch(0.6 0.13 300) 55%,
+    var(--sakura) 90%
+  );
+  --background: oklch(0.97 0.02 230);
+  background: transparent;
+}
+.udgam-team .team-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background: oklch(0.86 0.06 235);
+}
+.udgam-team .tb-world {
+  position: absolute;
+  inset: -4vh -3vw;
+  transform: translate3d(calc(var(--mx, 0) * -14px), calc(var(--my, 0) * -10px), 0);
+}
+.udgam-team .tb-panorama {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  display: block;
+  width: max(100%, 95vh);
+  height: auto;
+  max-width: none;
+  transform: translate3d(-50%, var(--shift, 0px), 0);
+  will-change: transform;
+  user-select: none;
+}
+.udgam-team .tb-veil {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 45%, oklch(0.99 0.01 230 / 0.28), transparent 75%),
+    linear-gradient(
+      180deg,
+      oklch(0.97 0.02 230 / 0.55) 0%,
+      oklch(0.97 0.02 230 / 0.22) 45%,
+      oklch(0.97 0.025 200 / 0.38) 100%
+    );
+}
+.udgam-team .tb-petals {
+  position: absolute;
+  inset: 0;
+  transform: translate3d(0, var(--wind, 0px), 0);
+}
+.udgam-team .tb-petal {
+  position: absolute;
+  top: -6vh;
+  left: var(--x);
+  width: var(--size);
+  aspect-ratio: 1 / 1.35;
+  border-radius: 80% 0 80% 0;
+  background: linear-gradient(135deg, oklch(0.95 0.04 355), oklch(0.82 0.1 355));
+  opacity: 0.75;
+  filter: blur(var(--blur));
+  animation:
+    tb-fall var(--fall) linear infinite,
+    tb-sway var(--sway) ease-in-out infinite alternate;
+  animation-delay: var(--delay), calc(var(--delay) / 3);
+}
+@keyframes tb-fall {
+  to {
+    translate: 0 112vh;
+  }
+}
+@keyframes tb-sway {
+  from {
+    transform: translateX(-26px) rotate(-30deg);
+  }
+  to {
+    transform: translateX(26px) rotate(40deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .udgam-team .tb-petals {
+    display: none;
+  }
+  .udgam-team .tb-world {
+    transform: none;
+  }
+}
+.udgam-team.team-page-root .leadership-role-title {
+  color: var(--lake);
+  text-shadow: 0 1px 14px oklch(1 0 0 / 0.9);
+}
+.udgam-team.team-page-root .organising-committee-title {
+  filter: drop-shadow(0 1px 10px oklch(1 0 0 / 0.85));
+}
+.udgam-team.team-page-root .tc-card {
+  background: oklch(0.995 0.006 230 / 0.94);
+  box-shadow: color-mix(in oklab, var(--lake) 32%, transparent)
+    calc((var(--pointer-from-left, 0.5) * 10px) - 5px)
+    calc((var(--pointer-from-top, 0.5) * 16px) - 8px) 30px -8px;
+}
+.udgam-team.team-page-root .team-pass-card-wrapper {
+  --behind-glow-color: color-mix(in oklab, var(--sky) 60%, transparent);
+}
+.udgam-team.team-page-root .tc-avatar-ring {
+  border-color: color-mix(in oklab, var(--sky) 45%, white);
+}
+.udgam-team.team-page-root .deck-page-overlay-root {
+  background: oklch(0.96 0.025 230 / 0.5);
+}
+.udgam-team.team-page-root .deck-overlay-ambient-halo {
+  background: radial-gradient(ellipse at 50% 35%, oklch(1 0 0 / 0.6) 0%, transparent 70%);
+}
+.udgam-team.team-page-root .hof-swipe-cue,
+.udgam-team.team-page-root .hof-swipe-count {
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: oklch(1 0 0 / 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--lake);
+}
+.udgam-team .hof-item {
+  opacity: 1;
+  filter: saturate(calc(1 - var(--hof-far, 0) * 0.35))
+    brightness(calc(1 - var(--hof-far, 0) * 0.05));
+}
+.udgam-team .deck-card-layer.layer-back,
+.udgam-team .deck-card-layer.layer-mid {
+  opacity: 1;
+}
+.udgam-team .deck-card-layer.layer-mid {
+  background: linear-gradient(180deg, oklch(0.97 0.02 350), oklch(0.93 0.035 350));
+}
+.udgam-team .deck-card-layer.layer-back {
+  background: linear-gradient(180deg, oklch(0.94 0.03 350), oklch(0.9 0.045 350));
+}
+.udgam-team .core-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 888px;
+}
+.udgam-team .core-group-cards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 40px 48px;
+  width: 100%;
+}
+@media (max-width: 768px) {
+  .udgam-team .core-group-cards {
+    gap: 28px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Fitting into the site shell
+   -------------------------------------------------------------------------- */
+
+/* the dealt-cards overlay lives inside the page; while it is open, lift the page
+   above the site navbar (z-50) so the overlay covers the whole screen */
+.udgam-team.team-page-has-deck-overlay {
+  z-index: 60;
+}
+
+/* clear the floating navbar pill */
+.udgam-team.team-page-root {
+  padding-top: 128px;
+}
+
+@media (max-width: 600px) {
+  .udgam-team.team-page-root {
+    padding-top: 104px;
+  }
+}

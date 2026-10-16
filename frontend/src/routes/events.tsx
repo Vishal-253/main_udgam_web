@@ -1,25 +1,30 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { PageShell, Card } from "@/components/ui/PageShell";
-import { getEvents } from "@/lib/fest.functions";
+import EventsPage from "@/features/events/EventsPage";
+import eventsCss from "@/features/events/events.css?url";
+import { getEventCatalog } from "@/lib/events.functions";
 
 export const Route = createFileRoute("/events")({
-  head: () => ({ meta: [
-    { title: "Events — Udgam 2K26" },
-    { name: "description", content: "Music, tech, art and culture events at Udgam 2K26." },
-    { property: "og:title", content: "Events — Udgam 2K26" },
-    { property: "og:description", content: "Explore the events blooming at Udgam 2K26." },
-  ] }),
-  loader: () => getEvents(),
+  head: () => ({
+    meta: [
+      { title: "Events — Udgam 2K26" },
+      {
+        name: "description",
+        content:
+          "26 events across games, sport, performance, food and e-sports at Udgam 2K26. Pick your stage.",
+      },
+      { property: "og:title", content: "Events — Udgam 2K26" },
+      {
+        property: "og:description",
+        content: "Pick your stage: every event at Udgam 2K26, NIT Sikkim.",
+      },
+    ],
+    links: [{ rel: "stylesheet", href: eventsCss }],
+  }),
+  loader: () => getEventCatalog(),
   component: Events,
 });
 
 function Events() {
-  const events = Route.useLoaderData();
-  return (
-    <PageShell title="Events" subtitle="Full lineup coming soon — here's a sneak peek.">
-      <div className="grid gap-5 md:grid-cols-3">
-        {events.map((e) => <Card key={e.id} title={e.title} tag={`${e.category} · Day ${e.day}`}>{e.blurb}</Card>)}
-      </div>
-    </PageShell>
-  );
+  const { events, categories } = Route.useLoaderData();
+  return <EventsPage events={events} categories={categories} />;
 }
