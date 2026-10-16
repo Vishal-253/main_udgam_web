@@ -55,6 +55,9 @@ const TIERS: { id: EventTier | "all"; label: string }[] = [
   { id: "regular", label: "Open floor" },
 ];
 
+/** Which events a tier tab covers: "Open floor" lists every event, headliners included. */
+const inTier = (e: FestEvent, tier: EventTier | "all") => tier !== "major" || e.tier === "major";
+
 const searchText = (e: FestEvent) =>
   [e.name, categoryOf(e.category).label, e.description, ...e.taglines, ...(e.rounds ?? [])]
     .filter(Boolean)
@@ -97,7 +100,7 @@ export default function EventsPage({
     const q = query.trim().toLowerCase();
     let list = events.filter(
       (e) =>
-        (tier === "all" || e.tier === tier) &&
+        inTier(e, tier) &&
         (category === "all" || e.category === category) &&
         (!q || searchText(e).includes(q)),
     );
@@ -107,18 +110,27 @@ export default function EventsPage({
   }, [events, query, tier, category, sort]);
 
   const headliners = useMemo(() => {
+    if (tier === "regular") return [];
     const list = filtered.filter((e) => e.tier === "major");
     return sort === "featured"
       ? list.sort((a, b) => SPOTLIGHT_ORDER.indexOf(a.id) - SPOTLIGHT_ORDER.indexOf(b.id))
       : list;
-  }, [filtered, sort]);
-  const openFloor = useMemo(() => filtered.filter((e) => e.tier === "regular"), [filtered]);
+  }, [filtered, sort, tier]);
+  // Open floor = every event (headliners first when featured), so none is only in the carousel
+  const openFloor = useMemo(() => {
+    if (tier === "major") return [];
+    if (sort !== "featured") return filtered;
+    const majors = filtered
+      .filter((e) => e.tier === "major")
+      .sort((a, b) => SPOTLIGHT_ORDER.indexOf(a.id) - SPOTLIGHT_ORDER.indexOf(b.id));
+    return [...majors, ...filtered.filter((e) => e.tier !== "major")];
+  }, [filtered, sort, tier]);
 
   const counts = useMemo(() => {
-    const inTier = events.filter((e) => tier === "all" || e.tier === tier);
-    const c: Record<string, number> = { all: inTier.length };
+    const tierEvents = events.filter((e) => inTier(e, tier));
+    const c: Record<string, number> = { all: tierEvents.length };
     categories.forEach((cat) => {
-      c[cat.id] = inTier.filter((e) => e.category === cat.id).length;
+      c[cat.id] = tierEvents.filter((e) => e.category === cat.id).length;
     });
     return c;
   }, [events, categories, tier]);
@@ -306,7 +318,7 @@ export default function EventsPage({
         <section className="ep-section" aria-labelledby="ep-open-floor">
           <div className="ep-section-head">
             <h2 id="ep-open-floor">Open floor</h2>
-            <p>Quick-fire games and contests running through the fest.</p>
+            <p>Every event at the fest, headliners included.</p>
           </div>
           <div className="ep-tickets">
             {openFloor.map((e) => (
