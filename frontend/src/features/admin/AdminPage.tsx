@@ -367,7 +367,13 @@ function EventRow({ e, onOpen }: { e: AdminEventStats; onOpen: () => void }) {
         {e.tier === "major" && <span className="adm-tag">Major</span>}
       </td>
       <td>{sizeText(e.teamSize)}</td>
-      <td>{e.fee === 0 ? "Free" : `₹${e.fee}${e.feeUnit ? `/${e.feeUnit}` : ""}`}</td>
+      <td>
+        {e.fee === null
+          ? "TBA"
+          : e.fee === 0
+            ? "Free"
+            : `₹${e.fee}${e.feeUnit ? `/${e.feeUnit}` : ""}`}
+      </td>
       <td className="num">{e.confirmedTeams}</td>
       <td className="num">{e.confirmedParticipants}</td>
       <td className="num">{e.pendingTeams || ""}</td>
@@ -462,8 +468,12 @@ function EventView({
           {stats && (
             <p className="adm-muted">
               Team size {sizeText(stats.teamSize)} ·{" "}
-              {stats.fee === 0 ? "Free" : `₹${stats.fee} per ${stats.feeUnit ?? "team"}`} ·{" "}
-              {stats.confirmedTeams} confirmed {isTeamEvent ? "teams" : "entries"},{" "}
+              {stats.fee === null
+                ? "Fee TBA"
+                : stats.fee === 0
+                  ? "Free"
+                  : `₹${stats.fee} per ${stats.feeUnit ?? "team"}`}{" "}
+              · {stats.confirmedTeams} confirmed {isTeamEvent ? "teams" : "entries"},{" "}
               {stats.confirmedParticipants} participants · {rupees(stats.revenuePaise)}
             </p>
           )}

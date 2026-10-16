@@ -8,8 +8,8 @@ export interface EventRule {
   id: string;
   name: string;
   tier: "major" | "regular";
-  /** entry fee in INR (0 = free) */
-  fee: number;
+  /** entry fee in INR (0 = free, null = not announced yet -> registration refused) */
+  fee: number | null;
   /** fee is charged per team or per person; null for free events */
   feeUnit: "team" | "person" | null;
   /** allowed participants per registration, INCLUDING the team leader */

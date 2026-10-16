@@ -36,7 +36,7 @@ export interface AdminEventStats {
   eventId: string;
   eventName: string;
   tier: "major" | "regular";
-  fee: number;
+  fee: number | null;
   feeUnit: "team" | "person" | null;
   teamSize: { min: number; max: number };
   confirmedTeams: number;

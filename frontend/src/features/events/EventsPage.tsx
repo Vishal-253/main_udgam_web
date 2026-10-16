@@ -2,13 +2,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { cssVars } from "@/lib/css-vars";
 import {
-  cardTaglines,
   type EventCategory,
   type EventCategoryId,
   type EventTier,
   type FestEvent,
 } from "./data/eventDetails";
-import { formatFee, feeUnitLabel } from "./format";
+import { feeLabel, feePill, formatFee } from "./format";
 import { useEventPass } from "./hooks/useEventPass";
 import { CategoryChip, RegisterButton, RotatingTagline } from "./components/EventBits";
 import { categoryOf } from "./utils";
@@ -44,8 +43,9 @@ type Comparator = (a: FestEvent, b: FestEvent) => number;
 
 const SORTS: Record<SortId, { label: string; fn: Comparator | null }> = {
   featured: { label: "Featured", fn: null },
-  "fee-asc": { label: "Fee: low to high", fn: (a, b) => a.fee - b.fee },
-  "fee-desc": { label: "Fee: high to low", fn: (a, b) => b.fee - a.fee },
+  // fees still to be announced sort last either way
+  "fee-asc": { label: "Fee: low to high", fn: (a, b) => (a.fee ?? Infinity) - (b.fee ?? Infinity) },
+  "fee-desc": { label: "Fee: high to low", fn: (a, b) => (b.fee ?? -1) - (a.fee ?? -1) },
   name: { label: "Name A–Z", fn: (a, b) => a.name.localeCompare(b.name) },
 };
 
@@ -56,14 +56,7 @@ const TIERS: { id: EventTier | "all"; label: string }[] = [
 ];
 
 const searchText = (e: FestEvent) =>
-  [
-    e.name,
-    categoryOf(e.category).label,
-    e.description,
-    ...e.taglines,
-    ...(e.rounds ?? []),
-    ...(e.games ?? []).flatMap((g) => [g.name, ...g.taglines]),
-  ]
+  [e.name, categoryOf(e.category).label, e.description, ...e.taglines, ...(e.rounds ?? [])]
     .filter(Boolean)
     .join(" ")
     .toLowerCase();
@@ -140,7 +133,7 @@ export default function EventsPage({
     setCategory("all");
   };
 
-  const minFee = Math.min(...events.map((e) => e.fee));
+  const freeCount = events.filter((e) => e.fee === 0).length;
   const openEvent = events.find((e) => e.id === openId) ?? null;
 
   return (
@@ -171,8 +164,8 @@ export default function EventsPage({
             <dd>{categories.length}</dd>
           </div>
           <div>
-            <dt>Entry from</dt>
-            <dd>{formatFee(minFee)}</dd>
+            <dt>Free entry</dt>
+            <dd>{freeCount}</dd>
           </div>
         </dl>
       </header>
@@ -404,10 +397,7 @@ function HeadlinerTile({
       <div className="ep-tile-top">
         <span className="ep-tile-index">{String(index + 1).padStart(2, "0")}</span>
         <CategoryChip id={event.category} small />
-        <span className="ep-fee-pill">
-          {formatFee(event.fee)}
-          {event.fee > 0 && event.feeUnit ? `/${event.feeUnit}` : ""}
-        </span>
+        <span className="ep-fee-pill">{feePill(event)}</span>
       </div>
 
       <h3 className="ep-tile-title">
@@ -415,9 +405,9 @@ function HeadlinerTile({
           {event.name}
         </button>
       </h3>
-      <RotatingTagline lines={cardTaglines(event)} />
+      <RotatingTagline lines={event.taglines} />
       {event.description && <p className="ep-tile-desc">{event.description}</p>}
-      {!event.description && !cardTaglines(event).length && (
+      {!event.description && !event.taglines.length && (
         <p className="ep-tile-desc">Full format in the event document.</p>
       )}
 
@@ -458,7 +448,6 @@ function TicketCard({ event, added, onToggle, onOpen, onOpenRulebook }: CardProp
   const cat = categoryOf(event.category);
   const meta: string[] = [];
   if (event.rounds) meta.push(`${event.rounds.length} rounds`);
-  if (event.games) meta.push(event.games.map((g) => g.name).join(" · "));
   return (
     <article
       className={`ep-ticket ${added ? "is-added" : ""}`}
@@ -471,7 +460,7 @@ function TicketCard({ event, added, onToggle, onOpen, onOpenRulebook }: CardProp
             {event.name}
           </button>
         </h3>
-        <RotatingTagline lines={cardTaglines(event)} interval={4200} />
+        <RotatingTagline lines={event.taglines} interval={4200} />
         <div className="ep-ticket-meta">
           {meta.map((m) => (
             <span key={m}>{m}</span>
@@ -485,7 +474,7 @@ function TicketCard({ event, added, onToggle, onOpen, onOpenRulebook }: CardProp
       </div>
       <div className="ep-ticket-stub">
         <span className="ep-ticket-fee">{formatFee(event.fee)}</span>
-        <span className="ep-ticket-fee-label">{feeUnitLabel(event) || "entry"}</span>
+        <span className="ep-ticket-fee-label">{feeLabel(event)}</span>
         <div className="ep-ticket-stub-actions">
           <RegisterButton added={added} onToggle={onToggle} eventName={event.name} size="sm" />
           {event.rulebookPdf ? (

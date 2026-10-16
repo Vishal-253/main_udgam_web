@@ -74,6 +74,14 @@ export async function startRegistration(raw: unknown): Promise<StartRegistration
     };
   }
 
+  if (event.fee === null) {
+    return {
+      ok: false,
+      code: "closed",
+      message: `Registration for ${event.name} opens once its entry fee is announced.`,
+    };
+  }
+
   const problems = teamProblems(event, data);
   if (problems.length) {
     return { ok: false, code: "invalid", message: problems[0] ?? "Invalid team.", problems };

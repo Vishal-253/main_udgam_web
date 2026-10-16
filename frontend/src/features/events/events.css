@@ -803,6 +803,8 @@
 }
 .udgam-events .ep-ticket-fee-label {
   margin-bottom: 10px;
+  text-align: center;
+  line-height: 1.3;
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.12em;
@@ -1030,14 +1032,6 @@
   background: oklch(0.93 0.05 var(--hue));
   color: oklch(0.4 0.12 var(--hue));
   font-family: var(--font-display);
-}
-.udgam-events .ep-games {
-  display: grid;
-  gap: 14px;
-}
-.udgam-events .ep-game-name {
-  margin: 0 0 6px;
-  font-weight: 700;
 }
 .udgam-events .ep-doc-link {
   display: flex;

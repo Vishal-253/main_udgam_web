@@ -6,7 +6,7 @@ import {
   verifyEventPayment,
 } from "../registration/api";
 import type { FestEvent } from "../data/eventDetails";
-import { feeUnitLabel, formatFee } from "../format";
+import { feePill, formatFee } from "../format";
 import {
   YEARS,
   amountPaise,
@@ -118,6 +118,7 @@ export default function RegistrationModal({
   const isTeam = max > 1;
   const size = 1 + form.members.length;
   const total = amountPaise(event, size) / 100;
+  const feeTba = event.fee === null;
 
   // resume an unpaid registration from earlier in this browser session — but ask the server
   // first, so a payment that already went through is never offered for payment again
@@ -315,7 +316,7 @@ export default function RegistrationModal({
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (busy) return;
+    if (busy || feeTba) return;
     setMessage(null);
     if (!validate()) return;
 
@@ -403,7 +404,7 @@ export default function RegistrationModal({
         <div className="ep-reg-head">
           <div>
             <p className="ep-reg-eyebrow">
-              {sizeText(event)} · {formatFee(event.fee)} {feeUnitLabel(event)}
+              {sizeText(event)} · {feePill(event)}
             </p>
             <h2 id="ep-reg-title" className="ep-reg-title">
               Register for {event.name}
@@ -482,6 +483,12 @@ export default function RegistrationModal({
           </div>
         ) : (
           <form className="ep-reg-body" onSubmit={submit} noValidate>
+            {feeTba && (
+              <p className="ep-tray-notice" role="status">
+                The entry fee for {event.name} hasn't been announced yet. Registration opens once it
+                is.
+              </p>
+            )}
             {isTeam && (
               <label className="ep-reg-field">
                 <span>Team name</span>
@@ -655,7 +662,7 @@ export default function RegistrationModal({
                   {total > 0 ? "to pay" : "no payment needed"}
                 </span>
               </div>
-              <button type="submit" className="ep-checkout ep-reg-submit" disabled={busy}>
+              <button type="submit" className="ep-checkout ep-reg-submit" disabled={busy || feeTba}>
                 {phase === "submitting"
                   ? "Checking…"
                   : phase === "paying"

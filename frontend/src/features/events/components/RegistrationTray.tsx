@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { cssVars } from "@/lib/css-vars";
 import type { FestEvent } from "../data/eventDetails";
-import { formatFee } from "../format";
+import { feePill, formatAmount, formatFee } from "../format";
 import RegistrationModal from "./RegistrationModal";
 import { categoryOf } from "../utils";
 import { CategoryIcon, CloseIcon, TicketIcon } from "./eventIcons";
@@ -23,7 +23,10 @@ export default function RegistrationTray({
   const [registering, setRegistering] = useState<FestEvent | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
-  const total = items.reduce((sum, e) => sum + e.fee, 0);
+  const total = items.reduce((sum, e) => sum + (e.fee ?? 0), 0);
+  // fees not announced yet can't be added up, so the total says so
+  const pending = items.some((e) => e.fee === null);
+  const totalText = `${total === 0 && !pending ? formatFee(0) : formatAmount(total)}${pending ? " + TBA" : ""}`;
 
   useEffect(() => {
     if (items.length === 0) {
@@ -87,7 +90,7 @@ export default function RegistrationTray({
                   >
                     {e.name}
                   </button>
-                  <span className="ep-tray-item-fee">{formatFee(e.fee)}</span>
+                  <span className="ep-tray-item-fee">{feePill(e)}</span>
                   <button
                     type="button"
                     className="ep-tray-register"
@@ -111,7 +114,7 @@ export default function RegistrationTray({
             </ul>
             <div className="ep-tray-total">
               <span>Total</span>
-              <strong>{formatFee(total)}</strong>
+              <strong>{totalText}</strong>
             </div>
             {notice && (
               <p className="ep-tray-notice" role="status">
@@ -135,7 +138,7 @@ export default function RegistrationTray({
           <span className="ep-tray-bar-count">
             {items.length} {items.length === 1 ? "event" : "events"}
           </span>
-          <span className="ep-tray-bar-total">{formatFee(total)}</span>
+          <span className="ep-tray-bar-total">{totalText}</span>
           <span className="ep-tray-bar-cta">{expanded ? "Hide" : "Review"}</span>
         </button>
       </div>

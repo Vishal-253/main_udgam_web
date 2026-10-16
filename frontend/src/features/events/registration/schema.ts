@@ -92,6 +92,7 @@ export function teamProblems(event: FestEvent, data: RegistrationData): string[]
 
 /** Amount in paise, computed only from the event config (never from the client). */
 export function amountPaise(event: FestEvent, teamSize: number): number {
-  const perUnit = event.fee * 100;
+  // a fee that isn't announced yet (null) can't be registered for; callers check that first
+  const perUnit = (event.fee ?? 0) * 100;
   return event.feeUnit === "person" ? perUnit * teamSize : perUnit;
 }

@@ -1,6 +1,7 @@
 // Udgam 2026 events, from event_details.md (event-management sheet).
-// `fee` values come from the event budget sheet (Event budget - Sheet1.csv).
-// Housie, Food Fiesta and Balloon Between Two Race have no fee in the sheet, so they are free.
+// Entry fees from event_names_entry_fees.md (event-management sheet).
+// Team sizes from the rulebooks; the backend enforces fees + sizes from backend/src/data/events.ts
+// (backend/test/events-sync.test.ts fails if the two lists disagree).
 
 export type EventTier = "major" | "regular";
 export type EventCategoryId = "games" | "sports" | "performance" | "creative" | "food" | "esports";
@@ -12,26 +13,20 @@ export interface EventCategory {
   hue: number;
 }
 
-export interface EventGame {
-  name: string;
-  taglines: string[];
-}
-
 export interface FestEvent {
   id: string;
   name: string;
   tier: EventTier;
   category: EventCategoryId;
-  /** entry fee in INR (0 = free) */
-  fee: number;
-  /** whether the fee is charged per team or per person (omitted for free events) */
+  /** entry fee in INR; 0 = free entry, null = not announced yet */
+  fee: number | null;
+  /** what the fee covers; omitted for free / unannounced fees and flat fees */
   feeUnit?: "team" | "person";
   /** allowed number of participants per registration, INCLUDING the team leader */
   teamSize: { min: number; max: number };
   taglines: string[];
   description?: string;
   rounds?: string[];
-  games?: EventGame[];
   docUrl?: string;
   /** path to local PDF rulebook served from /public/rulebooks/ */
   rulebookPdf?: string;
@@ -237,7 +232,6 @@ export const EVENTS: FestEvent[] = [
     ],
     rulebookPdf: "/rulebooks/squid-games.pdf",
   },
-  // E-Sports: one event per title (fees from the budget sheet: ₹200 squad titles, ₹50 eFootball)
   {
     id: "free-fire",
     name: "Free Fire",
@@ -266,7 +260,6 @@ export const EVENTS: FestEvent[] = [
     fee: 200,
     feeUnit: "team",
     teamSize: { min: 5, max: 5 },
-    description: "Mobile Legends: Bang Bang.",
     taglines: [
       "Legends aren't born — they're made in the arena!",
       "Five heroes, one goal — total annihilation!",
@@ -436,7 +429,3 @@ export const EVENTS: FestEvent[] = [
     rulebookPdf: "/rulebooks/fill-and-burst.pdf",
   },
 ];
-
-/** Taglines to rotate on a card; E-Games pulls one line from each title. */
-export const cardTaglines = (event: FestEvent): string[] =>
-  event.games ? event.games.map((g) => `${g.name}: ${g.taglines[0]}`) : event.taglines;
