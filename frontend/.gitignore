@@ -37,3 +37,6 @@ src/features/team/assets/team-photos/originals/
 # (moved from the old repo-root .gitignore)
 PROJECT_STRUCTURE.md
 theme-export/
+
+# full-size rulebook originals (compressed copies served from public/rulebooks/)
+/rulebook/

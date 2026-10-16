@@ -416,7 +416,7 @@ function EventView({
   const [status, setStatus] = useState<RegistrationStatus | "all">("confirmed");
   const [rows, setRows] = useState<AdminRegistration[] | null>(null);
   const [filter, setFilter] = useState("");
-  const [withContacts, setWithContacts] = useState(false);
+  const [withEmail, setWithEmail] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const load = useCallback(async () => {
@@ -516,10 +516,10 @@ function EventView({
         <label className="adm-inline">
           <input
             type="checkbox"
-            checked={withContacts}
-            onChange={(e) => setWithContacts(e.target.checked)}
+            checked={withEmail}
+            onChange={(e) => setWithEmail(e.target.checked)}
           />
-          Phone &amp; email on printed sheet
+          Email on printed sheet
         </label>
         <span className="adm-muted">
           {shown.length} {isTeamEvent ? "teams" : "entries"} · {participants} participants
@@ -540,7 +540,7 @@ function EventView({
         eventName={name}
         status={status}
         rows={shown}
-        withContacts={withContacts}
+        withEmail={withEmail}
         isTeamEvent={isTeamEvent}
       />
     </>
@@ -552,13 +552,13 @@ function PrintSheet({
   eventName,
   status,
   rows,
-  withContacts,
+  withEmail,
   isTeamEvent,
 }: {
   eventName: string;
   status: string;
   rows: AdminRegistration[];
-  withContacts: boolean;
+  withEmail: boolean;
   isTeamEvent: boolean;
 }) {
   let serial = 0;
@@ -585,8 +585,8 @@ function PrintSheet({
             <th>Name</th>
             <th>Roll no</th>
             {isTeamEvent && <th>Role</th>}
-            {withContacts && <th>Phone</th>}
-            {withContacts && <th>Email</th>}
+            <th>Mobile</th>
+            {withEmail && <th>Email</th>}
             <th className="sig">Signature</th>
           </tr>
         </thead>
@@ -605,8 +605,8 @@ function PrintSheet({
                   <td>{m.name}</td>
                   <td>{m.roll_no}</td>
                   {isTeamEvent && <td>{m.is_leader ? "Leader" : "Member"}</td>}
-                  {withContacts && <td>{m.phone ?? (m.is_leader ? r.leaderPhone : "")}</td>}
-                  {withContacts && <td>{m.email ?? (m.is_leader ? r.leaderEmail : "")}</td>}
+                  <td className="mobile">{m.phone ?? (m.is_leader ? r.leaderPhone : "")}</td>
+                  {withEmail && <td>{m.email ?? (m.is_leader ? r.leaderEmail : "")}</td>}
                   <td className="sig" />
                 </tr>
               );

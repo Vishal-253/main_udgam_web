@@ -1,3 +1,5 @@
+import { existsSync, statSync } from "node:fs";
+import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { EVENTS, EVENT_CATEGORIES } from "@/features/events/data/eventDetails";
@@ -18,6 +20,16 @@ describe("events data", () => {
     expect(byId("squid-games")).toMatchObject({ fee: 30, feeUnit: "person" });
     expect(byId("dance-competition")?.fee).toBe(0);
     expect(byId("food-fiesta")?.fee).toBe(0); // no fee in the budget sheet -> free (organisers' call)
+  });
+
+  it("links a rulebook PDF that really exists (and is compressed) for 25 events", () => {
+    const withBook = EVENTS.filter((e) => e.rulebookPdf);
+    expect(withBook).toHaveLength(25);
+    for (const e of withBook) {
+      const file = resolve(__dirname, "../../public", `.${e.rulebookPdf}`);
+      expect(existsSync(file), e.rulebookPdf).toBe(true);
+      expect(statSync(file).size, e.rulebookPdf).toBeLessThan(3 * 1024 * 1024);
+    }
   });
 
   it("only gives a fee unit to paid events, and no negative fees", () => {

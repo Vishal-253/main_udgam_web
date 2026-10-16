@@ -181,7 +181,7 @@ describe("registration service", () => {
       },
     ];
     const { startRegistration } = await import("../src/services/registrations");
-    const r = await startRegistration(input("dumb-charades", [{ name: "Bina", rollNo: "b23x02" }]));
+    const r = await startRegistration(input("three-leg-tie", [{ name: "Bina", rollNo: "b23x02" }]));
     expect(r).toMatchObject({
       ok: false,
       code: "conflict",
@@ -204,7 +204,7 @@ describe("registration service", () => {
     });
     vi.spyOn(console, "error").mockImplementation(() => undefined);
     const { startRegistration } = await import("../src/services/registrations");
-    const m = [1, 2, 3].map((i) => ({ name: `Member ${"ABCDE"[i]}`, rollNo: `B23T0${i}` }));
+    const m = [1, 2].map((i) => ({ name: `Member ${"ABCDE"[i]}`, rollNo: `B23T0${i}` }));
     const r = await startRegistration(input("treasure-hunt", m));
     expect(r).toMatchObject({ ok: false, code: "error" });
     expect(dbCalls.some((q) => q.includes("udgam_cancel_pending"))).toBe(true);
@@ -225,7 +225,7 @@ describe("registration service", () => {
       status: "created",
     });
     const { startRegistration } = await import("../src/services/registrations");
-    const m = [1, 2, 3].map((i) => ({ name: `Member ${"ABCDE"[i]}`, rollNo: `B23T0${i}` }));
+    const m = [1, 2].map((i) => ({ name: `Member ${"ABCDE"[i]}`, rollNo: `B23T0${i}` }));
     const r = await startRegistration({ ...input("treasure-hunt", m), amount: 1 } as never); // client "amount" ignored
     expect(createOrder).toHaveBeenCalledWith(
       expect.objectContaining({ amountPaise: 25000, receipt: id }),
@@ -247,7 +247,7 @@ describe("registration service", () => {
     createOrder.mockRejectedValue(new Error("razorpay down"));
     vi.spyOn(console, "error").mockImplementation(() => undefined);
     const { startRegistration } = await import("../src/services/registrations");
-    const m = [1, 2, 3].map((i) => ({ name: `Member ${"ABCDE"[i]}`, rollNo: `B23T0${i}` }));
+    const m = [1, 2].map((i) => ({ name: `Member ${"ABCDE"[i]}`, rollNo: `B23T0${i}` }));
     const r = await startRegistration(input("treasure-hunt", m));
     expect(r).toMatchObject({ ok: false, code: "error" });
     expect(dbCalls.some((q) => q.includes("udgam_cancel_pending"))).toBe(true);

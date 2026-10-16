@@ -86,7 +86,8 @@ export function teamProblems(event: EventRule, data: RegistrationData): string[]
       `Each participant must be a different person. Repeated roll number: ${dupes.join(", ")}.`,
     );
   }
-  if (max > 1 && !data.teamName) problems.push("Enter a team name.");
+  // a team name is needed only when more than one person registers (a solo dancer needs none)
+  if (size > 1 && !data.teamName) problems.push("Enter a team name.");
   return problems;
 }
 

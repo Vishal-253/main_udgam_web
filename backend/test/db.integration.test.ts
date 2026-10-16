@@ -78,18 +78,25 @@ describe("registration flow on a real database", () => {
       members: [],
     });
     expect(again).toMatchObject({ ok: false, code: "conflict" });
+    // ...but the same student is free to take part in a different event
+    const otherEvent = await startRegistration({
+      eventId: "cup-pong",
+      leader: leader("B23CS001"),
+      members: [],
+    });
+    expect(otherEvent).toMatchObject({ ok: true, status: "confirmed" });
   });
 
   it("blocks a member who is already in another team of the same event", async () => {
     const a = await startRegistration({
-      eventId: "dumb-charades",
+      eventId: "balloon-pair-race",
       teamName: "Mimes",
       leader: leader("B23CS010"),
       members: [{ name: "Bina Lama", rollNo: "B23CS011" }],
     });
     expect(a).toMatchObject({ ok: true, status: "confirmed" });
     const b = await startRegistration({
-      eventId: "dumb-charades",
+      eventId: "balloon-pair-race",
       teamName: "Actors",
       leader: leader("B23CS020"),
       members: [{ name: "Bina Lama", rollNo: "B23CS011" }],
@@ -149,7 +156,7 @@ describe("admin queries", () => {
       confirmedParticipants: 4,
       revenuePaise: 8000,
     });
-    const charades = o.events.find((e) => e.eventId === "dumb-charades");
+    const charades = o.events.find((e) => e.eventId === "balloon-pair-race");
     expect(charades).toMatchObject({
       confirmedTeams: 1,
       confirmedParticipants: 2,
@@ -157,12 +164,13 @@ describe("admin queries", () => {
     });
     expect(o.events).toHaveLength(29); // every event listed, even with no registrations
     expect(o.totals).toMatchObject({
-      confirmedTeams: 3,
-      confirmedParticipants: 7,
+      confirmedTeams: 4,
+      confirmedParticipants: 8,
       revenuePaise: 8000,
     });
+    // 8 entries but 7 people: one student is in both Photography and Cup Pong
     expect(o.totals.uniqueParticipants).toBe(7);
-    expect(o.recent.length).toBe(3);
+    expect(o.recent.length).toBe(4);
     expect(o.backup).toEqual({ configured: false, unsynced: expect.any(Number) });
   });
 
@@ -190,7 +198,7 @@ describe("admin queries", () => {
 
   it("searches by roll number, partial name, team and payment id; wildcards are literal", async () => {
     expect((await searchRegistrations("b23cs011")).map((r) => r.eventId)).toEqual([
-      "dumb-charades",
+      "balloon-pair-race",
     ]);
     expect((await searchRegistrations("bina")).length).toBe(1);
     expect((await searchRegistrations("Colours"))[0]?.eventId).toBe("rangoli");

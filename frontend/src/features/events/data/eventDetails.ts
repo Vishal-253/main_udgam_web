@@ -52,9 +52,10 @@ export const EVENTS: FestEvent[] = [
     category: "games",
     fee: 150,
     feeUnit: "team",
-    teamSize: { min: 4, max: 4 },
+    teamSize: { min: 3, max: 3 },
     taglines: [],
     docUrl: DOC("1B7N4-QUDR-qa8jM9BscvCeTci3eNen6rC4VW0rTIWqo", "edit?usp=sharing"),
+    rulebookPdf: "/rulebooks/spoil-the-tshirt.pdf",
   },
   {
     id: "treasure-hunt",
@@ -63,7 +64,7 @@ export const EVENTS: FestEvent[] = [
     category: "games",
     fee: 250,
     feeUnit: "team",
-    teamSize: { min: 4, max: 4 },
+    teamSize: { min: 3, max: 3 },
     taglines: [
       "Follow the clues. Find the glory.",
       "X marks the spot. Who finds it first?",
@@ -78,13 +79,14 @@ export const EVENTS: FestEvent[] = [
     category: "games",
     fee: 50,
     feeUnit: "team",
-    teamSize: { min: 4, max: 4 },
+    teamSize: { min: 4, max: 6 },
     description: "Auction for IPL teams.",
     taglines: [
       "Every bid counts. Every player matters.",
       "Don't just watch the game, build it!",
       "Paddle up, pick your champions!",
     ],
+    rulebookPdf: "/rulebooks/ipl-auction.pdf",
   },
   {
     id: "ramp-walk",
@@ -136,9 +138,10 @@ export const EVENTS: FestEvent[] = [
     tier: "major",
     category: "food",
     fee: 0,
-    teamSize: { min: 1, max: 4 },
+    teamSize: { min: 3, max: 5 },
     description: "Cook-off for food makers. The winner gets to run a stall during Udgam.",
     taglines: ["One fest. Endless flavors.", "Come hungry. Leave happy."],
+    rulebookPdf: "/rulebooks/food-fiesta.pdf",
   },
   {
     id: "singing-competition",
@@ -149,6 +152,7 @@ export const EVENTS: FestEvent[] = [
     teamSize: { min: 1, max: 1 },
     taglines: ["Sing your heart out. Touch the soul.", "Amplify your voice. Electrify the crowd."],
     docUrl: DOC("1e5-mq9BAFEiCco7V1LSZt8cZ7-1HGBvsz1WJbWh3xtk", "edit?usp=drivesdk"),
+    rulebookPdf: "/rulebooks/singing-competition.pdf",
   },
   {
     id: "wall-painting",
@@ -170,7 +174,7 @@ export const EVENTS: FestEvent[] = [
     tier: "regular",
     category: "games",
     fee: 0,
-    teamSize: { min: 2, max: 2 },
+    teamSize: { min: 4, max: 4 },
     description:
       "Guess the movie name — one player acts while the other guesses. Includes a guess-the-personality round.",
     taglines: [
@@ -178,6 +182,7 @@ export const EVENTS: FestEvent[] = [
       "चेहरे पर भाव, ज़ुबाँ पर ताला।",
       "Where silence becomes cinema.",
     ],
+    rulebookPdf: "/rulebooks/dumb-charades.pdf",
   },
   {
     id: "antakshari",
@@ -241,6 +246,7 @@ export const EVENTS: FestEvent[] = [
     feeUnit: "team",
     teamSize: { min: 4, max: 4 },
     taglines: ["Drop, loot, survive — Booyah or bust!", "One zone, one winner — are you ready?"],
+    rulebookPdf: "/rulebooks/free-fire.pdf",
   },
   {
     id: "bgmi",
@@ -249,8 +255,9 @@ export const EVENTS: FestEvent[] = [
     category: "esports",
     fee: 200,
     feeUnit: "team",
-    teamSize: { min: 4, max: 4 },
+    teamSize: { min: 4, max: 5 },
     taglines: ["Chicken dinner isn't served — it's earned!", "Not just a game — it's war!"],
+    rulebookPdf: "/rulebooks/bgmi.pdf",
   },
   {
     id: "mlbb",
@@ -259,11 +266,12 @@ export const EVENTS: FestEvent[] = [
     category: "esports",
     fee: 200,
     feeUnit: "team",
-    teamSize: { min: 5, max: 5 },
+    teamSize: { min: 5, max: 6 },
     taglines: [
       "Legends aren't born — they're made in the arena!",
       "Five heroes, one goal — total annihilation!",
     ],
+    rulebookPdf: "/rulebooks/mlbb.pdf",
   },
   {
     id: "efootball",
@@ -308,6 +316,7 @@ export const EVENTS: FestEvent[] = [
       "Tied together, race together.",
     ],
     docUrl: DOC("1kq-1mGJSQ4bCddgdR1_8Nq5mBhhrNwHXEIQ-_uBrykY", "edit?usp=sharing"),
+    rulebookPdf: "/rulebooks/three-leg-tie.pdf",
   },
   {
     id: "musical-chair",
@@ -350,6 +359,7 @@ export const EVENTS: FestEvent[] = [
     teamSize: { min: 1, max: 1 },
     description: "Submit raw pictures taken on your phone, with no post-processing.",
     taglines: ["Freeze the vibe, frame the moment.", "Paal ko thaamo, yaadon mein sajaao."],
+    rulebookPdf: "/rulebooks/photography.pdf",
   },
   {
     id: "food-eating-challenge",
@@ -380,9 +390,10 @@ export const EVENTS: FestEvent[] = [
     tier: "regular",
     category: "creative",
     fee: 0,
-    teamSize: { min: 1, max: 5 },
+    teamSize: { min: 1, max: 3 },
     taglines: ["Small screen. Big stories.", "Your vision, our screen."],
     docUrl: DOC("1RIhcZUI_ft315IRD_aH607UVxkKPNDeOGRuYlBUMGHQ", "edit?usp=drivesdk"),
+    rulebookPdf: "/rulebooks/short-movie.pdf",
   },
   {
     id: "string-maze",
@@ -409,7 +420,7 @@ export const EVENTS: FestEvent[] = [
     fee: 0,
     teamSize: { min: 2, max: 2 },
     taglines: ["Two to hold one.", "Press in pair to move.", "Stick together, move as one!"],
-    rulebookPdf: "/rulebooks/balloon-burst.pdf",
+    rulebookPdf: "/rulebooks/balloon-pair-race.pdf",
   },
   {
     id: "fill-and-burst",

@@ -459,6 +459,10 @@
     font-weight: 700;
     vertical-align: top;
   }
+  .udgam-admin .adm-print .mobile {
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
   .udgam-admin .adm-print .sig {
     width: 22%;
   }

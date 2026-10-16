@@ -1,12 +1,11 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Billboard, Environment, Lightformer, useTexture, Html, PerformanceMonitor } from "@react-three/drei";
+import { Billboard, Environment, Lightformer, useTexture, Html, PerformanceMonitor, useProgress } from "@react-three/drei";
 import tree1 from "@/assets/tree1.webp";
 import tree2 from "@/assets/tree2.webp";
 import tree3 from "@/assets/tree3.webp";
 import groundImg from "@/assets/ground.jpg";
 import roadImg from "@/assets/forest-road.jpg";
 import dragonImg from "@/assets/sky-dragon-real.webp";
-import floatingCampusImg from "@/assets/floating_campus.webp";
 import woodImg from "@/assets/wood_planks.webp";
 import canvasImg from "@/assets/canvas_fabric.webp";
 import clothesImg from "@/assets/folded_clothes.webp";
@@ -14,7 +13,7 @@ import dominosImg from "@/assets/dominos_pizza_photo.webp";
 import quarksImg from "@/assets/quarks_tech_photo.webp";
 import arcadeScreenImg from "@/assets/arcade_screen_udgam.webp";
 import mountainImg from "@/assets/distant_mountains_sikkim.webp";
-import { Suspense, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 
 /* ─── deterministic RNG ─────────────────────────────── */
@@ -199,134 +198,6 @@ function Ground() {
         <meshStandardMaterial map={road} roughness={0.93} />
       </mesh>
     </>
-  );
-}
-
-/* ─── NIT Sikkim Campus Modal ───── */
-function NITCampus({ progress }: { progress: React.MutableRefObject<number> }) {
-  const modalRef = useRef<HTMLDivElement>(null);
-
-  useFrame(() => {
-    if (modalRef.current) {
-      const p = progress.current;
-      if (p > 0.75) {
-        const t = Math.min((p - 0.75) / 0.25, 1);
-        // Easing function for smooth pop-up
-        const easeOutBack = (x: number): number => {
-          const c1 = 1.70158;
-          const c3 = c1 + 1;
-          return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2);
-        };
-        const scale = 0.5 + 0.5 * easeOutBack(t);
-
-        modalRef.current.style.display = 'flex';
-        modalRef.current.style.opacity = t.toString();
-        modalRef.current.style.transform = `scale(${scale})`;
-        modalRef.current.style.pointerEvents = t > 0.9 ? 'auto' : 'none';
-      } else {
-        // display:none skips the costly backdrop/drop-shadow blurs while the modal is hidden
-        modalRef.current.style.display = 'none';
-        modalRef.current.style.opacity = '0';
-        modalRef.current.style.transform = `scale(0.5)`;
-        modalRef.current.style.pointerEvents = 'none';
-      }
-    }
-  });
-
-  return (
-    <group position={[0, 24.2, -96]}>
-      <Html transform center scale={0.3} zIndexRange={[100, 0]}>
-        <div ref={modalRef} style={{
-          background: 'rgba(255, 255, 255, 0.15)',
-          backdropFilter: 'blur(24px)',
-          WebkitBackdropFilter: 'blur(24px)',
-          border: '1px solid rgba(255, 255, 255, 0.4)',
-          borderRadius: '40px',
-          padding: '50px',
-          width: '900px',
-          display: 'none',
-          flexDirection: 'column',
-          alignItems: 'center',
-          boxShadow: '0 32px 128px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.2)',
-          opacity: 0,
-          transformOrigin: 'center center',
-          pointerEvents: 'none',
-        }}>
-          <h2 style={{
-            color: 'white',
-            fontSize: '56px',
-            fontFamily: '"Inter", sans-serif',
-            fontWeight: '800',
-            margin: '0 0 10px 0',
-            textShadow: '0 4px 16px rgba(0,0,0,0.4)',
-            letterSpacing: '-0.02em'
-          }}>
-            Explore NIT Sikkim
-          </h2>
-          <p style={{
-            color: 'rgba(255,255,255,0.9)',
-            fontSize: '24px',
-            fontFamily: '"Inter", sans-serif',
-            margin: '0 0 40px 0',
-            textShadow: '0 2px 8px rgba(0,0,0,0.3)'
-          }}>
-            The official venue for UDGAM 2K26
-          </p>
-
-          <div style={{ position: 'relative', width: '100%', display: 'flex', justifyContent: 'center' }}>
-            {/* Glow effect behind image */}
-            <div style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: '80%',
-              height: '80%',
-              background: 'radial-gradient(circle, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 70%)',
-              filter: 'blur(40px)',
-              zIndex: -1
-            }} />
-            {/* Use floating_campus.png because nitsikkim_3d_img.png is not in src/assets */}
-            <img src={floatingCampusImg} alt="NIT Sikkim Campus" style={{
-              width: '110%',
-              maxWidth: '1000px',
-              height: 'auto',
-              filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.5))',
-              transform: 'translateY(-20px)'
-            }} />
-          </div>
-
-          <button
-            style={{
-              marginTop: '20px',
-              padding: '20px 50px',
-              fontSize: '28px',
-              background: 'linear-gradient(135deg, #fff 0%, #f0f0f0 100%)',
-              color: '#e9a9bd',
-              border: 'none',
-              borderRadius: '60px',
-              fontWeight: '900',
-              cursor: 'pointer',
-              boxShadow: '0 12px 24px rgba(0,0,0,0.2), 0 0 0 4px rgba(255,255,255,0.3)',
-              transition: 'all 0.2s ease',
-              textTransform: 'uppercase',
-              letterSpacing: '1px'
-            }}
-            onPointerOver={(e) => {
-              e.currentTarget.style.transform = 'translateY(-4px) scale(1.05)';
-              e.currentTarget.style.boxShadow = '0 20px 40px rgba(0,0,0,0.3), 0 0 0 4px rgba(255,255,255,0.5)';
-            }}
-            onPointerOut={(e) => {
-              e.currentTarget.style.transform = 'translateY(0) scale(1)';
-              e.currentTarget.style.boxShadow = '0 12px 24px rgba(0,0,0,0.2), 0 0 0 4px rgba(255,255,255,0.3)';
-            }}
-            onClick={() => window.dispatchEvent(new Event("udgam:enter-campus"))}
-          >
-            Enter Campus
-          </button>
-        </div>
-      </Html>
-    </group>
   );
 }
 
@@ -1385,7 +1256,44 @@ function DistantHimalayas() {
 }
 
 /* ─── Root ───────────────────────────────────────────── */
-export function BlossomScene({ progress, low, paused = false }: { progress: React.MutableRefObject<number>; low: boolean; paused?: boolean }) {
+/* ─── Loading signals for the page's loader ──────────── */
+/** Reports texture loading progress (0..1) while the scene's assets download. */
+function LoadProgress({ onProgress }: { onProgress?: ((p: number) => void) | undefined }) {
+  const { progress } = useProgress();
+  useEffect(() => {
+    onProgress?.(progress / 100);
+  }, [progress, onProgress]);
+  return null;
+}
+
+/** Mounted inside the Suspense boundary: fires once every asset is loaded and 2 frames have drawn. */
+function ReadySignal({ onReady }: { onReady?: (() => void) | undefined }) {
+  const frames = useRef(0);
+  const fired = useRef(false);
+  useFrame(() => {
+    if (fired.current) return;
+    frames.current += 1;
+    if (frames.current >= 2) {
+      fired.current = true;
+      onReady?.();
+    }
+  });
+  return null;
+}
+
+export function BlossomScene({
+  progress,
+  low,
+  paused = false,
+  onLoadProgress,
+  onReady,
+}: {
+  progress: React.MutableRefObject<number>;
+  low: boolean;
+  paused?: boolean;
+  onLoadProgress?: (p: number) => void;
+  onReady?: () => void;
+}) {
   // Drops resolution automatically if the frame rate can't keep up
   const [dpr, setDpr] = useState(1.5);
   return (
@@ -1406,6 +1314,7 @@ export function BlossomScene({ progress, low, paused = false }: { progress: Reac
         <Lightformer intensity={1} color="#ffc0d6" position={[-5, 1, -1]} rotation-y={Math.PI / 2} scale={[20, 1, 1]} />
       </Environment>
       <CameraRig progress={progress} />
+      <LoadProgress onProgress={onLoadProgress} />
       <Suspense fallback={null}>
         <DistantHimalayas />
         <Ground />
@@ -1419,6 +1328,7 @@ export function BlossomScene({ progress, low, paused = false }: { progress: Reac
         <SponsorBillboard position={[-8.2, 0, -82]} rotationY={0.25} sponsor="dominos" />
         <SponsorBillboard position={[8.2, 0, -82]} rotationY={-0.25} sponsor="quarks" />
         <HotAirBalloon progress={progress} />
+        <ReadySignal onReady={onReady} />
       </Suspense>
       <Petals count={low ? 1500 : 4500} progress={progress} />
     </Canvas>
