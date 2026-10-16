@@ -40,7 +40,8 @@ export function useEventPass(validIds: readonly string[]) {
     (id: string) => setPass((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id])),
     [],
   );
+  const remove = useCallback((id: string) => setPass((p) => p.filter((x) => x !== id)), []);
   const clear = useCallback(() => setPass([]), []);
 
-  return { pass, toggle, clear };
+  return { pass, toggle, remove, clear };
 }

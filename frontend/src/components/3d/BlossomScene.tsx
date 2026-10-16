@@ -1,20 +1,20 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Billboard, Environment, Lightformer, useTexture, Html } from "@react-three/drei";
-import tree1 from "@/assets/tree1.png";
-import tree2 from "@/assets/tree2.png";
-import tree3 from "@/assets/tree3.png";
+import { Billboard, Environment, Lightformer, useTexture, Html, PerformanceMonitor } from "@react-three/drei";
+import tree1 from "@/assets/tree1.webp";
+import tree2 from "@/assets/tree2.webp";
+import tree3 from "@/assets/tree3.webp";
 import groundImg from "@/assets/ground.jpg";
 import roadImg from "@/assets/forest-road.jpg";
-import dragonImg from "@/assets/sky-dragon-real.png";
-import floatingCampusImg from "@/assets/floating_campus.png";
-import woodImg from "@/assets/wood_planks.jpg";
-import canvasImg from "@/assets/canvas_fabric.jpg";
-import clothesImg from "@/assets/folded_clothes.jpg";
-import dominosImg from "@/assets/dominos_pizza_photo.jpg";
-import quarksImg from "@/assets/quarks_tech_photo.jpg";
-import arcadeScreenImg from "@/assets/arcade_screen_udgam.jpg";
-import mountainImg from "@/assets/distant_mountains_sikkim.jpg";
-import { Suspense, useMemo, useRef } from "react";
+import dragonImg from "@/assets/sky-dragon-real.webp";
+import floatingCampusImg from "@/assets/floating_campus.webp";
+import woodImg from "@/assets/wood_planks.webp";
+import canvasImg from "@/assets/canvas_fabric.webp";
+import clothesImg from "@/assets/folded_clothes.webp";
+import dominosImg from "@/assets/dominos_pizza_photo.webp";
+import quarksImg from "@/assets/quarks_tech_photo.webp";
+import arcadeScreenImg from "@/assets/arcade_screen_udgam.webp";
+import mountainImg from "@/assets/distant_mountains_sikkim.webp";
+import { Suspense, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 
 /* ─── deterministic RNG ─────────────────────────────── */
@@ -219,10 +219,13 @@ function NITCampus({ progress }: { progress: React.MutableRefObject<number> }) {
         };
         const scale = 0.5 + 0.5 * easeOutBack(t);
 
+        modalRef.current.style.display = 'flex';
         modalRef.current.style.opacity = t.toString();
         modalRef.current.style.transform = `scale(${scale})`;
         modalRef.current.style.pointerEvents = t > 0.9 ? 'auto' : 'none';
       } else {
+        // display:none skips the costly backdrop/drop-shadow blurs while the modal is hidden
+        modalRef.current.style.display = 'none';
         modalRef.current.style.opacity = '0';
         modalRef.current.style.transform = `scale(0.5)`;
         modalRef.current.style.pointerEvents = 'none';
@@ -241,7 +244,7 @@ function NITCampus({ progress }: { progress: React.MutableRefObject<number> }) {
           borderRadius: '40px',
           padding: '50px',
           width: '900px',
-          display: 'flex',
+          display: 'none',
           flexDirection: 'column',
           alignItems: 'center',
           boxShadow: '0 32px 128px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.2)',
@@ -813,7 +816,7 @@ function MerchStall({ position }: { position: [number, number, number] }) {
               e.currentTarget.style.transform = 'scale(1)';
             }}
             onClick={() => {
-              alert('Opening Merch Page!');
+              window.location.href = '/merch';
             }}
           >
             🛍️ Shop Merch
@@ -1076,18 +1079,16 @@ function GameArcadeZone({ position }: { position: [number, number, number] }) {
       <group ref={petalRef} position={[-1.3, 2.5, 0.15]}>
         <mesh castShadow>
           <sphereGeometry args={[0.26, 12, 10]} />
-          <meshStandardMaterial color="#ff8da7" emissive="#ff6584" emissiveIntensity={0.4} roughness={0.3} />
+          <meshStandardMaterial color="#ff8da7" emissive="#ff6584" emissiveIntensity={0.7} roughness={0.3} />
         </mesh>
-        <pointLight color="#ff8da7" intensity={0.7} distance={3} decay={2} />
       </group>
 
       {/* ── Floating Golden Blossom Star (Right Side) ── */}
       <group ref={starRef} position={[1.3, 2.2, 0.15]}>
         <mesh castShadow>
           <octahedronGeometry args={[0.26, 0]} />
-          <meshStandardMaterial color="#f5c842" emissive="#d4a017" emissiveIntensity={0.6} metalness={0.7} roughness={0.2} />
+          <meshStandardMaterial color="#f5c842" emissive="#d4a017" emissiveIntensity={0.9} metalness={0.7} roughness={0.2} />
         </mesh>
-        <pointLight color="#f5c842" intensity={0.8} distance={3} decay={2} />
       </group>
 
       {/* ── Clean Floating "Register for Events" Button Above ── */}
@@ -1247,9 +1248,6 @@ function SponsorBillboard({
           </mesh>
         </group>
       ))}
-
-      {/* Powerful Floodlight Illumination for Billboard */}
-      <pointLight position={[0, 7.6, 1.6]} intensity={3.0} distance={12} color="#fffbe8" />
     </group>
   );
 }
@@ -1387,14 +1385,18 @@ function DistantHimalayas() {
 }
 
 /* ─── Root ───────────────────────────────────────────── */
-export function BlossomScene({ progress, low }: { progress: React.MutableRefObject<number>; low: boolean }) {
+export function BlossomScene({ progress, low, paused = false }: { progress: React.MutableRefObject<number>; low: boolean; paused?: boolean }) {
+  // Drops resolution automatically if the frame rate can't keep up
+  const [dpr, setDpr] = useState(1.5);
   return (
     <Canvas
       shadows={!low}
-      dpr={low ? 1 : [1, 1.5]}
+      dpr={low ? 1 : dpr}
+      frameloop={paused ? "never" : "always"}
       camera={{ fov: 60, position: [0, 1.7, 10] }}
       gl={{ antialias: !low, powerPreference: "high-performance" }}
     >
+      <PerformanceMonitor onDecline={() => setDpr(1)} onIncline={() => setDpr(1.5)} flipflops={3} onFallback={() => setDpr(1)} />
       <color attach="background" args={["#dbe7fb"]} />
       <fog attach="fog" args={["#dbe7fb", 10, 68]} />
       <ambientLight intensity={0.7} color="#f0f4ff" />

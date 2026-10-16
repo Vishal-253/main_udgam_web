@@ -30,3 +30,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# (moved from the old repo-root .gitignore)
+PROJECT_STRUCTURE.md
+theme-export/

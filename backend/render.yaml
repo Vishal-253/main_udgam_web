@@ -1,0 +1,42 @@
+# Render blueprint for the Udgam backend API (backend/ folder).
+# Render Dashboard -> New -> Blueprint -> pick this repo and set "Blueprint Path" to
+# backend/render.yaml. Then fill in the secret values (marked sync: false) under the
+# service's Environment tab. rootDir below is relative to the repository root.
+services:
+  - type: web
+    name: udgam-api
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: REGISTRATIONS_OPEN
+        value: "false"
+      - key: FRONTEND_ORIGINS
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: RAZORPAY_WEBHOOK_SECRET
+        sync: false
+      - key: FIREBASE_PROJECT_ID
+        sync: false
+      - key: FIREBASE_CLIENT_EMAIL
+        sync: false
+      - key: FIREBASE_PRIVATE_KEY
+        sync: false
+      - key: BACKUP_SYNC_TOKEN
+        generateValue: true
+      - key: ADMIN_USERNAME
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: ADMIN_SESSION_SECRET
+        generateValue: true

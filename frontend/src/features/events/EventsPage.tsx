@@ -8,15 +8,23 @@ import {
   type EventTier,
   type FestEvent,
 } from "./data/eventDetails";
-import { formatFee } from "./format";
+import { formatFee, feeUnitLabel } from "./format";
 import { useEventPass } from "./hooks/useEventPass";
 import { CategoryChip, RegisterButton, RotatingTagline } from "./components/EventBits";
 import { categoryOf } from "./utils";
-import { ArrowIcon, CategoryIcon, CloseIcon, DocIcon, SearchIcon } from "./components/eventIcons";
+import {
+  ArrowIcon,
+  BookIcon,
+  CategoryIcon,
+  CloseIcon,
+  DocIcon,
+  SearchIcon,
+} from "./components/eventIcons";
 import EventDrawer from "./components/EventDrawer";
 import RegistrationTray from "./components/RegistrationTray";
 import HeadlinerCarousel from "./components/HeadlinerCarousel";
 import NoticeTicker from "./components/NoticeTicker";
+import RulebookViewer from "./components/RulebookViewer";
 
 // Headliner order: the first one starts in the centre of the carousel.
 const SPOTLIGHT_ORDER = [
@@ -72,8 +80,14 @@ export default function EventsPage({
   const [category, setCategory] = useState<EventCategoryId | "all">("all");
   const [sort, setSort] = useState<SortId>("featured");
   const [openId, setOpenId] = useState<string | null>(null);
+  const [rulebookEvent, setRulebookEvent] = useState<FestEvent | null>(null);
   const eventIds = useMemo(() => events.map((e) => e.id), [events]);
-  const { pass, toggle: togglePass, clear: clearPass } = useEventPass(eventIds);
+  const {
+    pass,
+    toggle: togglePass,
+    remove: removeFromPass,
+    clear: clearPass,
+  } = useEventPass(eventIds);
   const searchRef = useRef<HTMLInputElement>(null);
 
   // "/" focuses search (desktop convenience)
@@ -141,7 +155,7 @@ export default function EventsPage({
         </h1>
         <p className="ep-lede">
           {events.length} events across games, sport, performance, food and more. Add the ones you
-          want to your pass and register for them in one go.
+          want to your pass, then register your team for each one.
         </p>
         <dl className="ep-stats">
           <div>
@@ -266,7 +280,7 @@ export default function EventsPage({
             <HeadlinerCarousel
               items={headliners}
               getKey={(e) => e.id}
-              paused={openId !== null}
+              paused={openId !== null || rulebookEvent !== null}
               label="Headliners"
               renderItem={(e, i) => (
                 <HeadlinerTile
@@ -275,6 +289,7 @@ export default function EventsPage({
                   added={pass.includes(e.id)}
                   onToggle={() => togglePass(e.id)}
                   onOpen={() => setOpenId(e.id)}
+                  onOpenRulebook={setRulebookEvent}
                 />
               )}
             />
@@ -288,6 +303,7 @@ export default function EventsPage({
                   added={pass.includes(e.id)}
                   onToggle={() => togglePass(e.id)}
                   onOpen={() => setOpenId(e.id)}
+                  onOpenRulebook={setRulebookEvent}
                 />
               ))}
             </div>
@@ -310,6 +326,7 @@ export default function EventsPage({
                 added={pass.includes(e.id)}
                 onToggle={() => togglePass(e.id)}
                 onOpen={() => setOpenId(e.id)}
+                onOpenRulebook={setRulebookEvent}
               />
             ))}
           </div>
@@ -347,10 +364,19 @@ export default function EventsPage({
 
       <RegistrationTray
         items={pass.map((id) => events.find((e) => e.id === id)).filter((e): e is FestEvent => !!e)}
-        onRemove={togglePass}
+        onRemove={removeFromPass}
         onClear={clearPass}
         onOpenEvent={setOpenId}
       />
+
+      {/* Direct rulebook PDF modal */}
+      {rulebookEvent && rulebookEvent.rulebookPdf && (
+        <RulebookViewer
+          pdfUrl={rulebookEvent.rulebookPdf}
+          eventName={rulebookEvent.name}
+          onClose={() => setRulebookEvent(null)}
+        />
+      )}
     </div>
   );
 }
@@ -360,9 +386,17 @@ interface CardProps {
   added: boolean;
   onToggle: () => void;
   onOpen: () => void;
+  onOpenRulebook: (event: FestEvent) => void;
 }
 
-function HeadlinerTile({ event, index, added, onToggle, onOpen }: CardProps & { index: number }) {
+function HeadlinerTile({
+  event,
+  index,
+  added,
+  onToggle,
+  onOpen,
+  onOpenRulebook,
+}: CardProps & { index: number }) {
   const cat = categoryOf(event.category);
   return (
     <article className={`ep-tile ${added ? "is-added" : ""}`} style={cssVars({ "--hue": cat.hue })}>
@@ -370,7 +404,10 @@ function HeadlinerTile({ event, index, added, onToggle, onOpen }: CardProps & { 
       <div className="ep-tile-top">
         <span className="ep-tile-index">{String(index + 1).padStart(2, "0")}</span>
         <CategoryChip id={event.category} small />
-        <span className="ep-fee-pill">{formatFee(event.fee)}</span>
+        <span className="ep-fee-pill">
+          {formatFee(event.fee)}
+          {event.fee > 0 && event.feeUnit ? `/${event.feeUnit}` : ""}
+        </span>
       </div>
 
       <h3 className="ep-tile-title">
@@ -386,15 +423,38 @@ function HeadlinerTile({ event, index, added, onToggle, onOpen }: CardProps & { 
 
       <div className="ep-tile-actions">
         <RegisterButton added={added} onToggle={onToggle} eventName={event.name} />
-        <button type="button" className="ep-details-btn" onClick={onOpen}>
-          Details <ArrowIcon className="ep-btn-icon" />
-        </button>
+        {event.rulebookPdf ? (
+          <button
+            type="button"
+            className="ep-details-btn ep-rulebook-direct-btn"
+            onClick={() => onOpenRulebook(event)}
+            title={`View ${event.name} Rulebook`}
+          >
+            <BookIcon className="ep-btn-icon" />
+            Rulebook
+          </button>
+        ) : event.docUrl ? (
+          <a
+            href={event.docUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ep-details-btn ep-rulebook-direct-btn"
+            title={`Open ${event.name} Rulebook`}
+          >
+            <DocIcon className="ep-btn-icon" />
+            Rulebook
+          </a>
+        ) : (
+          <button type="button" className="ep-details-btn" onClick={onOpen}>
+            Details <ArrowIcon className="ep-btn-icon" />
+          </button>
+        )}
       </div>
     </article>
   );
 }
 
-function TicketCard({ event, added, onToggle, onOpen }: CardProps) {
+function TicketCard({ event, added, onToggle, onOpen, onOpenRulebook }: CardProps) {
   const cat = categoryOf(event.category);
   const meta: string[] = [];
   if (event.rounds) meta.push(`${event.rounds.length} rounds`);
@@ -425,8 +485,32 @@ function TicketCard({ event, added, onToggle, onOpen }: CardProps) {
       </div>
       <div className="ep-ticket-stub">
         <span className="ep-ticket-fee">{formatFee(event.fee)}</span>
-        <span className="ep-ticket-fee-label">entry</span>
-        <RegisterButton added={added} onToggle={onToggle} eventName={event.name} size="sm" />
+        <span className="ep-ticket-fee-label">{feeUnitLabel(event) || "entry"}</span>
+        <div className="ep-ticket-stub-actions">
+          <RegisterButton added={added} onToggle={onToggle} eventName={event.name} size="sm" />
+          {event.rulebookPdf ? (
+            <button
+              type="button"
+              className="ep-ticket-rb-btn"
+              onClick={() => onOpenRulebook(event)}
+              title={`View ${event.name} Rulebook`}
+            >
+              <BookIcon className="ep-btn-icon" />
+              <span>Rules</span>
+            </button>
+          ) : event.docUrl ? (
+            <a
+              href={event.docUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ep-ticket-rb-btn"
+              title={`Open ${event.name} Rulebook`}
+            >
+              <DocIcon className="ep-btn-icon" />
+              <span>Rules</span>
+            </a>
+          ) : null}
+        </div>
       </div>
     </article>
   );

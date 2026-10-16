@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState, useCallback } from "react";
 import * as THREE from "three";
 import groundImg from "@/assets/ground.jpg";
-import mountainImg from "@/assets/distant_mountains_sikkim.jpg";
+import mountainImg from "@/assets/distant_mountains_sikkim.webp";
 import "../gallery.css";
 
 export const Route = createFileRoute("/gallery")({
@@ -25,7 +25,7 @@ export const Route = createFileRoute("/gallery")({
   component: GalleryPage,
 });
 
-export interface EditionInfo {
+interface EditionInfo {
   key: string;
   title: string;
   tagline: string;
@@ -36,7 +36,7 @@ export interface EditionInfo {
   photos: string[];
 }
 
-export const UDGAM_EDITIONS: EditionInfo[] = [
+const UDGAM_EDITIONS: EditionInfo[] = [
   {
     key: "udgam2k25",
     title: "Udgam 2K25",
@@ -130,7 +130,7 @@ function buildPhotoList(folder: string, maxN: number) {
   return list;
 }
 
-export function GalleryPage() {
+function GalleryPage() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const minimapCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -151,6 +151,12 @@ export function GalleryPage() {
   // Proximity cooldown state ref
   const proximityCooldownRef = useRef<{ [key: string]: number }>({});
   const activeEditionRef = useRef<string | null>(null);
+
+  // Read by the render loop so opening/closing the modal doesn't rebuild the whole 3D world
+  const galleryOpenRef = useRef(false);
+  useEffect(() => {
+    galleryOpenRef.current = galleryOpen;
+  }, [galleryOpen]);
 
   // Joystick controller state
   const joyStateRef = useRef({
@@ -268,7 +274,7 @@ export function GalleryPage() {
       antialias: true,
       powerPreference: "high-performance",
     });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -490,11 +496,25 @@ export function GalleryPage() {
     scene.add(path);
 
     // ── PROCEDURAL CHERRY BLOSSOM TREES ──────────────────────────
+    // All trees are collected into a handful of InstancedMeshes (one draw call per part type)
+    // instead of thousands of individual meshes/materials.
     const blossomColors = [0xffb7d5, 0xffa0c4, 0xffc4dc, 0xfce4ec, 0xff8fb6, 0xffffff];
     const trunkMat = new THREE.MeshStandardMaterial({ color: 0x4a2418, roughness: 0.9 });
 
+    type InstanceSpec = { matrix: THREE.Matrix4; color?: THREE.Color };
+    const branchInstances: InstanceSpec[] = [];
+    const trunkInstances: InstanceSpec[] = [];
+    const blossomInstances: InstanceSpec[] = [];
+    const satelliteInstances: InstanceSpec[] = [];
+    const tmpScale = new THREE.Vector3();
+    const tmpPos = new THREE.Vector3();
+    const upAxis = new THREE.Vector3(0, 1, 0);
+
+    // Lightweight stand-in for a THREE.Group: records instances offset by the tree position
+    type TreeGroup = { x: number; z: number };
+
     const addBranch = (
-      group: THREE.Group,
+      group: TreeGroup,
       startX: number,
       startY: number,
       startZ: number,
@@ -505,64 +525,56 @@ export function GalleryPage() {
       len: number
     ) => {
       const dir = new THREE.Vector3(dx, dy, dz).normalize();
-      const geo = new THREE.CylinderGeometry(rad * 0.6, rad, len, 6);
-      const mesh = new THREE.Mesh(geo, trunkMat);
-      mesh.position.set(startX + (dir.x * len) / 2, startY + (dir.y * len) / 2, startZ + (dir.z * len) / 2);
-      const up = new THREE.Vector3(0, 1, 0);
-      const quaternion = new THREE.Quaternion();
-      quaternion.setFromUnitVectors(up, dir);
-      mesh.quaternion.copy(quaternion);
-      mesh.castShadow = true;
-      group.add(mesh);
+      const quaternion = new THREE.Quaternion().setFromUnitVectors(upAxis, dir);
+      tmpPos.set(
+        group.x + startX + (dir.x * len) / 2,
+        startY + (dir.y * len) / 2,
+        group.z + startZ + (dir.z * len) / 2
+      );
+      branchInstances.push({
+        matrix: new THREE.Matrix4().compose(tmpPos, quaternion, tmpScale.set(rad, len, rad)),
+      });
       return new THREE.Vector3(startX + dir.x * len, startY + dir.y * len, startZ + dir.z * len);
     };
 
-    const addBlossom = (group: THREE.Group, px: number, py: number, pz: number, r: number) => {
-      const color = blossomColors[Math.floor(Math.random() * blossomColors.length)];
-      const geo = new THREE.SphereGeometry(r, 7, 5);
-      const mat = new THREE.MeshStandardMaterial({
-        color,
-        roughness: 0.85,
-        transparent: true,
-        opacity: 0.92,
-        emissive: new THREE.Color(color).multiplyScalar(0.12),
+    const pickBlossomColor = () =>
+      new THREE.Color(blossomColors[Math.floor(Math.random() * blossomColors.length)]);
+    const noRotation = new THREE.Quaternion();
+
+    const addBlossom = (group: TreeGroup, px: number, py: number, pz: number, r: number) => {
+      tmpPos.set(group.x + px, py, group.z + pz);
+      blossomInstances.push({
+        matrix: new THREE.Matrix4().compose(tmpPos, noRotation, tmpScale.set(r, r, r)),
+        color: pickBlossomColor(),
       });
-      const mesh = new THREE.Mesh(geo, mat);
-      mesh.position.set(px, py, pz);
-      mesh.castShadow = true;
-      group.add(mesh);
 
       const satCount = 2 + Math.floor(Math.random() * 2);
       for (let s = 0; s < satCount; s++) {
         const a = (s / satCount) * Math.PI * 2 + Math.random();
-        const satColor = blossomColors[Math.floor(Math.random() * blossomColors.length)];
-        const satGeo = new THREE.SphereGeometry(r * 0.58, 6, 4);
-        const satMat = new THREE.MeshStandardMaterial({
-          color: satColor,
-          roughness: 0.85,
-          transparent: true,
-          opacity: 0.88,
-        });
-        const sat = new THREE.Mesh(satGeo, satMat);
-        sat.position.set(
-          px + Math.cos(a) * r * 0.7,
+        const sr = r * 0.58;
+        tmpPos.set(
+          group.x + px + Math.cos(a) * r * 0.7,
           py + (Math.random() - 0.25) * r * 0.75,
-          pz + Math.sin(a) * r * 0.7
+          group.z + pz + Math.sin(a) * r * 0.7
         );
-        sat.castShadow = true;
-        group.add(sat);
+        satelliteInstances.push({
+          matrix: new THREE.Matrix4().compose(tmpPos, noRotation, tmpScale.set(sr, sr, sr)),
+          color: pickBlossomColor(),
+        });
       }
     };
 
     const buildCherryTree = (x: number, z: number, scale = 1) => {
-      const group = new THREE.Group();
+      const group: TreeGroup = { x, z };
       const trunkH = 3.6 * scale;
-      const trunkGeo = new THREE.CylinderGeometry(0.12 * scale, 0.3 * scale, trunkH, 7);
-      const trunk = new THREE.Mesh(trunkGeo, trunkMat);
-      trunk.position.y = trunkH / 2;
-      trunk.rotation.z = (Math.random() - 0.5) * 0.15;
-      trunk.castShadow = true;
-      group.add(trunk);
+      tmpPos.set(x, trunkH / 2, z);
+      trunkInstances.push({
+        matrix: new THREE.Matrix4().compose(
+          tmpPos,
+          new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, (Math.random() - 0.5) * 0.15)),
+          tmpScale.set(0.3 * scale, trunkH, 0.3 * scale)
+        ),
+      });
 
       const crownY = trunkH;
       const branchCount = 4 + Math.floor(Math.random() * 3);
@@ -609,10 +621,22 @@ export function GalleryPage() {
           (0.55 + Math.random() * 0.2) * scale
         );
       }
+    };
 
-      group.position.set(x, 0, z);
-      scene.add(group);
-      return group;
+    const addInstanced = (
+      geometry: THREE.BufferGeometry,
+      material: THREE.Material,
+      specs: InstanceSpec[]
+    ) => {
+      const mesh = new THREE.InstancedMesh(geometry, material, specs.length);
+      specs.forEach((s, i) => {
+        mesh.setMatrixAt(i, s.matrix);
+        if (s.color) mesh.setColorAt(i, s.color);
+      });
+      mesh.instanceMatrix.needsUpdate = true;
+      if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+      mesh.castShadow = true;
+      scene.add(mesh);
     };
 
     const treeSpecs: [number, number, number][] = [
@@ -654,10 +678,26 @@ export function GalleryPage() {
       buildCherryTree(x, z, s);
     });
 
+    // Unit geometries, scaled per instance (same proportions as the original per-mesh geometry)
+    addInstanced(new THREE.CylinderGeometry(0.4, 1, 1, 7), trunkMat, trunkInstances);
+    addInstanced(new THREE.CylinderGeometry(0.6, 1, 1, 6), trunkMat, branchInstances);
+    addInstanced(
+      new THREE.SphereGeometry(1, 7, 5),
+      // faint pink glow approximates the old per-blossom emissive tint
+      new THREE.MeshStandardMaterial({ roughness: 0.85, emissive: 0x1f161a }),
+      blossomInstances
+    );
+    addInstanced(
+      new THREE.SphereGeometry(1, 6, 4),
+      new THREE.MeshStandardMaterial({ roughness: 0.85 }),
+      satelliteInstances
+    );
+
     // ── FALLING 3D SAKURA PETALS ─────────────────────────────────
+    // One InstancedMesh for every petal (single draw call)
     const PETAL_COUNT = 220;
     const petalPool: {
-      mesh: THREE.Mesh;
+      mesh: THREE.Object3D;
       vx: number;
       vy: number;
       vz: number;
@@ -666,8 +706,16 @@ export function GalleryPage() {
     }[] = [];
     const petalGeo = new THREE.PlaneGeometry(0.18, 0.12);
     const petalColorPalette = [0xffb7d5, 0xffa0c4, 0xffc4dc, 0xffe0ee, 0xffffff];
+    const petalMesh = new THREE.InstancedMesh(
+      petalGeo,
+      new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, transparent: true, opacity: 0.85 }),
+      PETAL_COUNT
+    );
+    petalMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    petalMesh.frustumCulled = false;
+    scene.add(petalMesh);
 
-    const resetPetal = (mesh: THREE.Mesh) => {
+    const resetPetal = (mesh: THREE.Object3D) => {
       mesh.position.set(
         (Math.random() - 0.5) * 110,
         9 + Math.random() * 15,
@@ -681,16 +729,11 @@ export function GalleryPage() {
     };
 
     for (let i = 0; i < PETAL_COUNT; i++) {
-      const c = petalColorPalette[Math.floor(Math.random() * petalColorPalette.length)];
-      const pmat = new THREE.MeshBasicMaterial({
-        color: c,
-        side: THREE.DoubleSide,
-        transparent: true,
-        opacity: 0.85,
-      });
-      const petal = new THREE.Mesh(petalGeo, pmat);
+      const c = petalColorPalette[Math.floor(Math.random() * petalColorPalette.length)] ?? 0xffffff;
+      petalMesh.setColorAt(i, new THREE.Color(c));
+      // Plain Object3D holds each petal's transform; its matrix is copied into the instance each frame
+      const petal = new THREE.Object3D();
       resetPetal(petal);
-      scene.add(petal);
       petalPool.push({
         mesh: petal,
         vx: 0.01 + (Math.random() - 0.4) * 0.03,
@@ -706,14 +749,32 @@ export function GalleryPage() {
       group: THREE.Group;
       edition: EditionInfo;
       position: THREE.Vector3;
-      pointLight: THREE.PointLight;
-      baseLightIntensity: number;
+      glowMat: THREE.MeshBasicMaterial;
+      frameMat: THREE.MeshStandardMaterial;
       floatOffset: number;
       canvasMesh: THREE.Mesh;
     }
 
     const billboards: BillboardItem[] = [];
     const clickableObjects: THREE.Object3D[] = [];
+
+    // Shared soft radial gradient used for the billboard ground glows
+    const GLOW_BASE_OPACITY = 0.45;
+    const FRAME_BASE_EMISSIVE = 1.8;
+    const groundGlowTex = (() => {
+      const cv = document.createElement("canvas");
+      cv.width = cv.height = 128;
+      const g = cv.getContext("2d");
+      if (g) {
+        const rg = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+        rg.addColorStop(0, "rgba(255,255,255,0.9)");
+        rg.addColorStop(0.45, "rgba(255,255,255,0.35)");
+        rg.addColorStop(1, "rgba(255,255,255,0)");
+        g.fillStyle = rg;
+        g.fillRect(0, 0, 128, 128);
+      }
+      return new THREE.CanvasTexture(cv);
+    })();
     const BILLBOARD_RADIUS = 26; // Brought closer to walkway for immediate visibility!
 
     // Ultra-sharp 2048x1200 billboard texture
@@ -820,7 +881,7 @@ export function GalleryPage() {
       tex.generateMipmaps = true;
       tex.minFilter = THREE.LinearMipmapLinearFilter;
       tex.magFilter = THREE.LinearFilter;
-      tex.anisotropy = 16;
+      tex.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
       return tex;
     };
 
@@ -919,18 +980,20 @@ export function GalleryPage() {
       });
       group.userData.rings = rings;
 
-      // Direct illumination spotlight pointing right at the billboard face!
-      const bannerSpot = new THREE.SpotLight(0xffffff, 2.5);
-      bannerSpot.position.set(0, boardCenterY + 4, 6);
-      bannerSpot.target = canvasMesh;
-      bannerSpot.angle = Math.PI / 3;
-      bannerSpot.penumbra = 0.5;
-      group.add(bannerSpot);
-
-      // Warm colored point light
-      const pointLight = new THREE.PointLight(new THREE.Color(edition.color), 2.2, 35);
-      pointLight.position.set(0, boardCenterY, 2.5);
-      group.add(pointLight);
+      // Colored glow pool on the ground in front of the board. Replaces per-billboard
+      // spot + point lights, which made every lit material in the scene far more expensive.
+      const glowMat = new THREE.MeshBasicMaterial({
+        color: new THREE.Color(edition.color),
+        map: groundGlowTex,
+        transparent: true,
+        opacity: GLOW_BASE_OPACITY,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      });
+      const glow = new THREE.Mesh(new THREE.PlaneGeometry(16, 11), glowMat);
+      glow.rotation.x = -Math.PI / 2;
+      glow.position.set(0, 0.06, 3);
+      group.add(glow);
 
       // Hanging lanterns on corners
       [-BW / 2, BW / 2].forEach((xOff) => {
@@ -966,8 +1029,8 @@ export function GalleryPage() {
         group,
         edition,
         position: new THREE.Vector3(x, 0, z),
-        pointLight,
-        baseLightIntensity: 2.2,
+        glowMat,
+        frameMat,
         floatOffset: Math.random() * Math.PI * 2,
         canvasMesh,
       });
@@ -1364,9 +1427,12 @@ export function GalleryPage() {
         const dist = Math.sqrt(dx * dx + dz * dz);
 
         if (dist < PULSE_DIST) {
-          b.pointLight.intensity = b.baseLightIntensity + Math.sin(now * 0.006) * 0.5;
+          const pulse = Math.sin(now * 0.006);
+          b.glowMat.opacity = GLOW_BASE_OPACITY + pulse * 0.15;
+          b.frameMat.emissiveIntensity = FRAME_BASE_EMISSIVE + pulse * 0.5;
         } else {
-          b.pointLight.intensity = b.baseLightIntensity;
+          b.glowMat.opacity = GLOW_BASE_OPACITY;
+          b.frameMat.emissiveIntensity = FRAME_BASE_EMISSIVE;
         }
 
         if (dist < TRIGGER_DIST && dist < closestDist) {
@@ -1381,7 +1447,7 @@ export function GalleryPage() {
           handleOpenGallery(closest.edition.key);
         }
       } else {
-        if (activeEditionRef.current && !galleryOpen) {
+        if (activeEditionRef.current && !galleryOpenRef.current) {
           activeEditionRef.current = null;
         }
       }
@@ -1389,14 +1455,20 @@ export function GalleryPage() {
 
     // Animation Loop
     const camOffset = new THREE.Vector3();
+    const camTarget = new THREE.Vector3();
+    let frameCount = 0;
+
+    // Compile all shaders up front so the first frames don't stall
+    renderer.compile(scene, camera);
 
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
+      frameCount++;
       const dt = Math.min(clock.getDelta(), 0.05);
       const t = clock.getElapsedTime();
 
       // Player Movement
-      if (!galleryOpen) {
+      if (!galleryOpenRef.current) {
         let moveX = 0,
           moveZ = 0;
 
@@ -1486,7 +1558,7 @@ export function GalleryPage() {
         Math.cos(cy) * Math.cos(cp) * cd
       );
 
-      camera.position.lerp(playerGroup.position.clone().add(camOffset), 0.12);
+      camera.position.lerp(camTarget.copy(playerGroup.position).add(camOffset), 0.12);
       camera.lookAt(playerGroup.position.x, playerGroup.position.y + 0.6, playerGroup.position.z);
 
       // Monument animations
@@ -1519,7 +1591,7 @@ export function GalleryPage() {
       });
 
       // Falling Petals
-      petalPool.forEach((p) => {
+      petalPool.forEach((p, i) => {
         p.mesh.position.x += p.vx + Math.sin(t * 0.5 + p.vx * 100) * 0.01;
         p.mesh.position.y += p.vy;
         p.mesh.position.z += p.vz;
@@ -1529,10 +1601,13 @@ export function GalleryPage() {
         if (p.mesh.position.y < -0.5) {
           resetPetal(p.mesh);
         }
+        p.mesh.updateMatrix();
+        petalMesh.setMatrixAt(i, p.mesh.matrix);
       });
+      petalMesh.instanceMatrix.needsUpdate = true;
 
       checkProximity();
-      drawMinimap();
+      if (frameCount % 2 === 0) drawMinimap();
       renderer.render(scene, camera);
     };
 
@@ -1551,9 +1626,19 @@ export function GalleryPage() {
       canvas.removeEventListener("touchmove", onTouchMove);
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
+      scene.traverse((obj) => {
+        const mesh = obj as THREE.Mesh;
+        if (mesh.geometry) mesh.geometry.dispose();
+        const mats = Array.isArray(mesh.material) ? mesh.material : mesh.material ? [mesh.material] : [];
+        mats.forEach((m) => {
+          const map = (m as THREE.MeshBasicMaterial).map;
+          if (map) map.dispose();
+          m.dispose();
+        });
+      });
       renderer.dispose();
     };
-  }, [handleOpenGallery, galleryOpen]);
+  }, [handleOpenGallery]);
 
   return (
     <div className="gallery-world-wrapper">

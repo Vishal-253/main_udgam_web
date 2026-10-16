@@ -1096,8 +1096,7 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--ep-muted);
-}
-.udgam-events .ep-tray {
+}.udgam-events .ep-tray {
   position: fixed;
   left: 50%;
   bottom: calc(18px + env(safe-area-inset-bottom, 0px));
@@ -1489,5 +1488,525 @@
   }
   .udgam-events.ep-root {
     padding-top: calc(var(--nav-clear) + var(--ticker-h) + 28px);
+  }
+}
+
+/* ==========================================================================
+   Rulebook Direct Buttons on Event Cards
+   ========================================================================== */
+.udgam-events .ep-details-btn.ep-rulebook-direct-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 38px;
+  padding: 0 14px;
+  background: oklch(0.6 0.14 var(--hue, 250) / 0.12);
+  border: 1px solid oklch(0.6 0.14 var(--hue, 250) / 0.35);
+  border-radius: 999px;
+  color: var(--ep-ink);
+  font: 700 0.85rem var(--font-sans);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+.udgam-events .ep-details-btn.ep-rulebook-direct-btn:hover {
+  background: oklch(0.6 0.14 var(--hue, 250) / 0.22);
+  border-color: oklch(0.6 0.14 var(--hue, 250) / 0.6);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px oklch(0.6 0.14 var(--hue, 250) / 0.2);
+}
+.udgam-events .ep-details-btn.ep-rulebook-direct-btn .ep-btn-icon {
+  width: 15px;
+  height: 15px;
+  color: oklch(0.5 0.16 var(--hue, 250));
+}
+
+.udgam-events .ep-ticket-stub-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  width: 100%;
+}
+.udgam-events .ep-ticket-rb-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 5px 10px;
+  font: 600 0.72rem var(--font-sans);
+  color: var(--ep-ink);
+  background: oklch(0.6 0.12 var(--hue, 250) / 0.1);
+  border: 1px solid oklch(0.6 0.12 var(--hue, 250) / 0.28);
+  border-radius: 999px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+.udgam-events .ep-ticket-rb-btn:hover {
+  background: oklch(0.6 0.12 var(--hue, 250) / 0.2);
+  border-color: oklch(0.6 0.12 var(--hue, 250) / 0.5);
+  transform: translateY(-1px);
+}
+.udgam-events .ep-ticket-rb-btn .ep-btn-icon {
+  width: 13px;
+  height: 13px;
+}
+
+/* ==========================================================================
+   Embedded Rulebook inside EventDrawer
+   ========================================================================== */
+.udgam-events .ep-drawer-rulebook-block {
+  margin-top: 14px;
+}
+.udgam-events .ep-drawer-rb-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.udgam-events .ep-drawer-rb-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.udgam-events .ep-drawer-rb-meta .ep-doc-icon {
+  width: 22px;
+  height: 22px;
+  color: oklch(0.6 0.15 var(--hue, 250));
+  flex-shrink: 0;
+}
+.udgam-events .ep-drawer-rb-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ep-ink);
+}
+.udgam-events .ep-drawer-rb-sub {
+  margin: 2px 0 0;
+  font-size: 0.74rem;
+  opacity: 0.7;
+}
+.udgam-events .ep-drawer-rb-tools {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.udgam-events .ep-drawer-rb-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 11px;
+  background: oklch(0.6 0.12 var(--hue, 250) / 0.12);
+  border: 1px solid oklch(0.6 0.12 var(--hue, 250) / 0.3);
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ep-ink);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.udgam-events .ep-drawer-rb-btn:hover {
+  background: oklch(0.6 0.12 var(--hue, 250) / 0.22);
+  border-color: oklch(0.6 0.12 var(--hue, 250) / 0.55);
+  transform: translateY(-1px);
+}
+.udgam-events .ep-drawer-rb-btn .ep-rb-icon {
+  width: 14px;
+  height: 14px;
+}
+.udgam-events .ep-drawer-pdf-box {
+  width: 100%;
+  height: 520px;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1.5px solid oklch(0.6 0.12 var(--hue, 250) / 0.3);
+  background: oklch(0.12 0.01 260);
+  box-shadow: 0 8px 24px -6px oklch(0 0 0 / 0.25);
+}
+.udgam-events .ep-drawer-pdf-frame {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+
+/* ==========================================================================
+   RulebookViewer — full-screen PDF modal
+   ========================================================================== */
+.rb-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+}
+
+.rb-backdrop {
+  position: absolute;
+  inset: 0;
+  background: oklch(0.08 0.02 260 / 0.78);
+  backdrop-filter: blur(14px) saturate(1.4);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  animation: rb-fade-in 0.25s ease forwards;
+}
+
+.rb-panel {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  width: min(960px, 100vw);
+  height: 100dvh;
+  background: oklch(0.12 0.018 260 / 0.97);
+  border-left: 1px solid oklch(1 0 0 / 0.1);
+  border-right: 1px solid oklch(1 0 0 / 0.1);
+  animation: rb-slide-up 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  overflow: hidden;
+}
+
+@keyframes rb-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes rb-slide-up {
+  from { opacity: 0; transform: translateY(32px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.rb-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  background: oklch(0.16 0.025 260 / 0.98);
+  border-bottom: 1px solid oklch(1 0 0 / 0.1);
+  flex-shrink: 0;
+}
+
+.rb-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.rb-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: oklch(0.72 0.14 260);
+}
+
+.rb-title {
+  font-size: 1.08rem;
+  font-weight: 700;
+  color: oklch(0.97 0.01 260);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rb-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.rb-download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: oklch(0.52 0.18 260);
+  color: oklch(0.97 0.01 260);
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.12s ease;
+}
+.rb-download-btn:hover {
+  background: oklch(0.6 0.2 260);
+  transform: translateY(-1px);
+}
+.rb-download-btn:active {
+  transform: translateY(0);
+}
+
+.rb-close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  background: oklch(1 0 0 / 0.08);
+  border: 1px solid oklch(1 0 0 / 0.15);
+  border-radius: 10px;
+  color: oklch(0.9 0.01 260);
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.12s ease;
+}
+.rb-close-btn:hover {
+  background: oklch(1 0 0 / 0.16);
+  transform: scale(1.08);
+}
+.rb-close-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.rb-body {
+  flex: 1;
+  overflow: hidden;
+  background: oklch(0.15 0.015 260);
+}
+
+.rb-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+
+@media (max-width: 640px) {
+  .rb-panel {
+    width: 100vw;
+    border-left: none;
+    border-right: none;
+  }
+  .rb-title {
+    font-size: 0.88rem;
+  }
+  .rb-download-btn {
+    padding: 7px 11px;
+    font-size: 0.76rem;
+  }
+}
+
+/* ---------------------------------------------------------------- Registration */
+.udgam-events .ep-tray-register {
+  flex-shrink: 0;
+  height: 30px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 999px;
+  background: var(--gradient-blossom);
+  color: var(--primary-foreground);
+  font: 700 0.78rem var(--font-sans);
+  cursor: pointer;
+}
+.udgam-events .ep-tray-hint {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--ep-muted);
+}
+.udgam-events .ep-reg-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+.udgam-events .ep-reg-scrim {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in oklab, var(--foreground) 35%, transparent);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.udgam-events .ep-reg-dialog {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(640px, 100%);
+  max-height: calc(100dvh - 32px);
+  overflow: hidden;
+  border-radius: 24px;
+  background: var(--popover);
+  color: var(--ep-ink);
+  box-shadow: 0 30px 80px -24px color-mix(in oklab, var(--blossom-deep) 55%, transparent);
+  outline: none;
+}
+.udgam-events .ep-reg-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 20px 12px 24px;
+  border-bottom: 1px solid var(--ep-line);
+}
+.udgam-events .ep-reg-eyebrow {
+  margin: 0 0 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--blossom-deep);
+}
+.udgam-events .ep-reg-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.15;
+}
+.udgam-events .ep-reg-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 18px 24px 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.udgam-events .ep-reg-group {
+  margin: 0;
+  padding: 14px 16px 16px;
+  border: 1px solid var(--ep-line);
+  border-radius: 16px;
+}
+.udgam-events .ep-reg-group legend {
+  padding: 0 6px;
+  font-weight: 700;
+}
+.udgam-events .ep-reg-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.udgam-events .ep-reg-wide {
+  grid-column: 1 / -1;
+}
+.udgam-events .ep-reg-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+.udgam-events .ep-reg-field input,
+.udgam-events .ep-reg-field select {
+  width: 100%;
+  height: 42px;
+  padding: 0 12px;
+  border: 1.5px solid var(--ep-line);
+  border-radius: 12px;
+  background: oklch(1 0 0 / 0.9);
+  color: var(--ep-ink);
+  font: 600 0.95rem var(--font-sans);
+}
+.udgam-events .ep-reg-field input:focus-visible,
+.udgam-events .ep-reg-field select:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 1px;
+}
+.udgam-events .ep-reg-field [aria-invalid="true"] {
+  border-color: oklch(0.6 0.2 25);
+}
+.udgam-events .ep-reg-error {
+  color: oklch(0.5 0.19 25);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+.udgam-events .ep-reg-member {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr) minmax(0, 1fr) 30px;
+  align-items: start;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.udgam-events .ep-reg-member-no {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  margin-top: 24px;
+  border-radius: 50%;
+  background: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+.udgam-events .ep-reg-member .ep-icon-btn {
+  margin-top: 24px;
+}
+.udgam-events .ep-reg-group .ep-btn-ghost {
+  margin-top: 4px;
+}
+.udgam-events .ep-reg-muted {
+  color: var(--ep-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.udgam-events .ep-reg-muted code {
+  word-break: break-all;
+}
+.udgam-events .ep-reg-body .ep-tray-notice p {
+  margin: 0;
+}
+.udgam-events .ep-reg-body .ep-tray-notice p + p {
+  margin-top: 6px;
+}
+.udgam-events .ep-reg-foot {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0 -24px;
+  padding: 14px 24px calc(14px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--ep-line);
+  background: var(--popover);
+}
+.udgam-events .ep-reg-submit {
+  width: auto;
+  min-width: 200px;
+  padding: 0 22px;
+}
+.udgam-events .ep-reg-result {
+  gap: 12px;
+  padding-bottom: 24px;
+}
+.udgam-events .ep-reg-result p {
+  margin: 0;
+}
+.udgam-events .ep-reg-result-title {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 600;
+}
+@media (max-width: 600px) {
+  .udgam-events .ep-reg-layer {
+    align-items: end;
+    padding: 0;
+  }
+  .udgam-events .ep-reg-dialog {
+    max-height: 92dvh;
+    border-radius: 24px 24px 0 0;
+  }
+  .udgam-events .ep-reg-grid {
+    grid-template-columns: 1fr;
+  }
+  .udgam-events .ep-reg-member {
+    grid-template-columns: 22px minmax(0, 1fr) 30px;
+  }
+  .udgam-events .ep-reg-member .ep-reg-field:nth-of-type(2) {
+    grid-column: 2;
+  }
+  .udgam-events .ep-reg-submit {
+    min-width: 0;
+    flex: 1;
   }
 }

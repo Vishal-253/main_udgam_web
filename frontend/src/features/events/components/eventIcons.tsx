@@ -115,3 +115,25 @@ export const TicketIcon = (props: IconProps) => (
     <path d="M13 5v2M13 17v2M13 11v2" />
   </svg>
 );
+
+export const BookIcon = (props: IconProps) => (
+  <svg {...base} {...props}>
+    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+  </svg>
+);
+
+export const ExpandIcon = (props: IconProps) => (
+  <svg {...base} strokeWidth={2} {...props}>
+    <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+  </svg>
+);
+
+export const DownloadIcon = (props: IconProps) => (
+  <svg {...base} strokeWidth={2} {...props}>
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+    <polyline points="7 10 12 15 17 10" />
+    <line x1="12" y1="15" x2="12" y2="3" />
+  </svg>
+);
+

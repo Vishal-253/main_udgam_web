@@ -12,10 +12,15 @@ describe("events data", () => {
     for (const e of EVENTS) expect(categories.has(e.category)).toBe(true);
   });
 
-  it("gives E-Games one tagline per title", () => {
-    const egames = EVENTS.find((e) => e.games);
-    expect(egames).toBeDefined();
-    if (egames?.games) expect(cardTaglines(egames)).toHaveLength(egames.games.length);
+  it("lists each e-sports title as its own event with the budget fee", () => {
+    const esports = EVENTS.filter((e) => e.category === "esports");
+    expect(esports.map((e) => e.name).sort()).toEqual(
+      ["BGMI", "Free Fire", "MLBB", "eFootball"].sort(),
+    );
+    for (const e of esports) {
+      expect(e.fee).toBe(e.id === "efootball" ? 50 : 200);
+      expect(cardTaglines(e).length).toBeGreaterThan(0);
+    }
   });
 });
 

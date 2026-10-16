@@ -12,9 +12,9 @@ import {
   Layers,
 } from "lucide-react";
 
-import aboutBg from "@/assets/about_blossom_bg.jpg";
-import campusSketch from "@/assets/campus_original_sketch.png";
-import campusPhoto from "@/assets/campus_real_photo.png";
+import aboutBg from "@/assets/about_blossom_bg.webp";
+import campusSketch from "@/assets/campus_original_sketch.webp";
+import campusPhoto from "@/assets/campus_real_photo.webp";
 
 export const Route = createFileRoute("/about")({
   head: () => ({

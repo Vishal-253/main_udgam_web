@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { BlossomLoader } from "@/components/ui/BlossomLoader";
-import campusImg from "@/assets/floating_campus.png";
+import campusImg from "@/assets/floating_campus.webp";
 
 const BlossomScene = lazy(() => import("@/components/3d/BlossomScene").then((m) => ({ default: m.BlossomScene })));
 
@@ -37,7 +37,14 @@ function Home() {
   const petalEl = useRef<HTMLDivElement>(null);
   const videoTarget = useRef(0); // 0..1
   const [loading, setLoading] = useState(true);
-  const [low, setLow] = useState(false);
+  // Start in low quality on phones / low-core or low-memory devices (user can still toggle)
+  const [low, setLow] = useState(() => {
+    if (typeof window === "undefined") return false;
+    const nav = navigator as Navigator & { deviceMemory?: number };
+    const coarse = window.matchMedia?.("(pointer: coarse)").matches ?? false;
+    return coarse || (nav.hardwareConcurrency ?? 8) <= 4 || (nav.deviceMemory ?? 8) <= 4;
+  });
+  const [scenePaused, setScenePaused] = useState(false);
   const [enterKey, setEnterKey] = useState(0); // +1 on every "Enter Campus" click
   const entered = enterKey > 0;
 
@@ -94,6 +101,8 @@ function Home() {
       videoTarget.current = maxV > 0 ? clamp((window.scrollY - zoneH) / maxV) : 0;
       // stop rendering the canvas once the video fully covers it
       if (canvasWrap.current) canvasWrap.current.style.visibility = f >= 1 ? "hidden" : "visible";
+      // ...and stop the WebGL render loop entirely while it's covered
+      setScenePaused(f >= 1);
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -127,7 +136,7 @@ function Home() {
     <>
       <AnimatePresence>{loading && <BlossomLoader onDone={() => setLoading(false)} />}</AnimatePresence>
       <div ref={canvasWrap} className="fixed inset-0 -z-0">
-        <Suspense fallback={null}><BlossomScene progress={progress} low={low} /></Suspense>
+        <Suspense fallback={null}><BlossomScene progress={progress} low={low} paused={scenePaused} /></Suspense>
       </div>
       <button onClick={() => setLow(!low)} className="glass fixed bottom-5 right-5 z-40 rounded-full px-4 py-2 text-xs font-bold text-secondary-foreground">
         {low ? "Low quality ✓" : "High quality ✓"}

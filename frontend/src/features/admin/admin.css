@@ -1,0 +1,465 @@
+/* Admin panel (/admin). Everything is scoped under .udgam-admin. */
+.udgam-admin {
+  --adm-bg: #f6f4f7;
+  --adm-surface: #ffffff;
+  --adm-ink: #1f1a24;
+  --adm-muted: #6b6475;
+  --adm-line: #e4dfe8;
+  --adm-accent: #d6336c;
+  --adm-accent-ink: #ffffff;
+  --adm-good: #1f7a4d;
+  --adm-warn: #a15c00;
+  --adm-bad: #b42318;
+  min-height: 100vh;
+  background: var(--adm-bg);
+  color: var(--adm-ink);
+  font:
+    15px/1.45 "Quicksand",
+    system-ui,
+    sans-serif;
+}
+.udgam-admin * {
+  box-sizing: border-box;
+}
+.udgam-admin h1 {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+.udgam-admin h2 {
+  margin: 0 0 12px;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+.udgam-admin .adm-center {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: 16px;
+}
+.udgam-admin .adm-login {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: min(380px, 100%);
+  padding: 28px;
+  border-radius: 18px;
+  background: var(--adm-surface);
+  box-shadow: 0 20px 50px -20px rgb(0 0 0 / 0.25);
+}
+.udgam-admin .adm-login label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+.udgam-admin input,
+.udgam-admin select {
+  height: 40px;
+  padding: 0 12px;
+  border: 1.5px solid var(--adm-line);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--adm-ink);
+  font: inherit;
+}
+.udgam-admin input[type="checkbox"] {
+  height: auto;
+}
+.udgam-admin input:focus-visible,
+.udgam-admin select:focus-visible,
+.udgam-admin button:focus-visible {
+  outline: 2px solid var(--adm-accent);
+  outline-offset: 1px;
+}
+.udgam-admin .adm-eyebrow {
+  margin: 0;
+  color: var(--adm-accent);
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.udgam-admin .adm-btn {
+  height: 38px;
+  padding: 0 14px;
+  border: 1.5px solid var(--adm-line);
+  border-radius: 10px;
+  background: var(--adm-surface);
+  color: var(--adm-ink);
+  font: 700 0.88rem inherit;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.udgam-admin .adm-btn:hover:not(:disabled) {
+  border-color: var(--adm-accent);
+}
+.udgam-admin .adm-btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.udgam-admin .adm-btn-primary {
+  border-color: var(--adm-accent);
+  background: var(--adm-accent);
+  color: var(--adm-accent-ink);
+}
+.udgam-admin .adm-btn-small {
+  height: 30px;
+  margin-top: 6px;
+  font-size: 0.8rem;
+}
+.udgam-admin .adm-link {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--adm-accent);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: left;
+  word-break: break-all;
+}
+.udgam-admin .adm-error {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fde8e7;
+  color: var(--adm-bad);
+  font-weight: 600;
+}
+.udgam-admin .adm-muted {
+  color: var(--adm-muted);
+  font-size: 0.88rem;
+}
+.udgam-admin .adm-tag {
+  display: inline-block;
+  margin: 0 6px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: #f3e8ef;
+  color: var(--adm-accent);
+  font-size: 0.72rem;
+  font-weight: 700;
+  vertical-align: middle;
+}
+
+/* shell */
+.udgam-admin .adm-top {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 10px 24px;
+  border-bottom: 1px solid var(--adm-line);
+  background: var(--adm-surface);
+}
+.udgam-admin .adm-brand {
+  font-weight: 800;
+}
+.udgam-admin .adm-brand span {
+  color: var(--adm-accent);
+}
+.udgam-admin .adm-nav {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+}
+.udgam-admin .adm-nav button {
+  height: 36px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 10px;
+  background: none;
+  color: var(--adm-muted);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.udgam-admin .adm-nav button.is-active {
+  background: #f3e8ef;
+  color: var(--adm-accent);
+}
+.udgam-admin .adm-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--adm-muted);
+  font-weight: 600;
+}
+.udgam-admin .adm-main {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px;
+}
+.udgam-admin .adm-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+.udgam-admin .adm-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.udgam-admin .adm-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.udgam-admin .adm-card {
+  display: flex;
+  flex-direction: column;
+  padding: 14px 16px;
+  border: 1px solid var(--adm-line);
+  border-radius: 14px;
+  background: var(--adm-surface);
+}
+.udgam-admin .adm-card.is-bad .adm-card-value {
+  color: var(--adm-bad);
+}
+.udgam-admin .adm-card.is-warn {
+  border-color: #f2c779;
+  background: #fff8ea;
+}
+.udgam-admin .adm-card-label {
+  color: var(--adm-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.udgam-admin .adm-card-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+.udgam-admin .adm-panel {
+  margin-bottom: 20px;
+  padding: 18px;
+  border: 1px solid var(--adm-line);
+  border-radius: 16px;
+  background: var(--adm-surface);
+}
+.udgam-admin .adm-panel.is-bad {
+  border-color: #f4b4ae;
+}
+.udgam-admin .adm-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.udgam-admin .adm-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--adm-muted);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.udgam-admin .adm-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.udgam-admin .adm-search {
+  flex: 1;
+  min-width: 220px;
+}
+
+/* tables */
+.udgam-admin .adm-table-wrap {
+  overflow-x: auto;
+}
+.udgam-admin .adm-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+.udgam-admin .adm-table th,
+.udgam-admin .adm-table td {
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--adm-line);
+  text-align: left;
+  white-space: nowrap;
+}
+.udgam-admin .adm-table th {
+  color: var(--adm-muted);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.udgam-admin .adm-table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.udgam-admin .adm-table tr.is-clickable {
+  cursor: pointer;
+}
+.udgam-admin .adm-table tr.is-clickable:hover td {
+  background: #fbf7fa;
+}
+
+/* registration cards */
+.udgam-admin .adm-regs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.udgam-admin .adm-reg {
+  border: 1px solid var(--adm-line);
+  border-radius: 12px;
+  background: var(--adm-surface);
+  overflow: hidden;
+}
+.udgam-admin .adm-reg-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 14px;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.udgam-admin .adm-reg-title {
+  flex: 1;
+  font-weight: 700;
+}
+.udgam-admin .adm-reg-meta {
+  color: var(--adm-muted);
+  font-size: 0.85rem;
+}
+.udgam-admin .adm-reg-body {
+  padding: 4px 14px 14px;
+  border-top: 1px solid var(--adm-line);
+}
+.udgam-admin .adm-status {
+  font-weight: 700;
+}
+.udgam-admin .adm-status.is-confirmed {
+  color: var(--adm-good);
+}
+.udgam-admin .adm-status.is-pending {
+  color: var(--adm-warn);
+}
+.udgam-admin .adm-status.is-refund_required {
+  color: var(--adm-bad);
+}
+.udgam-admin .adm-status.is-expired,
+.udgam-admin .adm-status.is-cancelled {
+  color: var(--adm-muted);
+}
+.udgam-admin .adm-dl {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px 20px;
+  margin: 12px 0;
+}
+.udgam-admin .adm-dl dt {
+  color: var(--adm-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.udgam-admin .adm-dl dd {
+  margin: 0;
+  font-weight: 600;
+  word-break: break-word;
+}
+.udgam-admin .adm-dl a {
+  color: inherit;
+}
+
+/* printable sheet: hidden on screen */
+.udgam-admin .adm-print {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .udgam-admin .adm-top {
+    flex-wrap: wrap;
+    padding: 10px 16px;
+  }
+  .udgam-admin .adm-main {
+    padding: 16px;
+  }
+  .udgam-admin .adm-reg-head {
+    flex-wrap: wrap;
+  }
+}
+
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 10mm;
+  }
+  body {
+    background: #fff !important;
+  }
+  .udgam-admin {
+    background: #fff;
+    font-size: 11pt;
+  }
+  .udgam-admin .no-print,
+  .udgam-admin .adm-top {
+    display: none !important;
+  }
+  .udgam-admin .adm-main {
+    max-width: none;
+    padding: 0;
+  }
+  .udgam-admin .adm-print {
+    display: block;
+    color: #000;
+  }
+  .udgam-admin .adm-print-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+  .udgam-admin .adm-print-head p {
+    margin: 0;
+    font-size: 9pt;
+  }
+  .udgam-admin .adm-print-head h1 {
+    font-size: 15pt;
+  }
+  .udgam-admin .adm-print table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .udgam-admin .adm-print th,
+  .udgam-admin .adm-print td {
+    padding: 5px 6px;
+    border: 1px solid #555;
+    text-align: left;
+    font-size: 10pt;
+  }
+  .udgam-admin .adm-print thead {
+    display: table-header-group; /* repeat the header on every page */
+  }
+  .udgam-admin .adm-print tbody {
+    break-inside: avoid; /* keep a team together on one page */
+  }
+  .udgam-admin .adm-print .team {
+    font-weight: 700;
+    vertical-align: top;
+  }
+  .udgam-admin .adm-print .sig {
+    width: 22%;
+  }
+}
