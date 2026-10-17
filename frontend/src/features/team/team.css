@@ -314,6 +314,39 @@
   flex-direction: column;
   animation: deckOverlayFadeIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+/* close button: stays in the top-right corner while the dealt cards scroll; the negative
+   margin keeps it from pushing the cards down */
+.udgam-team .deck-overlay-close {
+  position: sticky;
+  top: 16px;
+  z-index: 3;
+  align-self: flex-end;
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  margin: 16px 16px -60px 0;
+  display: grid;
+  place-items: center;
+  border: 1px solid oklch(1 0 0 / 0.9);
+  border-radius: 50%;
+  background: oklch(1 0 0 / 0.85);
+  color: #3a2a30;
+  box-shadow: 0 6px 18px -6px oklch(0.3 0.05 260 / 0.35);
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease;
+}
+.udgam-team .deck-overlay-close:hover {
+  transform: rotate(90deg);
+  background: var(--gradient-blossom, #b4505c);
+  color: #fff;
+}
+.udgam-team .deck-overlay-close:focus-visible {
+  outline: 2px solid var(--ring, #b4505c);
+  outline-offset: 3px;
+}
 @keyframes deckOverlayFadeIn {
   from {
     opacity: 0;
@@ -1170,6 +1203,10 @@
   .udgam-team .deck-deal-card-slot {
     flex-basis: calc(50% - 7px);
     width: calc(50% - 7px);
+  }
+  /* leave room for the close button above the first row */
+  .udgam-team .deck-overlay-content {
+    padding-top: 76px;
   }
   /* "Vice President" etc. above a half-width card */
   .udgam-team .leadership-card-col > .leadership-role-title {
