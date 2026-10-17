@@ -23,9 +23,9 @@ describe("events data", () => {
     expect(byId("food-fiesta")?.fee).toBe(0); // no fee in the budget sheet -> free (organisers' call)
   });
 
-  it("links a rulebook PDF that really exists (and is compressed) for 24 events", () => {
+  it("links a rulebook PDF that really exists (and is compressed) for 23 events", () => {
     const withBook = EVENTS.filter((e) => e.rulebookPdf);
-    expect(withBook).toHaveLength(24);
+    expect(withBook).toHaveLength(23);
     expect(EVENTS.find((e) => e.id === "guess-the-juice")).not.toHaveProperty("rulebookPdf");
     for (const e of withBook) {
       const file = resolve(__dirname, "../../public", `.${e.rulebookPdf}`);
@@ -43,7 +43,7 @@ describe("events data", () => {
 
   it("lists each e-sports title as its own event", () => {
     const esports = EVENTS.filter((e) => e.category === "esports");
-    expect(esports.map((e) => e.name)).toEqual(["Free Fire", "BGMI", "MLBB", "eFootball"]);
+    expect(esports.map((e) => e.name)).toEqual(["Free Fire", "MLBB", "eFootball"]);
     for (const e of esports.filter((x) => x.id !== "efootball")) {
       expect(e).toMatchObject({ fee: 200, feeUnit: "team" });
     }
@@ -71,7 +71,10 @@ describe("team directory", () => {
     const dealt = team.committees.reduce((n, d) => n + d.members.length, 0);
     expect(dealt).toBe(committeeMembers.length);
     for (const d of team.committees) {
-      expect(d.coverImage).toBe(`/assets/team/committees/${d.id}.webp`);
+      expect(d.coverImage).toMatch(new RegExp(`^/assets/team/committees/${d.id}(-v\\d+)?\\.webp$`));
+      expect(existsSync(resolve(__dirname, "../../public", `.${d.coverImage}`)), d.coverImage).toBe(
+        true,
+      );
     }
   });
 
@@ -102,6 +105,8 @@ describe("team directory", () => {
       ["raj", "Raj"],
       ["ngawang-damchoe", "Ngawang Damchoe Sherpa"],
       ["aryan-gupta", "Aryan Gupta"],
+      ["shivanshu-kumar", "Shivanshu Kumar"],
+      ["saysay", "Saysay Hang Limboo"],
     ] as const) {
       expect(people.find((m) => m.id === id)?.name, id).toBe(name);
       expect(teamPhotoFor(id), id).toMatch(new RegExp(`${id}`));
@@ -109,7 +114,10 @@ describe("team directory", () => {
   });
 
   it("calls the publicity deck Publicity", () => {
-    expect(team.committees.find((d) => d.id === "publicity")?.title).toBe("Publicity");
+    const deck = team.committees.find((d) => d.id === "publicity");
+    expect(deck?.title).toBe("Publicity");
+    // new file name, so browsers holding the old "Public Relations" card fetch the new one
+    expect(deck?.coverImage).toBe("/assets/team/committees/publicity-v2.webp");
   });
 
   it("shows the Web Dev committee first, others in their usual order", () => {

@@ -23,6 +23,10 @@ export interface TeamDirectory {
 }
 
 const COVER_DIR = "/assets/team/committees";
+// /assets is cached by browsers for a year, so a changed cover needs a new file name
+const COVER_FILES: Record<string, string> = {
+  publicity: "publicity-v2", // relabelled from "Public Relations"
+};
 
 // Dinesh Saini leads the General Secretary row
 const GENSEC_FIRST = "dinesh-saini";
@@ -55,7 +59,7 @@ export function buildTeamDirectory(): TeamDirectory {
         subtitle: cat.fullName ?? `${title} Committee`,
         roleText: `${members.length} PASSES IN DECK`,
         icon: cat.icon,
-        coverImage: `${COVER_DIR}/${cat.id}.webp`,
+        coverImage: `${COVER_DIR}/${COVER_FILES[cat.id] ?? cat.id}.webp`,
         members,
       };
     });

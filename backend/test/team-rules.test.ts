@@ -10,7 +10,6 @@ const OFFICIAL: Record<string, [number, number]> = {
   antakshari: [5, 5], // exactly 5 per team
   "balloon-burst": [2, 2],
   "balloon-pair-race": [2, 2], // Balloon Between Knees Race
-  bgmi: [4, 5], // 4 players + 1 optional substitute
   "cup-pong": [1, 1],
   "dance-competition": [1, 7], // maximum 7
   "dumb-charades": [4, 4],
@@ -58,8 +57,8 @@ function problemsFor(eventId: string, size: number): string[] {
 }
 
 describe("official team sizes", () => {
-  it("covers all 25 events from the organisers' list", () => {
-    expect(Object.keys(OFFICIAL)).toHaveLength(25);
+  it("covers all 24 events from the organisers' list (BGMI dropped)", () => {
+    expect(Object.keys(OFFICIAL)).toHaveLength(24);
     for (const [id, [min, max]] of Object.entries(OFFICIAL)) {
       expect(EVENTS.find((e) => e.id === id)?.teamSize, id).toEqual({ min, max });
     }

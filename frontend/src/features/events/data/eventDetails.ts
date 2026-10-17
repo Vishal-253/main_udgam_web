@@ -249,17 +249,6 @@ export const EVENTS: FestEvent[] = [
     rulebookPdf: "/rulebooks/free-fire.pdf",
   },
   {
-    id: "bgmi",
-    name: "BGMI",
-    tier: "regular",
-    category: "esports",
-    fee: 200,
-    feeUnit: "team",
-    teamSize: { min: 4, max: 5 },
-    taglines: ["Chicken dinner isn't served — it's earned!", "Not just a game — it's war!"],
-    rulebookPdf: "/rulebooks/bgmi.pdf",
-  },
-  {
     id: "mlbb",
     name: "MLBB",
     tier: "regular",

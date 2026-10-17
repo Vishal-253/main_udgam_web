@@ -162,7 +162,7 @@ describe("admin queries", () => {
       confirmedParticipants: 2,
       revenuePaise: 0,
     });
-    expect(o.events).toHaveLength(29); // every event listed, even with no registrations
+    expect(o.events).toHaveLength(28); // every event listed, even with no registrations
     expect(o.totals).toMatchObject({
       confirmedTeams: 4,
       confirmedParticipants: 8,
