@@ -341,12 +341,6 @@ function About() {
           >
             Explore Events
           </Link>
-          <Link
-            to="/calendar"
-            className="glass inline-flex items-center gap-2 rounded-full px-7 py-3 text-sm font-bold text-secondary-foreground shadow-sm transition-transform hover:scale-105"
-          >
-            Day Calendar
-          </Link>
         </motion.div>
       </section>
 
