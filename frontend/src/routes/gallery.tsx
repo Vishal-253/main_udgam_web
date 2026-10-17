@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import * as THREE from "three";
 import groundImg from "@/assets/ground.jpg";
 import mountainImg from "@/assets/distant_mountains_sikkim.webp";
+import { buildStage, type Stage, type StageKind } from "@/features/gallery/stages";
 import "../gallery.css";
 
 export const Route = createFileRoute("/gallery")({
@@ -64,33 +65,6 @@ const UDGAM_EDITIONS: EditionInfo[] = [
     photos: photoSeries("udgam2k23", 2),
   },
   {
-    key: "udgam2k22",
-    title: "Udgam 2K22",
-    tagline: "Rising from silence — culture finds its voice again",
-    url: "",
-    color: "#34d399",
-    accentColor: "#059669",
-    photos: [],
-  },
-  {
-    key: "udgam2k21",
-    title: "Udgam 2K21",
-    tagline: "Digital horizons — festival beyond boundaries",
-    url: "",
-    color: "#60a5fa",
-    accentColor: "#2563eb",
-    photos: [],
-  },
-  {
-    key: "udgam2k20",
-    title: "Udgam 2K20",
-    tagline: "The last great gathering before the world paused",
-    url: "https://udgam.nitsikkim.ac.in/udgam20/",
-    color: "#f472b6",
-    accentColor: "#db2777",
-    photos: [],
-  },
-  {
     key: "udgam2k19",
     title: "Udgam 2K19",
     tagline: "Nights of music, days of magic",
@@ -109,6 +83,32 @@ const UDGAM_EDITIONS: EditionInfo[] = [
     photos: photoSeries("udgam2k18", 10),
   },
 ];
+
+// The eight spots around the walkway: a billboard for each edition with photos, and live
+// stages where the photo-less editions (2K20-2K22) used to stand.
+const GROVE_SLOTS: ({ edition: string } | { stage: StageKind })[] = [
+  { edition: "udgam2k25" },
+  { edition: "udgam2k24" },
+  { edition: "udgam2k23" },
+  { stage: "singers" },
+  { stage: "dancers" },
+  { stage: "band" },
+  { edition: "udgam2k19" },
+  { edition: "udgam2k18" },
+];
+const slotAngle = (i: number) => (i / GROVE_SLOTS.length) * Math.PI * 2;
+const STAGE_RADIUS = 32; // just outside the walkway, so the stages never sit on the path
+const STAGE_SPOTS = GROVE_SLOTS.flatMap((slot, i) =>
+  "stage" in slot
+    ? [
+        {
+          kind: slot.stage,
+          x: Math.sin(slotAngle(i)) * STAGE_RADIUS,
+          z: Math.cos(slotAngle(i)) * STAGE_RADIUS,
+        },
+      ]
+    : [],
+);
 
 // photos taken from each edition's own festival site, stored as /images/<edition>/1.webp, 2.webp, ...
 function photoSeries(edition: string, count: number) {
@@ -663,9 +663,12 @@ function GalleryPage() {
       [-42, -42, 1.15],
     ];
 
-    treeSpecs.forEach(([x, z, s]) => {
-      buildCherryTree(x, z, s);
-    });
+    treeSpecs
+      // keep the view of each stage clear
+      .filter(([x, z]) => STAGE_SPOTS.every((s) => Math.hypot(x - s.x, z - s.z) > 9))
+      .forEach(([x, z, s]) => {
+        buildCherryTree(x, z, s);
+      });
 
     // Unit geometries, scaled per instance (same proportions as the original per-mesh geometry)
     addInstanced(new THREE.CylinderGeometry(0.4, 1, 1, 7), trunkMat, trunkInstances);
@@ -1025,10 +1028,14 @@ function GalleryPage() {
       });
     };
 
-    UDGAM_EDITIONS.forEach((edition, i) => {
-      const angle = (i / UDGAM_EDITIONS.length) * Math.PI * 2;
-      buildBillboard(edition, angle);
+    GROVE_SLOTS.forEach((slot, i) => {
+      if (!("edition" in slot)) return;
+      const edition = UDGAM_EDITIONS.find((e) => e.key === slot.edition);
+      if (edition) buildBillboard(edition, slotAngle(i));
     });
+
+    // ── LIVE STAGES ──────────────────────────────────────────────
+    const stages: Stage[] = STAGE_SPOTS.map((s) => buildStage(scene, s.kind, s.x, s.z));
 
     // ── CENTER MONUMENT ───────────────────────────────────────────
     const buildMonument = () => {
@@ -1402,6 +1409,12 @@ function GalleryPage() {
         mmCtx.fill();
       });
 
+      // Stages
+      stages.forEach((s) => {
+        mmCtx.fillStyle = s.color;
+        mmCtx.fillRect(cx + s.position.x * SCALE - 3.5, cy + s.position.z * SCALE - 3.5, 7, 7);
+      });
+
       // Monument
       mmCtx.fillStyle = "#ffffff";
       mmCtx.beginPath();
@@ -1605,6 +1618,8 @@ function GalleryPage() {
           }
         });
       });
+
+      stages.forEach((s) => s.update(t));
 
       // Falling Petals
       petalPool.forEach((p, i) => {

@@ -33,7 +33,7 @@ describe("gallery photos", () => {
   });
 
   it("links each edition to its own festival site", () => {
-    for (const y of ["25", "24", "19", "18", "20"]) {
+    for (const y of ["25", "24", "19", "18"]) {
       expect(source).toContain(`url: "https://udgam.nitsikkim.ac.in/udgam${y}/"`);
     }
   });
