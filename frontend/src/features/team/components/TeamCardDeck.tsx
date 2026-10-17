@@ -34,7 +34,6 @@ export default function TeamCardDeck({
           }
         }}
         aria-label={`Open ${title} card deck with ${memberCount} passes`}
-        title={`Click to open ${title} deck (${memberCount} passes)`}
       >
         <div className="deck-behind-glow" aria-hidden="true" />
 
