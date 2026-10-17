@@ -22,7 +22,6 @@ import {
 import EventDrawer from "./components/EventDrawer";
 import RegistrationModal from "./components/RegistrationModal";
 import HeadlinerCarousel from "./components/HeadlinerCarousel";
-import NoticeTicker from "./components/NoticeTicker";
 import RulebookViewer from "./components/RulebookViewer";
 
 // Headliner order: the first one starts in the centre of the carousel.
@@ -147,8 +146,6 @@ export default function EventsPage({
 
   return (
     <div className="udgam-events ep-root">
-      <NoticeTicker />
-
       {/* ------------------------------------------------------------ Header */}
       <header className="ep-hero">
         <p className="ep-eyebrow">Udgam 2026 · Event programme</p>

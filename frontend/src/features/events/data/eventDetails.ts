@@ -299,8 +299,6 @@ export const EVENTS: FestEvent[] = [
       "Taste buds vs. blindfold — who wins?",
       "Taste it. Trust it. Guess it.",
     ],
-    docUrl: DOC("1W3b8AdF4SLNxlcbhjoxf3WaS9DgyOyXRUi0VFVq0QWI", "edit?tab=t.0"),
-    rulebookPdf: "/rulebooks/guess-the-juice.pdf",
   },
   {
     id: "three-leg-tie",
