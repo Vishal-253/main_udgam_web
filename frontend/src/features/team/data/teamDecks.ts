@@ -31,7 +31,7 @@ const FIRST_COMMITTEE = "web-dev";
 
 const DECK_TITLES: Record<string, string> = {
   "web-dev": "Web Development",
-  publicity: "Public Relations",
+  publicity: "Publicity",
 };
 
 export function buildTeamDirectory(): TeamDirectory {

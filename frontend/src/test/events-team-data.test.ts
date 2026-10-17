@@ -90,6 +90,27 @@ describe("team directory", () => {
     expect(teamPhotoFor("anuska-mandal")).not.toMatch(/jointsec-/);
   });
 
+  it("has photos for Aarti, Avash, Divyangna, Prince Aarya and Suraksha", () => {
+    const people = [...teamMembers, ...committeeMembers];
+    for (const [id, name] of [
+      ["aarti-kumari", "Aarti Kumari"],
+      ["avash-lama", "Avash Lama"],
+      ["divyangana", "Divyangna Puri Goswami"],
+      ["prince-arya", "Prince Kumar Aarya"],
+      ["suraksha-sharma", "Suraksha Sharma"],
+      ["bhavya-kuryawat", "Bhavya Kuryawat"],
+      ["raj", "Raj"],
+      ["ngawang-damchoe", "Ngawang Damchoe Sherpa"],
+    ] as const) {
+      expect(people.find((m) => m.id === id)?.name, id).toBe(name);
+      expect(teamPhotoFor(id), id).toMatch(new RegExp(`${id}`));
+    }
+  });
+
+  it("calls the publicity deck Publicity", () => {
+    expect(team.committees.find((d) => d.id === "publicity")?.title).toBe("Publicity");
+  });
+
   it("shows the Web Dev committee first, others in their usual order", () => {
     expect(team.committees[0]?.id).toBe("web-dev");
     expect(team.committees[1]?.id).toBe("sponsorship");
