@@ -30,7 +30,6 @@ interface EditionInfo {
   title: string;
   tagline: string;
   url: string;
-  folder: string;
   color: string;
   accentColor: string;
   photos: string[];
@@ -41,38 +40,34 @@ const UDGAM_EDITIONS: EditionInfo[] = [
     key: "udgam2k25",
     title: "Udgam 2K25",
     tagline: "The dawn of a new era — bigger, bolder, brighter",
-    url: "#",
-    folder: "images/udgam2k25",
+    url: "https://udgam.nitsikkim.ac.in/udgam25/",
     color: "#f9a8c9",
     accentColor: "#e8547a",
-    photos: [],
+    photos: photoSeries("udgam2k25", 10),
   },
   {
     key: "udgam2k24",
     title: "Udgam 2K24",
     tagline: "A year of stars, stories and spectacular moments",
-    url: "#",
-    folder: "images/udgam2k24",
+    url: "https://udgam.nitsikkim.ac.in/udgam24/",
     color: "#ffb347",
     accentColor: "#f07000",
-    photos: [],
+    photos: photoSeries("udgam2k24", 10),
   },
   {
     key: "udgam2k23",
     title: "Udgam 2K23",
     tagline: "Where art meets ambition — Udgam returns",
-    url: "#",
-    folder: "images/udgam2k23",
+    url: "https://udgam.nitsikkim.ac.in/udgam23/home.php",
     color: "#a78bfa",
     accentColor: "#7c3aed",
-    photos: [],
+    photos: photoSeries("udgam2k23", 2),
   },
   {
     key: "udgam2k22",
     title: "Udgam 2K22",
     tagline: "Rising from silence — culture finds its voice again",
-    url: "#",
-    folder: "images/udgam2k22",
+    url: "",
     color: "#34d399",
     accentColor: "#059669",
     photos: [],
@@ -81,8 +76,7 @@ const UDGAM_EDITIONS: EditionInfo[] = [
     key: "udgam2k21",
     title: "Udgam 2K21",
     tagline: "Digital horizons — festival beyond boundaries",
-    url: "#",
-    folder: "images/udgam2k21",
+    url: "",
     color: "#60a5fa",
     accentColor: "#2563eb",
     photos: [],
@@ -91,8 +85,7 @@ const UDGAM_EDITIONS: EditionInfo[] = [
     key: "udgam2k20",
     title: "Udgam 2K20",
     tagline: "The last great gathering before the world paused",
-    url: "#",
-    folder: "images/udgam2k20",
+    url: "https://udgam.nitsikkim.ac.in/udgam20/",
     color: "#f472b6",
     accentColor: "#db2777",
     photos: [],
@@ -101,33 +94,25 @@ const UDGAM_EDITIONS: EditionInfo[] = [
     key: "udgam2k19",
     title: "Udgam 2K19",
     tagline: "Nights of music, days of magic",
-    url: "#",
-    folder: "images/udgam2k19",
+    url: "https://udgam.nitsikkim.ac.in/udgam19/",
     color: "#fbbf24",
     accentColor: "#d97706",
-    photos: [],
+    photos: photoSeries("udgam2k19", 9),
   },
   {
     key: "udgam2k18",
     title: "Udgam 2K18",
     tagline: "Where it all began to glow",
-    url: "#",
-    folder: "images/udgam2k18",
+    url: "https://udgam.nitsikkim.ac.in/udgam18/",
     color: "#f87171",
     accentColor: "#dc2626",
-    photos: [],
+    photos: photoSeries("udgam2k18", 10),
   },
 ];
 
-function buildPhotoList(folder: string, maxN: number) {
-  const exts = ["jpg", "jpeg", "png", "webp"];
-  const list: string[] = [];
-  for (let i = 1; i <= maxN; i++) {
-    for (const ext of exts) {
-      list.push(`/${folder}/${i}.${ext}`);
-    }
-  }
-  return list;
+// photos taken from each edition's own festival site, stored as /images/<edition>/1.webp, 2.webp, ...
+function photoSeries(edition: string, count: number) {
+  return Array.from({ length: count }, (_, i) => `/images/${edition}/${i + 1}.webp`);
 }
 
 function GalleryPage() {
@@ -178,8 +163,7 @@ function GalleryPage() {
     setCurrentEdition(edition);
     setCurrentPhotoIndex(0);
 
-    const photos = edition.photos.length > 0 ? edition.photos : buildPhotoList(edition.folder, 10);
-    setPhotoList(photos);
+    setPhotoList(edition.photos);
     setImageLoaded(false);
     setImageError(false);
     setGalleryOpen(true);
@@ -285,7 +269,12 @@ function GalleryPage() {
     // Soft, luminous morning sakura mist
     scene.fog = new THREE.FogExp2(0xf5d9e5, 0.0035);
 
-    const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 400);
+    const camera = new THREE.PerspectiveCamera(
+      65,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      400,
+    );
     camera.position.set(0, 5, 12);
 
     const clock = new THREE.Clock();
@@ -522,14 +511,14 @@ function GalleryPage() {
       dy: number,
       dz: number,
       rad: number,
-      len: number
+      len: number,
     ) => {
       const dir = new THREE.Vector3(dx, dy, dz).normalize();
       const quaternion = new THREE.Quaternion().setFromUnitVectors(upAxis, dir);
       tmpPos.set(
         group.x + startX + (dir.x * len) / 2,
         startY + (dir.y * len) / 2,
-        group.z + startZ + (dir.z * len) / 2
+        group.z + startZ + (dir.z * len) / 2,
       );
       branchInstances.push({
         matrix: new THREE.Matrix4().compose(tmpPos, quaternion, tmpScale.set(rad, len, rad)),
@@ -555,7 +544,7 @@ function GalleryPage() {
         tmpPos.set(
           group.x + px + Math.cos(a) * r * 0.7,
           py + (Math.random() - 0.25) * r * 0.75,
-          group.z + pz + Math.sin(a) * r * 0.7
+          group.z + pz + Math.sin(a) * r * 0.7,
         );
         satelliteInstances.push({
           matrix: new THREE.Matrix4().compose(tmpPos, noRotation, tmpScale.set(sr, sr, sr)),
@@ -572,7 +561,7 @@ function GalleryPage() {
         matrix: new THREE.Matrix4().compose(
           tmpPos,
           new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, (Math.random() - 0.5) * 0.15)),
-          tmpScale.set(0.3 * scale, trunkH, 0.3 * scale)
+          tmpScale.set(0.3 * scale, trunkH, 0.3 * scale),
         ),
       });
 
@@ -603,7 +592,7 @@ function GalleryPage() {
             secRise,
             Math.sin(sa) * secSpread,
             0.045 * scale,
-            secLen
+            secLen,
           );
           addBlossom(group, secTip.x, secTip.y, secTip.z, (0.38 + Math.random() * 0.2) * scale);
         }
@@ -618,7 +607,7 @@ function GalleryPage() {
           Math.cos(ca) * cr,
           crownY + (1.0 + k * 0.4) * scale,
           Math.sin(ca) * cr,
-          (0.55 + Math.random() * 0.2) * scale
+          (0.55 + Math.random() * 0.2) * scale,
         );
       }
     };
@@ -626,7 +615,7 @@ function GalleryPage() {
     const addInstanced = (
       geometry: THREE.BufferGeometry,
       material: THREE.Material,
-      specs: InstanceSpec[]
+      specs: InstanceSpec[],
     ) => {
       const mesh = new THREE.InstancedMesh(geometry, material, specs.length);
       specs.forEach((s, i) => {
@@ -685,12 +674,12 @@ function GalleryPage() {
       new THREE.SphereGeometry(1, 7, 5),
       // faint pink glow approximates the old per-blossom emissive tint
       new THREE.MeshStandardMaterial({ roughness: 0.85, emissive: 0x1f161a }),
-      blossomInstances
+      blossomInstances,
     );
     addInstanced(
       new THREE.SphereGeometry(1, 6, 4),
       new THREE.MeshStandardMaterial({ roughness: 0.85 }),
-      satelliteInstances
+      satelliteInstances,
     );
 
     // ── FALLING 3D SAKURA PETALS ─────────────────────────────────
@@ -709,7 +698,7 @@ function GalleryPage() {
     const petalMesh = new THREE.InstancedMesh(
       petalGeo,
       new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, transparent: true, opacity: 0.85 }),
-      PETAL_COUNT
+      PETAL_COUNT,
     );
     petalMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
     petalMesh.frustumCulled = false;
@@ -719,12 +708,12 @@ function GalleryPage() {
       mesh.position.set(
         (Math.random() - 0.5) * 110,
         9 + Math.random() * 15,
-        (Math.random() - 0.5) * 110
+        (Math.random() - 0.5) * 110,
       );
       mesh.rotation.set(
         Math.random() * Math.PI * 2,
         Math.random() * Math.PI * 2,
-        Math.random() * Math.PI * 2
+        Math.random() * Math.PI * 2,
       );
     };
 
@@ -954,7 +943,7 @@ function GalleryPage() {
       const tex = createBillboardTexture(edition);
       const canvasMesh = new THREE.Mesh(
         new THREE.PlaneGeometry(BW - 0.2, BH - 0.2),
-        new THREE.MeshBasicMaterial({ map: tex, transparent: false })
+        new THREE.MeshBasicMaterial({ map: tex, transparent: false }),
       );
       canvasMesh.position.set(0, boardCenterY, 0.12);
       group.add(canvasMesh);
@@ -1134,7 +1123,7 @@ function GalleryPage() {
       pz: number,
       rx = 0,
       ry = 0,
-      rz = 0
+      rz = 0,
     ) => {
       const m = new THREE.Mesh(geo, mat);
       m.position.set(px, py, pz);
@@ -1148,8 +1137,20 @@ function GalleryPage() {
     pm(new THREE.BoxGeometry(0.38, 0.4, 0.36), skinMat, 0, 1.62, 0);
     pm(new THREE.BoxGeometry(0.41, 0.12, 0.38), hairMat, 0, 1.87, 0);
     pm(new THREE.BoxGeometry(0.41, 0.28, 0.08), hairMat, 0, 1.72, -0.22);
-    pm(new THREE.BoxGeometry(0.07, 0.06, 0.04), new THREE.MeshStandardMaterial({ color: 0x1a0a10 }), -0.1, 1.65, 0.19);
-    pm(new THREE.BoxGeometry(0.07, 0.06, 0.04), new THREE.MeshStandardMaterial({ color: 0x1a0a10 }), 0.1, 1.65, 0.19);
+    pm(
+      new THREE.BoxGeometry(0.07, 0.06, 0.04),
+      new THREE.MeshStandardMaterial({ color: 0x1a0a10 }),
+      -0.1,
+      1.65,
+      0.19,
+    );
+    pm(
+      new THREE.BoxGeometry(0.07, 0.06, 0.04),
+      new THREE.MeshStandardMaterial({ color: 0x1a0a10 }),
+      0.1,
+      1.65,
+      0.19,
+    );
     pm(new THREE.CylinderGeometry(0.09, 0.1, 0.12, 8), skinMat, 0, 1.44, 0);
 
     // Torso, Scarf
@@ -1225,7 +1226,11 @@ function GalleryPage() {
     });
 
     const shadowGeo = new THREE.CircleGeometry(0.45, 32);
-    const shadowMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.35 });
+    const shadowMat = new THREE.MeshBasicMaterial({
+      color: 0x000000,
+      transparent: true,
+      opacity: 0.35,
+    });
     const shadowCircle = new THREE.Mesh(shadowGeo, shadowMat);
     shadowCircle.rotation.x = -Math.PI / 2;
     shadowCircle.position.y = -0.82;
@@ -1278,14 +1283,17 @@ function GalleryPage() {
       if (Math.abs(dx) > 3 || Math.abs(dy) > 3) didDrag = true;
       camState.targetYaw -= dx * 0.006;
       camState.targetPitch += dy * 0.006;
-      camState.targetPitch = Math.max(camState.minPitch, Math.min(camState.maxPitch, camState.targetPitch));
+      camState.targetPitch = Math.max(
+        camState.minPitch,
+        Math.min(camState.maxPitch, camState.targetPitch),
+      );
       lastMX = e.clientX;
       lastMY = e.clientY;
     };
     const onWheel = (e: WheelEvent) => {
       camState.distance = Math.max(
         camState.minDist,
-        Math.min(camState.maxDist, camState.distance + e.deltaY * 0.015)
+        Math.min(camState.maxDist, camState.distance + e.deltaY * 0.015),
       );
     };
 
@@ -1330,7 +1338,7 @@ function GalleryPage() {
         const dist = Math.hypot(t0.clientX - t1.clientX, t0.clientY - t1.clientY);
         camState.distance = Math.max(
           camState.minDist,
-          Math.min(camState.maxDist, camState.distance - (dist - lastTouchDist) * 0.05)
+          Math.min(camState.maxDist, camState.distance - (dist - lastTouchDist) * 0.05),
         );
         lastTouchDist = dist;
       }
@@ -1517,8 +1525,14 @@ function GalleryPage() {
         playerGroup.position.x += playerState.velocity.x * dt;
         playerGroup.position.z += playerState.velocity.z * dt;
 
-        playerGroup.position.x = Math.max(-WORLD_HALF, Math.min(WORLD_HALF, playerGroup.position.x));
-        playerGroup.position.z = Math.max(-WORLD_HALF, Math.min(WORLD_HALF, playerGroup.position.z));
+        playerGroup.position.x = Math.max(
+          -WORLD_HALF,
+          Math.min(WORLD_HALF, playerGroup.position.x),
+        );
+        playerGroup.position.z = Math.max(
+          -WORLD_HALF,
+          Math.min(WORLD_HALF, playerGroup.position.z),
+        );
       }
 
       // Walking Animations
@@ -1529,8 +1543,10 @@ function GalleryPage() {
       const idleAmp = isMoving ? 0 : 0.03;
 
       playerGroup.position.y = 0.82 + Math.abs(Math.sin(t * walkSpeed)) * (isMoving ? 0.06 : 0.01);
-      leftUpperArmGroup.rotation.x = Math.sin(t * walkSpeed) * walkAmp + Math.sin(t * 1.2) * idleAmp;
-      rightUpperArmGroup.rotation.x = -Math.sin(t * walkSpeed) * walkAmp + Math.sin(t * 1.2) * idleAmp;
+      leftUpperArmGroup.rotation.x =
+        Math.sin(t * walkSpeed) * walkAmp + Math.sin(t * 1.2) * idleAmp;
+      rightUpperArmGroup.rotation.x =
+        -Math.sin(t * walkSpeed) * walkAmp + Math.sin(t * 1.2) * idleAmp;
       leftLegGroup.rotation.x = -Math.sin(t * walkSpeed) * walkAmp;
       rightLegGroup.rotation.x = Math.sin(t * walkSpeed) * walkAmp;
 
@@ -1555,7 +1571,7 @@ function GalleryPage() {
       camOffset.set(
         Math.sin(cy) * Math.cos(cp) * cd,
         Math.sin(cp) * cd,
-        Math.cos(cy) * Math.cos(cp) * cd
+        Math.cos(cy) * Math.cos(cp) * cd,
       );
 
       camera.position.lerp(camTarget.copy(playerGroup.position).add(camOffset), 0.12);
@@ -1629,7 +1645,11 @@ function GalleryPage() {
       scene.traverse((obj) => {
         const mesh = obj as THREE.Mesh;
         if (mesh.geometry) mesh.geometry.dispose();
-        const mats = Array.isArray(mesh.material) ? mesh.material : mesh.material ? [mesh.material] : [];
+        const mats = Array.isArray(mesh.material)
+          ? mesh.material
+          : mesh.material
+            ? [mesh.material]
+            : [];
         mats.forEach((m) => {
           const map = (m as THREE.MeshBasicMaterial).map;
           if (map) map.dispose();
@@ -1845,30 +1865,32 @@ function GalleryPage() {
                 : ""}
             </div>
 
-            <a
-              id="gallery-link"
-              href={currentEdition.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                background: `linear-gradient(135deg, ${currentEdition.accentColor}, ${currentEdition.color})`,
-                boxShadow: `0 4px 20px ${currentEdition.accentColor}55`,
-              }}
-            >
-              <span>Visit Festival Archive</span>
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
+            {currentEdition.url && (
+              <a
+                id="gallery-link"
+                href={currentEdition.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  background: `linear-gradient(135deg, ${currentEdition.accentColor}, ${currentEdition.color})`,
+                  boxShadow: `0 4px 20px ${currentEdition.accentColor}55`,
+                }}
               >
-                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                <polyline points="15 3 21 3 21 9" />
-                <line x1="10" y1="14" x2="21" y2="3" />
-              </svg>
-            </a>
+                <span>Visit Festival Archive</span>
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                >
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                  <polyline points="15 3 21 3 21 9" />
+                  <line x1="10" y1="14" x2="21" y2="3" />
+                </svg>
+              </a>
+            )}
           </div>
         )}
       </div>
