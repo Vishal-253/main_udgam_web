@@ -9,9 +9,9 @@
      variables, so the page defines the ones its rules use */
   --font-display: "Fraunces", Georgia, serif;
   --font-sans: "Quicksand", system-ui, sans-serif;
-  /* the site navbar is a floating pill (fixed, top-4); the notice strip sits under it */
+  /* the site navbar is a floating pill (fixed, top-4); the notice strip was removed, so it takes no room */
   --nav-clear: 76px;
-  --ticker-h: 34px;
+  --ticker-h: 0px;
   font-family: var(--font-sans);
 }
 
@@ -1474,7 +1474,7 @@
 @media (max-width: 640px) {
   .udgam-events {
     --nav-clear: 72px;
-    --ticker-h: 30px;
+    --ticker-h: 0px;
   }
   .udgam-events.ep-root {
     padding-top: calc(var(--nav-clear) + var(--ticker-h) + 28px);
