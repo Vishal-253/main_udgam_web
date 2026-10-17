@@ -361,7 +361,11 @@ export default function EventsPage({
         onRegister={() => {
           if (openEvent) setRegistering(openEvent);
         }}
-        onClose={() => setOpenId(null)}
+        onClose={() => {
+          // the registration form sits on top of the drawer: Escape closes the form first, and
+          // never the drawer underneath while the form is busy (that broke the page's scroll lock)
+          if (!registering) setOpenId(null);
+        }}
       />
 
       {registering && (

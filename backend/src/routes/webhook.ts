@@ -66,22 +66,23 @@ webhookRouter.post("/", express.raw({ type: "*/*", limit: "256kb" }), async (req
 
   try {
     const result = await confirmPaidOrder(orderId, paymentId);
-    // piggy-back: back up a few registrations that changed without a request (expired holds)
-    await syncPending(3).catch((err) => console.error("[webhook] backup sweep failed", err));
     if (result.ok) {
       res.type("text").send("confirmed");
-      return;
-    }
-    // not_found = a payment for something other than event registration: nothing to do.
-    // refund_required is final and already logged for the organisers.
-    if (result.code === "not_found" || result.code === "refund_required") {
+    } else if (result.code === "not_found" || result.code === "refund_required") {
+      // not_found = a payment for something other than event registration: nothing to do.
+      // refund_required is final and already logged for the organisers.
       res.type("text").send(result.code);
-      return;
+    } else {
+      // "invalid" (e.g. capture not finished yet) or "error": ask Razorpay to retry later
+      res.status(500).type("text").send("retry");
     }
-    // "invalid" (e.g. capture not finished yet) or "error": ask Razorpay to retry later
-    res.status(500).type("text").send("retry");
   } catch (err) {
     console.error("[webhook] confirm failed", orderId, paymentId, err);
     res.status(500).type("text").send("retry");
   }
+
+  // Only after answering: Razorpay counts a reply slower than 5 s as a failure and disables the
+  // webhook after a day of failures, so a slow Firebase must never delay the response.
+  // Piggy-back: back up a few registrations that changed without a request (expired holds).
+  void syncPending(3).catch((err) => console.error("[webhook] backup sweep failed", err));
 });
