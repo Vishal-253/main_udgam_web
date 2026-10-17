@@ -590,8 +590,6 @@
   overflow: clip;
   overflow-clip-margin: 16px;
   touch-action: pan-y;
-  -webkit-mask: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
-  mask: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
 }
 .udgam-events .ep-slide {
   grid-area: 1 / 1;
@@ -1319,8 +1317,6 @@
   }
   .udgam-events .ep-carousel-stage {
     margin-inline: -14px;
-    -webkit-mask: none;
-    mask: none;
   }
   .udgam-events .ep-slide-inner > .ep-tile {
     min-height: 320px;

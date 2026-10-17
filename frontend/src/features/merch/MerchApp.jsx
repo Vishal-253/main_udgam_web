@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import Header from "./components/Header";
+import CartButton from "./components/CartButton";
 import Carousel from "./components/Carousel";
 import ProductDetail from "./components/ProductDetail";
 import CartDrawer from "./components/CartDrawer";
@@ -257,13 +257,8 @@ export default function MerchApp() {
       {/* Subtle Floating Petals Across All Views */}
       <PetalsOverlay />
 
-      {/* Centered UDGAM Branding, Top-Right Cart */}
-      <Header
-        cartCount={totalCartCount}
-        onOpenCart={() => setIsCartOpen(true)}
-        currentView={currentView}
-        onNavigateHome={handleNavigateHome}
-      />
+      {/* Top-Right Cart (the site navbar handles navigation) */}
+      <CartButton cartCount={totalCartCount} onOpenCart={() => setIsCartOpen(true)} />
 
       {/* Main View Area with Animated Transitions */}
       <main className="app-main-content">
