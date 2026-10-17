@@ -301,7 +301,7 @@ function About() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.1 }}
-          className="mt-6 font-display text-5xl font-semibold tracking-tight text-gradient sm:text-6xl md:text-7xl lg:text-8xl"
+          className="mt-6 pb-[0.14em] font-display text-5xl font-semibold tracking-tight text-gradient sm:text-6xl md:text-7xl lg:text-8xl"
         >
           Celebrating Udgam
         </motion.h1>

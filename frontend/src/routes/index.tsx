@@ -107,7 +107,7 @@ function Home() {
             initial={{ opacity: 0, y: 30, scale: 0.94 }}
             animate={loading ? {} : { opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-            className="font-['Outfit',sans-serif] text-7xl sm:text-8xl md:text-9xl lg:text-[11rem] font-black tracking-[-0.03em] leading-none"
+            className="font-['Outfit',sans-serif] text-7xl sm:text-8xl md:text-9xl lg:text-[11rem] font-black tracking-[-0.03em] leading-none pb-[0.14em]"
             style={{
               background: 'linear-gradient(180deg, #ffffff 15%, #ffe6f0 45%, #ff5c87 78%, #d81b4b 100%)',
               WebkitBackgroundClip: 'text',
