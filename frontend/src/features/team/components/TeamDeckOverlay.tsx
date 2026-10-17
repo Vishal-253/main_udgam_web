@@ -24,7 +24,7 @@ const jitterAt = (i: number) => DEAL_JITTER[i % DEAL_JITTER.length] ?? { x: 0, r
  * TeamDeckOverlay
  * An overlay page that appears over the Teams page when an organising committee deck is opened.
  * Full-screen layer over the Teams page that shows only the dealt lead / associate lead
- * cards. Closes via Esc or a click outside the cards.
+ * cards. Closes via the × button, Esc or a click outside the cards.
  */
 export default function TeamDeckOverlay({
   deck,
@@ -130,6 +130,23 @@ export default function TeamDeckOverlay({
     >
       {/* Background Translucent Ambient Aura */}
       <div className="deck-overlay-ambient-halo" aria-hidden="true" />
+
+      <button
+        type="button"
+        className="deck-overlay-close"
+        onClick={requestClose}
+        aria-label={`Close ${deck.title} deck`}
+      >
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <path
+            d="M6 6l12 12M18 6L6 18"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+          />
+        </svg>
+      </button>
 
       <div className="deck-overlay-content deck-overlay-backdrop-hit">
         <div className="deck-deal-table" key={dealKey} ref={tableRef}>
