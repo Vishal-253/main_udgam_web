@@ -470,7 +470,6 @@ export default function TeamPassCard({
                   type="button"
                   className={`tc-icon-btn ${copied === "email" ? "copied" : ""}`}
                   onClick={(e) => copyText(e, member.email, "email")}
-                  title={copied === "email" ? "Copied!" : `${member.email} (click to copy)`}
                   aria-label={`Copy email ${member.email}`}
                 >
                   {copied === "email" ? (
