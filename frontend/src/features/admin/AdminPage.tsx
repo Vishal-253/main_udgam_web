@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   getAdminEventRegistrations,
   getAdminOverview,
@@ -418,12 +418,15 @@ function EventView({
   const [filter, setFilter] = useState("");
   const [withEmail, setWithEmail] = useState(false);
   const [loading, setLoading] = useState(false);
+  const latestLoad = useRef(0);
 
   const load = useCallback(async () => {
+    const request = ++latestLoad.current;
     setLoading(true);
-    const data = unwrap(
-      await getAdminEventRegistrations({ data: { eventId, status } }).catch(() => null),
-    );
+    const res = await getAdminEventRegistrations({ data: { eventId, status } }).catch(() => null);
+    // a slow answer for a previous status must not replace the list (or the CSV) of the current one
+    if (request !== latestLoad.current) return;
+    const data = unwrap(res);
     if (data) setRows(data);
     setLoading(false);
   }, [eventId, status, unwrap]);

@@ -238,7 +238,9 @@ export async function confirmPaidOrder(orderId: string, paymentId: string): Prom
     status: string;
   }[];
   const result = rows[0];
-  if (result?.registration_id) await backupRegistration(result.registration_id);
+  // in the background: the webhook must answer Razorpay within 5 s and a payer shouldn't wait on
+  // Firebase either; a backup that doesn't finish is retried by the backup scheduler
+  if (result?.registration_id) void backupRegistration(result.registration_id);
   if (result?.status === "confirmed" && result.registration_id) {
     return { ok: true, status: "confirmed", registrationId: result.registration_id };
   }
